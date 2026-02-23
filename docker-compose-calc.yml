@@ -1,0 +1,24 @@
+services:
+  window-container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: window-container
+    ports:
+      - "6080:6080" # noVNC (open in browser)
+      - "5900:5900" # raw VNC
+    volumes:
+      - ./recordings:/recordings
+    environment:
+      DISPLAY: ":99"
+      SCREEN_SIZE: "1440x900x24"
+      APP_STARTCOMMAND: "gnome-calculator"
+      APP_LOG_FILE: "/tmp/gnome-calculator.log"
+      APP_WINDOW_CLASS: "gnome-calculator"
+      APP_WINDOW_TITLE: "Calculator"
+      AUTO_POSITION: "1"
+      WINDOW_X: "20"
+      WINDOW_Y: "20"
+      WINDOW_WIDTH: "1400"
+      WINDOW_HEIGHT: "860"
+    restart: "no"
