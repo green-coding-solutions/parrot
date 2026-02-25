@@ -131,7 +131,8 @@ if [[ -n "$CHECK_IGNORE_RECT" ]]; then
 fi
 
 metric_out="$(compare -metric RMSE "$actual_cmp" "$ref_cmp" null: 2>&1 >/dev/null || true)"
-rmse_norm="$(printf '%s\n' "$metric_out" | sed -n 's/.*(\([0-9.][0-9.]*\)).*/\1/p' | head -n1)"
+# ImageMagick may emit the normalized RMSE in scientific notation (e.g. 2.85668e-05).
+rmse_norm="$(printf '%s\n' "$metric_out" | sed -n 's/.*(\([^)]*\)).*/\1/p' | head -n1)"
 
 if [[ -z "$rmse_norm" ]]; then
   echo "[check-image] could not parse compare output: $metric_out" >&2
