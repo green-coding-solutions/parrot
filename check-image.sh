@@ -41,21 +41,75 @@ win_id="$(find_app_window)" || {
 }
 
 tmp_dir="$(mktemp -d)"
-cleanup() { rm -rf "$tmp_dir"; }
+keep_tmp_dir=0
+cleanup() {
+  if [[ "$keep_tmp_dir" -eq 0 ]]; then
+    rm -rf "$tmp_dir"
+  fi
+}
 trap cleanup EXIT
 
 actual_raw="$tmp_dir/actual.png"
 actual_cmp="$tmp_dir/actual_cmp.png"
 ref_cmp="$tmp_dir/ref_cmp.png"
+ref_copy="$tmp_dir/reference.png"
+diff_img="$tmp_dir/diff-highlight.png"
+overlay_img="$tmp_dir/diff-overlay.png"
+mask_img="$tmp_dir/diff-mask.png"
+
+preserve_failure_artifacts() {
+  local reason="${1:-unknown}"
+  keep_tmp_dir=1
+
+  [[ -f "$actual_raw" ]] || true
+  if [[ -f "$ref_path" && ! -f "$ref_copy" ]]; then
+    cp "$ref_path" "$ref_copy" 2>/dev/null || true
+  fi
+
+  {
+    echo "reason=$reason"
+    echo "ref_path=$ref_path"
+    echo "actual_raw=$actual_raw"
+    echo "reference_copy=$ref_copy"
+    [[ -n "${ref_size:-}" ]] && echo "ref_size=$ref_size"
+    [[ -n "${actual_size:-}" ]] && echo "actual_size=$actual_size"
+    [[ -n "${rmse_norm:-}" ]] && echo "rmse=$rmse_norm"
+    echo "max_rmse=$CHECK_MAX_RMSE"
+    [[ -n "$CHECK_IGNORE_RECT" ]] && echo "ignore_rect=$CHECK_IGNORE_RECT"
+  } >"$tmp_dir/check-failure.txt"
+
+  if [[ -f "$actual_cmp" && -f "$ref_cmp" ]]; then
+    compare -highlight-color Red -lowlight-color Black \
+      "$ref_cmp" "$actual_cmp" "$diff_img" >/dev/null 2>&1 || true
+    convert "$ref_cmp" "$actual_cmp" -compose difference -composite \
+      -colorspace gray -threshold 0 "$mask_img" >/dev/null 2>&1 || true
+    if [[ -f "$mask_img" ]]; then
+      convert "$mask_img" -transparent black -fill 'rgba(255,0,0,0.55)' -opaque white \
+        "$tmp_dir/diff-mask-overlay.png" >/dev/null 2>&1 || true
+      if [[ -f "$tmp_dir/diff-mask-overlay.png" ]]; then
+        composite "$tmp_dir/diff-mask-overlay.png" "$actual_raw" "$overlay_img" >/dev/null 2>&1 || true
+      fi
+    fi
+  fi
+
+  echo "[check-image] Saved failure artifacts to $tmp_dir" >&2
+  if [[ -f "$overlay_img" ]]; then
+    echo "[check-image] Overlay highlight: $overlay_img" >&2
+  elif [[ -f "$diff_img" ]]; then
+    echo "[check-image] Diff highlight image: $diff_img" >&2
+  fi
+}
 
 # Capture the current app window image.
 import -window "$win_id" "$actual_raw"
 cp "$actual_raw" "$actual_cmp"
 cp "$ref_path" "$ref_cmp"
+cp "$ref_path" "$ref_copy"
 
 ref_size="$(identify -format '%wx%h' "$ref_cmp")"
 actual_size="$(identify -format '%wx%h' "$actual_cmp")"
 if [[ "$ref_size" != "$actual_size" ]]; then
+  preserve_failure_artifacts "size-mismatch"
   echo "[check-image] size mismatch: actual=$actual_size ref=$ref_size" >&2
   exit 1
 fi
@@ -89,5 +143,6 @@ if awk -v actual="$rmse_norm" -v max="$CHECK_MAX_RMSE" 'BEGIN { exit (actual <= 
   exit 0
 fi
 
+preserve_failure_artifacts "rmse-exceeded"
 echo "[check-image] FAIL ref=$(basename "$ref_path") rmse=${rmse_norm} max=${CHECK_MAX_RMSE}" >&2
 exit 1
