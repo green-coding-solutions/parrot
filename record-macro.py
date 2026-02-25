@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import os
 import re
 import shlex
@@ -14,9 +15,22 @@ SERVICE = "window-container"
 
 
 def usage() -> int:
-    print(f"Usage: {Path(sys.argv[0]).name} <docker-compose-file>")
-    print(f"Example: {Path(sys.argv[0]).name} docker-compose-firefox.yml")
+    print(f"Usage: {Path(sys.argv[0]).name} <docker-compose-file> [--display :99]")
+    print(f"Example: {Path(sys.argv[0]).name} docker-compose-firefox.yml --display :99")
     return 1
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("compose_file")
+    parser.add_argument("--display", default=":99")
+    parser.add_argument("-h", "--help", action="store_true")
+    args, extra = parser.parse_known_args()
+    if args.help:
+        raise SystemExit(usage())
+    if extra:
+        raise SystemExit(usage())
+    return args
 
 
 def load_compose_env_value(compose_file: Path, key: str) -> str:
@@ -48,13 +62,20 @@ def run(cmd: list[str], *, env: dict[str, str], check: bool = True) -> int:
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        return usage()
+    try:
+        args = parse_args()
+    except SystemExit as exc:
+        code = exc.code
+        return int(code) if isinstance(code, int) else 1
 
-    compose_file = Path(sys.argv[1])
+    compose_file = Path(args.compose_file)
     if not compose_file.is_file():
         print(f"Compose file not found: {compose_file}")
         return 1
+    if not args.display:
+        print("Display must be non-empty")
+        return 1
+    display = args.display
 
     run_name = derive_run_name(compose_file)
     if not re.fullmatch(r"[A-Za-z0-9._-]+", run_name):
@@ -85,6 +106,7 @@ def main() -> int:
 
     print(f"Recording to {outfile} (timed)")
     print(f"Compose file: {compose_file}")
+    print(f"Container display: {display}")
     print(f"Run name: {run_name}")
     print(f"Auto-arming xmacro recorder with stop key: {stop_key}")
     print(f"Screenshot/check hotkey during recording: {check_key}")
@@ -135,6 +157,8 @@ fi
             f"APP_WINDOW_CLASS={app_window_class}",
             "-e",
             f"APP_WINDOW_TITLE={app_window_title}",
+            "-e",
+            f"DISPLAY={display}",
             SERVICE,
             "bash",
             "-lc",
@@ -146,6 +170,8 @@ fi
     recorder_cmd = compose_cmd + [
         "exec",
         "-T",
+        "-e",
+        f"DISPLAY={display}",
         SERVICE,
         "bash",
         "-lc",
