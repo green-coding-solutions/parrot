@@ -1,52 +1,23 @@
 #!/usr/bin/env python3
-"""Shared helpers for xmacro #APP metadata."""
+"""Shared helpers for Parrot recording metadata and format."""
 
 from __future__ import annotations
 
-import shlex
 from pathlib import Path
 
-APP_DIRECTIVE = "#APP"
+PARROT_HEADER = "# Parrot recording v2"
+
 APP_FIELDS = ("startcommand", "windowtitle", "windowclass")
+
 DEFAULT_APP_META = {
     "startcommand": "",
-    "windowtitle": "Calculator",
-    "windowclass": "gnome-calculator",
+    "windowtitle":  "Calculator",
+    "windowclass":  "gnome-calculator",
 }
 
-
-def parse_app_directive(line: str) -> dict[str, str] | None:
-    if line != APP_DIRECTIVE and not line.startswith(f"{APP_DIRECTIVE} "):
-        return None
-
-    rest = line[len(APP_DIRECTIVE) :].strip()
-    if not rest:
-        return {}
-
-    try:
-        tokens = shlex.split(rest)
-    except ValueError:
-        return {}
-
-    result: dict[str, str] = {}
-    i = 0
-    while i < len(tokens):
-        token = tokens[i]
-        if "=" in token:
-            key, value = token.split("=", 1)
-            i += 1
-        elif i + 1 < len(tokens):
-            key, value = token, tokens[i + 1]
-            i += 2
-        else:
-            i += 1
-            continue
-
-        key = key.strip().lower()
-        if key in APP_FIELDS:
-            result[key] = value.strip()
-
-    return result
+# First token of any event line in a .🦜 file.
+# Lines whose first token is NOT one of these are treated as metadata.
+EVENT_VERBS = frozenset({"wait", "mousemove", "mousedown", "mouseup", "keydown", "keyup", "check"})
 
 
 def normalize_app_meta(meta: dict[str, str] | None) -> dict[str, str]:
@@ -61,24 +32,43 @@ def normalize_app_meta(meta: dict[str, str] | None) -> dict[str, str]:
 
 
 def load_app_metadata(input_path: Path) -> dict[str, str]:
+    """
+    Parse the metadata block at the top of a .🦜 file.
+
+    Format:
+        # comment
+        key = value          ← metadata (everything after '=' is the value)
+        <blank line>
+        wait 2.5             ← first event line; stops metadata parsing
+        mousemove 100 200
+
+    Lines before the first event verb are treated as 'key = value' pairs.
+    '=' is optional; 'key value' (space-separated) is also accepted.
+    """
     raw: dict[str, str] = {}
     with input_path.open("r", encoding="utf-8") as f:
-        for line in f:
-            parsed = parse_app_directive(line.rstrip("\n"))
-            if parsed is not None:
-                raw.update(parsed)
+        for raw_line in f:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.split()[0].lower() in EVENT_VERBS:
+                break   # reached the events section
+            if "=" in line:
+                key, _, value = line.partition("=")
+            else:
+                parts = line.split(None, 1)
+                key, value = parts[0], (parts[1] if len(parts) > 1 else "")
+            key = key.strip().lower()
+            if key in APP_FIELDS:
+                raw[key] = value.strip()
     return normalize_app_meta(raw)
 
 
-def format_app_directive_lines(meta: dict[str, str]) -> list[str]:
+def format_metadata_lines(meta: dict[str, str]) -> list[str]:
+    """Return the metadata block lines for writing to a .🦜 file."""
     lines: list[str] = []
     for key in APP_FIELDS:
         value = meta.get(key, "")
-        if value == "":
-            continue
-        lines.append(f"{APP_DIRECTIVE} {key}={shlex.quote(value)}")
+        if value:
+            lines.append(f"{key} = {value}")
     return lines
-
-def derive_run_name(compose_file: Path) -> str:
-    parts = [p for p in compose_file.stem.split("-") if p]
-    return parts[-1] if parts else compose_file.stem

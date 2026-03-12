@@ -1,0 +1,45 @@
+# Parrot recording v2
+# Firefox Speedometer 3.1 benchmark
+
+startcommand = firefox https://browserbench.org/Speedometer3.1/ --no-default-browser-check
+windowtitle  = Firefox
+windowclass  = firefox
+
+wait      2.607657
+mousemove 651 284
+wait      0.000017
+mousedown 1
+wait      0.076316
+mouseup   1
+wait      2.171156
+check     firefox/firefox-check-001.png
+wait      2.326162
+mousemove 686 545
+wait      0.000015
+mousedown 1
+wait      0.107812
+mouseup   1
+wait      1.363062
+keydown   Alt_L
+wait      0.194278
+keyup     Alt_L
+wait      2.801556
+keydown   Alt_L
+wait      0.093055
+keyup     Alt_L
+wait      18.422572
+keydown   Alt_L
+wait      0.108412
+keyup     Alt_L
+wait      13.135337
+keydown   Alt_L
+wait      0.084288
+keyup     Alt_L
+wait      16.116636
+mousemove 422 75
+wait      0.000035
+mousedown 1
+wait      0.116280
+mouseup   1
+wait      2.039969
+check     firefox/firefox-check-002.png

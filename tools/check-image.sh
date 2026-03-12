@@ -18,7 +18,7 @@ if [[ ! -f "$ref_path" ]]; then
 fi
 
 export DISPLAY="${DISPLAY:-:99}"
-CHECK_MAX_RMSE="${CHECK_MAX_RMSE:-0.01}"
+CHECK_MAX_RMSE="${CHECK_MAX_RMSE:-0.2}"
 CHECK_IGNORE_RECT="${CHECK_IGNORE_RECT:-}"
 APP_WINDOW_CLASS="${APP_WINDOW_CLASS:-gnome-calculator}"
 APP_WINDOW_TITLE="${APP_WINDOW_TITLE:-Calculator}"

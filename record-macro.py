@@ -1,208 +1,133 @@
 #!/usr/bin/env python3
+"""Record a Parrot .🦜 macro by capturing input from a running container.
+
+The container must already be running with the display environment ready
+(e.g. via entrypoint.sh). Use --container to override the default name.
+
+Example:
+  python3 record-macro.py applications/firefox/firefox.🦜 \\
+      --startcommand "firefox https://browserbench.org/Speedometer3.1/ --no-default-browser-check" \\
+      --windowtitle Firefox --windowclass firefox
+"""
+
 from __future__ import annotations
 
 import argparse
 import os
-import re
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
-
-from helpers import derive_run_name
-
-SERVICE = "window-container"
-
-
-def usage() -> int:
-    print(f"Usage: {Path(sys.argv[0]).name} <docker-compose-file> [--display :99]")
-    print(f"Example: {Path(sys.argv[0]).name} docker-compose-firefox.yml --display :99")
-    return 1
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("compose_file")
-    parser.add_argument("--display", default=":99")
-    parser.add_argument("-h", "--help", action="store_true")
-    args, extra = parser.parse_known_args()
-    if args.help:
-        raise SystemExit(usage())
-    if extra:
-        raise SystemExit(usage())
-    return args
+    parser = argparse.ArgumentParser(
+        description="Record a .🦜 macro from a running container",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    parser.add_argument("output", type=Path, help="Path to write the .🦜 recording")
+    parser.add_argument("--startcommand", default="",   help="Command to launch the app")
+    parser.add_argument("--windowtitle",  default="",   help="Window title for app detection")
+    parser.add_argument("--windowclass",  default="",   help="WM_CLASS for app detection")
+    parser.add_argument("--display",   default=os.environ.get("DISPLAY", ":99"))
+    parser.add_argument("--container", default="window-container", help="Docker container name")
+    parser.add_argument("--container-repo", default="/tmp/repo",
+                        help="Path where the project repo is mounted in the container")
+    return parser.parse_args()
 
 
-def load_compose_env_value(compose_file: Path, key: str) -> str:
-    pattern_map = re.compile(rf"^\s*{re.escape(key)}\s*:\s*(.*)$")
-    pattern_list = re.compile(rf"^\s*-\s*{re.escape(key)}=(.*)$")
-    for raw in compose_file.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
+def _find_window(container: str, display: str, window_class: str, window_title: str) -> str | None:
+    """Return the first visible xdotool window ID from inside the container."""
+    for flag, value in [("--class", window_class), ("--name", window_title)]:
+        if not value:
             continue
-        m = pattern_map.match(raw)
-        if not m:
-            m = pattern_list.match(raw)
-        if not m:
-            continue
-        value = m.group(1).strip()
-        if "#" in value:
-            value = value.split("#", 1)[0].rstrip()
-        if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
-            value = value[1:-1]
-        return value
-    return ""
+        result = subprocess.run(
+            ["docker", "exec", "-e", f"DISPLAY={display}", container,
+             "xdotool", "search", "--onlyvisible", flag, value],
+            capture_output=True, text=True,
+        )
+        ids = result.stdout.strip().splitlines()
+        if ids:
+            return ids[0]
+    return None
 
 
-def run(cmd: list[str], *, env: dict[str, str], check: bool = True) -> int:
-    proc = subprocess.run(cmd, env=env, check=False)
-    if check and proc.returncode != 0:
-        raise SystemExit(proc.returncode)
-    return proc.returncode
+def focus_app(container: str, display: str, start_cmd: str, win_class: str, win_title: str) -> None:
+    """Ensure the app is running and focused inside the container."""
+    win = _find_window(container, display, win_class, win_title)
+
+    if win is None and start_cmd:
+        print(f"[record] window not found — launching: {start_cmd}")
+        subprocess.run(
+            ["docker", "exec", "-d", "-e", f"DISPLAY={display}", container, "bash", "-lc", start_cmd],
+            check=False,
+        )
+        time.sleep(1)
+        win = _find_window(container, display, win_class, win_title)
+
+    if win:
+        subprocess.run(
+            ["docker", "exec", "-T", "-e", f"DISPLAY={display}", container, "xdotool", "windowraise", win],
+            check=False,
+        )
+        subprocess.run(
+            ["docker", "exec", "-T", "-e", f"DISPLAY={display}", container, "xdotool", "windowfocus", win],
+            check=False,
+        )
+    else:
+        print("[record] warning: app window not found")
 
 
 def main() -> int:
-    try:
-        args = parse_args()
-    except SystemExit as exc:
-        code = exc.code
-        return int(code) if isinstance(code, int) else 1
+    args = parse_args()
 
-    compose_file = Path(args.compose_file)
-    if not compose_file.is_file():
-        print(f"Compose file not found: {compose_file}")
-        return 1
-    if not args.display:
-        print("Display must be non-empty")
-        return 1
-    display = args.display
-
-    run_name = derive_run_name(compose_file)
-    if not re.fullmatch(r"[A-Za-z0-9._-]+", run_name):
-        print(f"Derived run name is invalid: {run_name}")
-        return 1
-
-    recordings_dir = Path("recordings") / run_name
-    recordings_dir.mkdir(parents=True, exist_ok=True)
-    outfile = recordings_dir / f"{run_name}.xmacro"
-
-    stop_key = os.environ.get("STOP_KEYSYM", "Pause")
+    stop_key  = os.environ.get("STOP_KEYSYM",  "Pause")
     check_key = os.environ.get("CHECK_KEYSYM", "F2")
     if stop_key.upper() == check_key.upper():
         print(f"CHECK_KEYSYM and STOP_KEYSYM must be different (got {check_key})")
         return 1
 
-    compose_app_start = load_compose_env_value(compose_file, "APP_STARTCOMMAND")
-    compose_app_title = load_compose_env_value(compose_file, "APP_WINDOW_TITLE")
-    compose_app_class = load_compose_env_value(compose_file, "APP_WINDOW_CLASS")
+    print(f"Recording to  : {args.output}")
+    print(f"Container     : {args.container}  display: {args.display}")
+    print(f"App class     : {args.windowclass}  title: {args.windowtitle}")
+    if args.startcommand:
+        print(f"Start command : {args.startcommand}")
+    print(f"Stop key      : {stop_key}  (press in VNC session to finish)")
+    print(f"Check key     : {check_key}  (press to capture a reference screenshot)")
+    print("Open noVNC at http://localhost:6080/vnc.html, interact, then press the stop key.")
 
-    app_startcommand = os.environ.get("APP_STARTCOMMAND", compose_app_start)
-    app_window_title = os.environ.get("APP_WINDOW_TITLE", compose_app_title)
-    app_window_class = os.environ.get("APP_WINDOW_CLASS", compose_app_class)
+    focus_app(args.container, args.display, args.startcommand, args.windowclass, args.windowtitle)
 
-    env = os.environ.copy()
-    env["COMPOSE_FILE"] = str(compose_file)
-    compose_cmd = ["docker", "compose", "-f", str(compose_file)]
-
-    print(f"Recording to {outfile} (timed)")
-    print(f"Compose file: {compose_file}")
-    print(f"Container display: {display}")
-    print(f"Run name: {run_name}")
-    print(f"Auto-arming xmacro recorder with stop key: {stop_key}")
-    print(f"Screenshot/check hotkey during recording: {check_key}")
-    print(f"App window match: class='{app_window_class}' title='{app_window_title}'")
-    if app_startcommand:
-        print(f"App start command (used if window not found): {app_startcommand}")
-    print("Open noVNC (http://localhost:6080/vnc.html), interact with the app, then press " f"{stop_key} in the VNC session to finish.")
-    print(
-        f"If your browser/noVNC intercepts {stop_key}, rerun with STOP_KEYSYM=<other-key> (example: STOP_KEYSYM=F9)."
-    )
-    print(f"Press {check_key} during recording to capture a reference image and insert a Check line.")
-
-    focus_script = r'''set -euo pipefail
-export DISPLAY=${DISPLAY:-:99}
-find_app_window() {
-  local win=""
-  if [[ -n "${APP_WINDOW_CLASS:-}" ]]; then
-    win="$(xdotool search --onlyvisible --class "$APP_WINDOW_CLASS" 2>/dev/null | head -n1 || true)"
-  fi
-  if [[ -z "$win" && -n "${APP_WINDOW_TITLE:-}" ]]; then
-    win="$(xdotool search --onlyvisible --name "$APP_WINDOW_TITLE" 2>/dev/null | head -n1 || true)"
-  fi
-  [[ -n "$win" ]] || return 1
-  printf '%s\n' "$win"
-}
-
-win="$(find_app_window || true)"
-if [[ -z "$win" && -n "${APP_STARTCOMMAND:-}" ]]; then
-  eval "${APP_STARTCOMMAND}" >/tmp/xtest-app-launch.log 2>&1 &
-  sleep 1
-  win="$(find_app_window || true)"
-fi
-
-if [[ -n "$win" ]]; then
-  xdotool windowraise "$win" >/dev/null 2>&1 || true
-  xdotool windowfocus "$win" >/dev/null 2>&1 || true
-fi
-'''
-
-    run(
-        compose_cmd
-        + [
-            "exec",
-            "-T",
-            "-e",
-            f"APP_STARTCOMMAND={app_startcommand}",
-            "-e",
-            f"APP_WINDOW_CLASS={app_window_class}",
-            "-e",
-            f"APP_WINDOW_TITLE={app_window_title}",
-            "-e",
-            f"DISPLAY={display}",
-            SERVICE,
-            "bash",
-            "-lc",
-            focus_script,
-        ],
-        env=env,
-    )
-
-    recorder_cmd = compose_cmd + [
-        "exec",
-        "-T",
-        "-e",
-        f"DISPLAY={display}",
-        SERVICE,
-        "bash",
-        "-lc",
+    # Start xmacrorec2 inside the container; auto-arm it by injecting the stop key once.
+    recorder_cmd = [
+        "docker", "exec", "-T", "-e", f"DISPLAY={args.display}", args.container,
+        "bash", "-lc",
         (
-            "export DISPLAY=${DISPLAY:-:99}; "
+            f"export DISPLAY={shlex.quote(args.display)}; "
             f"(sleep 0.7; xdotool key --clearmodifiers {shlex.quote(stop_key)} >/dev/null 2>&1 || true) & "
             "stdbuf -oL xmacrorec2"
         ),
     ]
 
+    # Pipe xmacrorec2 output through the local timed recorder.
+    script_dir = Path(__file__).resolve().parent
     timed_cmd = [
-        sys.executable,
-        "timed_xmacro.py",
-        "record",
-        "--output",
-        str(outfile),
-        "--screenshot-key",
-        check_key,
-        "--stop-key",
-        stop_key,
-        "--app-startcommand",
-        app_startcommand,
-        "--app-windowtitle",
-        app_window_title,
-        "--app-windowclass",
-        app_window_class,
+        sys.executable, str(script_dir / "timed_xmacro.py"), "record",
+        "--output",           str(args.output),
+        "--screenshot-key",   check_key,
+        "--stop-key",         stop_key,
+        "--app-startcommand", args.startcommand,
+        "--app-windowtitle",  args.windowtitle,
+        "--app-windowclass",  args.windowclass,
+        "--container",        args.container,
+        "--container-repo",   args.container_repo,
     ]
 
-    producer = subprocess.Popen(recorder_cmd, stdout=subprocess.PIPE, env=env)
+    producer = subprocess.Popen(recorder_cmd, stdout=subprocess.PIPE)
     assert producer.stdout is not None
-    consumer = subprocess.Popen(timed_cmd, stdin=producer.stdout, env=env)
+    consumer = subprocess.Popen(timed_cmd, stdin=producer.stdout)
     producer.stdout.close()
     consumer_rc = consumer.wait()
     producer_rc = producer.wait()

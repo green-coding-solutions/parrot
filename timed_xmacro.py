@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-"""Timed wrapper for xmacro recordings.
+"""Parrot recording and replay utilities.
 
-`xmacrorec2` records events but not timing. This helper stores per-event delays
-in a comment directive and replays by sleeping between events while streaming
-plain xmacro commands to stdout.
+Records xmacrorec2 input into the Parrot v2 .🦜 format and replays it.
 """
 
 from __future__ import annotations
@@ -11,20 +9,37 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import shlex
 import subprocess
 import sys
 import time
 from pathlib import Path
 
-from helpers import APP_FIELDS, format_app_directive_lines, load_app_metadata, normalize_app_meta
+from helpers import (
+    APP_FIELDS,
+    EVENT_VERBS,
+    PARROT_HEADER,
+    format_metadata_lines,
+    load_app_metadata,
+    normalize_app_meta,
+)
 
-WAIT_PREFIX = "#WAIT_SEC "
-HEADER = "# xtest timed xmacro v1"
+# ---------------------------------------------------------------------------
+# xmacrorec2 input parsing
+# ---------------------------------------------------------------------------
 
-# Common xmacrorec2 informational lines. They are usually stderr, but we filter
-# them if they appear on stdout to avoid corrupting the macro file.
-NOISE_PATTERNS = [
+# Map xmacrorec2 event names to Parrot v2 verbs.
+XMACRO_TO_PARROT: dict[str, str] = {
+    "motionnotify":  "mousemove",
+    "buttonpress":   "mousedown",
+    "buttonrelease": "mouseup",
+    "keypress":      "keydown",
+    "keyrelease":    "keyup",
+    "keystrpress":   "keydown",
+    "keystrrelease": "keyup",
+}
+
+# Informational lines xmacrorec2 sometimes writes to stdout.
+_NOISE = [
     re.compile(r"^Press the key you want"),
     re.compile(r"^Only key-release events"),
     re.compile(r"^To end the recording"),
@@ -34,98 +49,97 @@ NOISE_PATTERNS = [
     re.compile(r"^xmacrorec"),
 ]
 
-KEY_EVENT_RE = re.compile(r"^(Key(?:Str)?Press|Key(?:Str)?Release):?\s+(\S+)")
+_KEY_RE = re.compile(r"^(Key(?:Str)?Press|Key(?:Str)?Release):?\s+(\S+)")
 
 
-def is_noise_line(line: str) -> bool:
-    if not line.strip():
-        return True
-    return any(p.search(line) for p in NOISE_PATTERNS)
+def _is_noise(line: str) -> bool:
+    return not line.strip() or any(p.search(line) for p in _NOISE)
 
 
-def parse_key_event(line: str):
-    m = KEY_EVENT_RE.match(line.strip())
+def _parse_key_event(line: str):
+    """Return (kind, keysym, is_press, is_release) or None."""
+    m = _KEY_RE.match(line.strip())
     if not m:
         return None
     kind = m.group(1)
     keysym = m.group(2)
-    is_press = "Press" in kind and "Release" not in kind
-    is_release = "Release" in kind
-    return kind, keysym, is_press, is_release
+    return kind, keysym, ("Press" in kind and "Release" not in kind), ("Release" in kind)
 
 
-def capture_reference_image(output_path: Path, index: int, app_meta: dict[str, str]) -> str:
-    """Capture app window screenshot into /recordings and return filename."""
-    png_name = f"{output_path.stem}-check-{index:03d}.png"
+def _xmacro_to_parrot(line: str) -> str | None:
+    """Convert one xmacrorec2 event line to Parrot v2 format, or None if unknown."""
+    parts = line.split(None, 1)
+    if not parts:
+        return None
+    verb = XMACRO_TO_PARROT.get(parts[0].rstrip(":").lower())
+    if verb is None:
+        return None
+    args = parts[1].strip() if len(parts) > 1 else ""
+    return f"{verb} {args}".strip()
+
+
+# ---------------------------------------------------------------------------
+# Recording
+# ---------------------------------------------------------------------------
+
+def _capture_screenshot(
+    output_path: Path,
+    index: int,
+    app_meta: dict[str, str],
+    container: str,
+    container_repo: str,
+) -> str:
+    """
+    Screenshot the app window inside *container* and save it alongside the recording.
+
+    Returns the ref string written into the .🦜 file, e.g. 'firefox/firefox-check-001.png'.
+    The image is saved to  <app_dir>/<app_name>-check-<NNN>.png  on both the host
+    (via the bind-mount) and equivalently inside the container at
+    <container_repo>/<rel_to_cwd>/<png_name>.
+    """
+    app_name = output_path.parent.name              # e.g. 'firefox'
+    png_name = f"{app_name}-check-{index:03d}.png"  # e.g. 'firefox-check-001.png'
+    ref      = f"{app_name}/{png_name}"             # written into the recording
+
+    # Container path: project root is bind-mounted at container_repo
     try:
-        rel_dir = output_path.parent.relative_to("recordings")
-        if str(rel_dir) == ".":
-            rel_png = Path(png_name)
-        else:
-            rel_png = rel_dir / png_name
+        rel = output_path.parent.resolve().relative_to(Path.cwd().resolve())
+        container_out = f"{container_repo}/{rel.as_posix()}/{png_name}"
     except ValueError:
-        rel_png = Path(png_name)
-    rel_png_str = rel_png.as_posix()
-    container_out = f"/recordings/{rel_png_str}"
-    app_window_class = app_meta.get("windowclass", "")
-    app_window_title = app_meta.get("windowtitle", "")
+        container_out = f"{container_repo}/applications/{app_name}/{png_name}"
 
-    cmd = [
-        "docker",
-        "compose",
-        "exec",
-        "-T",
-        "-e",
-        f"SNAPSHOT_OUT={container_out}",
-        "-e",
-        f"APP_WINDOW_CLASS={app_window_class}",
-        "-e",
-        f"APP_WINDOW_TITLE={app_window_title}",
-        "window-container",
-        "bash",
-        "-lc",
-        (
-            'export DISPLAY=${DISPLAY:-:99}; '
-            'find_win(){ '
-            '  local win=""; '
-            '  if [ -n "${APP_WINDOW_CLASS:-}" ]; then '
-            '    win="$(xdotool search --onlyvisible --class "$APP_WINDOW_CLASS" 2>/dev/null | head -n1)"; '
-            '  fi; '
-            '  if [ -z "$win" ] && [ -n "${APP_WINDOW_TITLE:-}" ]; then '
-            '    win="$(xdotool search --onlyvisible --name "$APP_WINDOW_TITLE" 2>/dev/null | head -n1)"; '
-            '  fi; '
-            '  [ -n "$win" ] || return 1; '
-            '  printf "%s\\n" "$win"; '
-            '}; '
-            'win="$(find_win)" || { '
-            '  echo "app window not found (class=${APP_WINDOW_CLASS:-}, title=${APP_WINDOW_TITLE:-})" >&2; '
-            '  exit 1; '
-            '}; '
-            'mkdir -p "$(dirname "$SNAPSHOT_OUT")"; '
-            'xdotool windowraise "$win" >/dev/null 2>&1 || true; '
-            'xdotool windowfocus "$win" >/dev/null 2>&1 || true; '
-            'sleep 0.1; '
-            'import -window "$win" "$SNAPSHOT_OUT"'
-        ),
-    ]
+    display = os.environ.get("DISPLAY", ":99")
     proc = subprocess.run(
-        cmd,
-        stdin=subprocess.DEVNULL,
-        capture_output=True,
-        text=True,
-        check=False,
+        [
+            "docker", "exec", "-T",
+            "-e", f"DISPLAY={display}",
+            "-e", f"SNAPSHOT_OUT={container_out}",
+            "-e", f"APP_WINDOW_CLASS={app_meta.get('windowclass', '')}",
+            "-e", f"APP_WINDOW_TITLE={app_meta.get('windowtitle', '')}",
+            container, "bash", "-lc",
+            (
+                'export DISPLAY=${DISPLAY:-:99}; '
+                'find_win(){ '
+                '  local win=""; '
+                '  [ -n "${APP_WINDOW_CLASS:-}" ] && '
+                '    win="$(xdotool search --onlyvisible --class "$APP_WINDOW_CLASS" 2>/dev/null | head -n1)"; '
+                '  [ -z "$win" ] && [ -n "${APP_WINDOW_TITLE:-}" ] && '
+                '    win="$(xdotool search --onlyvisible --name "$APP_WINDOW_TITLE" 2>/dev/null | head -n1)"; '
+                '  [ -n "$win" ] || return 1; printf "%s\n" "$win"; }; '
+                'win="$(find_win)" || { echo "window not found" >&2; exit 1; }; '
+                'mkdir -p "$(dirname "$SNAPSHOT_OUT")"; '
+                'xdotool windowraise "$win" >/dev/null 2>&1 || true; '
+                'xdotool windowfocus "$win" >/dev/null 2>&1 || true; '
+                'sleep 0.1; '
+                'import -window "$win" "$SNAPSHOT_OUT"'
+            ),
+        ],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False,
     )
     if proc.returncode != 0:
-        stderr = (proc.stderr or "").strip()
-        stdout = (proc.stdout or "").strip()
-        detail = stderr or stdout or f"exit={proc.returncode}"
+        detail = (proc.stderr or proc.stdout or f"exit={proc.returncode}").strip()
         raise RuntimeError(f"screenshot capture failed: {detail}")
-    return rel_png_str
-
-
-def write_timed_line(f, delay: float, line: str):
-    f.write(f"{WAIT_PREFIX}{delay:.6f}\n")
-    f.write(f"{line}\n")
+    return ref
 
 
 def cmd_record(
@@ -133,163 +147,140 @@ def cmd_record(
     screenshot_key: str | None,
     stop_key: str | None,
     app_meta_raw: dict[str, str] | None,
+    container: str = "window-container",
+    container_repo: str = "/tmp/repo",
 ) -> int:
+    """Read xmacrorec2 lines from stdin and write a Parrot v2 .🦜 recording."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    last_emitted_ts = time.monotonic()
-    event_count = 0
-    check_count = 0
+    last_ts    = time.monotonic()
+    event_count = check_count = 0
     screenshot_key_norm = screenshot_key.upper() if screenshot_key else None
-    stop_key_norm = stop_key.upper() if stop_key else None
+    stop_key_norm       = stop_key.upper()       if stop_key       else None
     app_meta = normalize_app_meta(app_meta_raw)
 
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
-        f.write(f"{HEADER}\n")
-        for line in format_app_directive_lines(app_meta):
+        f.write(f"{PARROT_HEADER}\n\n")
+        for line in format_metadata_lines(app_meta):
             f.write(f"{line}\n")
+        f.write("\n")
+
         for raw in sys.stdin:
             line = raw.rstrip("\n")
-            if is_noise_line(line):
+            if _is_noise(line):
                 continue
 
-            now = time.monotonic()
-            delay = now - last_emitted_ts
+            now   = time.monotonic()
+            delay = now - last_ts
 
-            key_info = parse_key_event(line)
+            key_info = _parse_key_event(line)
             if key_info is not None:
                 _, keysym, is_press, is_release = key_info
                 keysym_norm = keysym.upper()
 
                 if stop_key_norm and keysym_norm == stop_key_norm:
-                    # The recorder stop key is control for xmacrorec2, not part of the app macro.
                     continue
 
                 if screenshot_key_norm and keysym_norm == screenshot_key_norm:
-                    # Use release to trigger screenshot so the key press duration is included.
                     if is_release:
                         check_count += 1
                         try:
-                            png_name = capture_reference_image(output_path, check_count, app_meta)
-                        except Exception as exc:  # noqa: BLE001 - keep recording failure readable
+                            ref = _capture_screenshot(
+                                output_path, check_count, app_meta,
+                                container=container, container_repo=container_repo,
+                            )
+                        except Exception as exc:
                             print(str(exc), file=sys.stderr)
                             return 1
-                        write_timed_line(f, delay, f"Check {png_name}")
+                        f.write(f"wait {delay:.6f}\n")
+                        f.write(f"check {ref}\n")
                         f.flush()
-                        last_emitted_ts = now
+                        last_ts = now
                         event_count += 1
-                        print(f"Inserted Check {png_name}", file=sys.stderr)
-                    # Consume both press and release for the screenshot hotkey.
-                    continue
+                        print(f"Inserted check {ref}", file=sys.stderr)
+                    continue  # consume both press and release for the hotkey
 
-                if is_press or is_release:
-                    # Fall through and record key events normally.
-                    pass
+            parrot_line = _xmacro_to_parrot(line)
+            if parrot_line is None:
+                continue
 
-            write_timed_line(f, delay, line)
-            last_emitted_ts = now
+            f.write(f"wait {delay:.6f}\n")
+            f.write(f"{parrot_line}\n")
+            last_ts = now
             event_count += 1
 
         f.flush()
 
-    print(f"Saved {event_count} events to {output_path} (checks inserted: {check_count})", file=sys.stderr)
+    print(f"Saved {event_count} events to {output_path} (checks: {check_count})", file=sys.stderr)
     return 0
 
 
-def iter_replay_lines(input_path: Path, speed: float):
-    pending_wait = 0.0
+# ---------------------------------------------------------------------------
+# Replay
+# ---------------------------------------------------------------------------
 
+def iter_replay_lines(input_path: Path, speed: float):
+    """
+    Yield event lines from a .🦜 recording, sleeping between them.
+
+    'wait X.X' lines set the delay before the next event; they are not yielded.
+    Comment, blank, and metadata lines are all skipped.
+    """
+    pending_wait = 0.0
     with input_path.open("r", encoding="utf-8") as f:
         for raw in f:
-            line = raw.rstrip("\n")
-            if not line:
+            line = raw.strip()
+            if not line or line.startswith("#"):
                 continue
-            if line.startswith(WAIT_PREFIX):
+            parts = line.split(None, 1)
+            verb  = parts[0].lower()
+
+            if verb == "wait":
                 try:
-                    pending_wait = float(line[len(WAIT_PREFIX) :])
+                    pending_wait = float(parts[1]) if len(parts) > 1 else 0.0
                 except ValueError:
                     pending_wait = 0.0
                 continue
-            if line.startswith("#"):
-                continue
+
+            if verb not in EVENT_VERBS:
+                continue  # metadata line
 
             if pending_wait > 0:
-                sleep_for = pending_wait / speed
-                if sleep_for > 0:
-                    time.sleep(sleep_for)
+                time.sleep(pending_wait / speed)
             pending_wait = 0.0
             yield line
 
 
-def cmd_replay(input_path: Path, speed: float) -> int:
-    if speed <= 0:
-        print("--speed must be > 0", file=sys.stderr)
-        return 2
+def parse_xmacro_event(line: str) -> tuple | None:
+    """
+    Parse a Parrot v2 event line into an action tuple for dispatch.
 
-    for line in iter_replay_lines(input_path, speed):
-        try:
-            sys.stdout.write(line + "\n")
-            sys.stdout.flush()
-        except BrokenPipeError:
-            _suppress_stdout_broken_pipe()
-            return 0
-    return 0
-
-
-def parse_xmacro_event(line: str):
-    if line.startswith("Check "):
-        ref = line[len("Check ") :].strip()
-        if ref:
-            return ("check", ref)
-        return None
-    if line.startswith("CHECK "):
-        ref = line[len("CHECK ") :].strip()
-        if ref:
-            return ("check", ref)
-        return None
-
+    Examples:
+        'mousemove 651 284'  →  ('mousemove', '651', '284')
+        'keydown Alt_L'      →  ('keydown', 'Alt_L')
+        'check foo/bar.png'  →  ('check', 'foo/bar.png')
+    """
     parts = line.split()
     if not parts:
         return None
-
-    event = parts[0].rstrip(":")
-    args = parts[1:]
-
-    if event == "MotionNotify" and len(args) >= 2:
-        return ("mousemove", args[0], args[1])
-    if event == "ButtonPress" and len(args) >= 1:
-        return ("mousedown", args[0])
-    if event == "ButtonRelease" and len(args) >= 1:
-        return ("mouseup", args[0])
-
-    # xmacro variants seen in the wild.
-    if event in {"KeyPress", "KeyStrPress"} and len(args) >= 1:
-        return ("keydown", args[0])
-    if event in {"KeyRelease", "KeyStrRelease"} and len(args) >= 1:
-        return ("keyup", args[0])
-
-    # Unsupported/unknown event; caller can skip.
+    verb = parts[0].lower()
+    if verb == "mousemove"  and len(parts) >= 3: return ("mousemove", parts[1], parts[2])
+    if verb == "mousedown"  and len(parts) >= 2: return ("mousedown", parts[1])
+    if verb == "mouseup"    and len(parts) >= 2: return ("mouseup",   parts[1])
+    if verb == "keydown"    and len(parts) >= 2: return ("keydown",   parts[1])
+    if verb == "keyup"      and len(parts) >= 2: return ("keyup",     parts[1])
+    if verb == "check"      and len(parts) >= 2: return ("check",     parts[1])
     return None
 
 
-def _suppress_stdout_broken_pipe() -> None:
-    """Avoid a second BrokenPipeError during interpreter shutdown."""
-    try:
-        stdout_fd = sys.stdout.fileno()
-    except (AttributeError, OSError, ValueError):
-        return
-    try:
-        with open(os.devnull, "w", encoding="utf-8") as devnull:
-            os.dup2(devnull.fileno(), stdout_fd)
-    except OSError:
-        pass
-
+# ---------------------------------------------------------------------------
+# CLI subcommands
+# ---------------------------------------------------------------------------
 
 def cmd_replay_xdotool(input_path: Path, speed: float) -> int:
     if speed <= 0:
         print("--speed must be > 0", file=sys.stderr)
         return 2
-
-    skipped = 0
-    emitted = 0
+    skipped = emitted = 0
     for line in iter_replay_lines(input_path, speed):
         action = parse_xmacro_event(line)
         if action is None:
@@ -299,10 +290,9 @@ def cmd_replay_xdotool(input_path: Path, speed: float) -> int:
             sys.stdout.write("\t".join(action) + "\n")
             sys.stdout.flush()
         except BrokenPipeError:
-            _suppress_stdout_broken_pipe()
+            _suppress_broken_pipe()
             return 0
         emitted += 1
-
     if skipped:
         print(f"Skipped {skipped} unsupported events", file=sys.stderr)
     print(f"Emitted {emitted} replay actions", file=sys.stderr)
@@ -310,78 +300,75 @@ def cmd_replay_xdotool(input_path: Path, speed: float) -> int:
 
 
 def cmd_app_meta(input_path: Path, fmt: str) -> int:
+    import shlex
     meta = load_app_metadata(input_path)
-
     if fmt == "shell":
         print(f"APP_STARTCOMMAND={shlex.quote(meta.get('startcommand', ''))}")
         print(f"APP_WINDOW_TITLE={shlex.quote(meta.get('windowtitle', ''))}")
         print(f"APP_WINDOW_CLASS={shlex.quote(meta.get('windowclass', ''))}")
         return 0
-
     if fmt == "tsv":
         for key in APP_FIELDS:
             print(f"{key}\t{meta.get(key, '')}")
         return 0
-
     print(f"unsupported format: {fmt}", file=sys.stderr)
     return 2
 
 
-def build_parser() -> argparse.ArgumentParser:
+def _suppress_broken_pipe() -> None:
+    try:
+        fd = sys.stdout.fileno()
+        with open(os.devnull, "w") as devnull:
+            os.dup2(devnull.fileno(), fd)
+    except OSError:
+        pass
+
+
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_record = sub.add_parser("record", help="Read xmacrorec2 stdout and save timed macro")
-    p_record.add_argument("--output", required=True, type=Path)
-    p_record.add_argument("--screenshot-key", default=None, help="Keysym that inserts a Check screenshot (e.g. F6)")
-    p_record.add_argument("--stop-key", default=None, help="Recorder stop keysym to filter from output (e.g. F8)")
-    p_record.add_argument("--app-startcommand", default="", help="App start command to store in #APP metadata")
-    p_record.add_argument("--app-windowtitle", default="", help="App window title matcher for #APP metadata")
-    p_record.add_argument("--app-windowclass", default="", help="App window class matcher for #APP metadata")
+    p_rec = sub.add_parser("record", help="Read xmacrorec2 stdout and save a .🦜 recording")
+    p_rec.add_argument("--output",           required=True, type=Path)
+    p_rec.add_argument("--screenshot-key",   default=None)
+    p_rec.add_argument("--stop-key",         default=None)
+    p_rec.add_argument("--app-startcommand", default="")
+    p_rec.add_argument("--app-windowtitle",  default="")
+    p_rec.add_argument("--app-windowclass",  default="")
+    p_rec.add_argument("--container",        default="window-container")
+    p_rec.add_argument("--container-repo",   default="/tmp/repo")
 
-    p_replay = sub.add_parser("replay", help="Emit macro lines to stdout with recorded timing")
-    p_replay.add_argument("--input", required=True, type=Path)
-    p_replay.add_argument("--speed", type=float, default=1.0, help="1.0=original speed, 2.0=2x faster")
+    p_rxd = sub.add_parser("replay-xdotool", help="Emit xdotool actions to stdout with timing")
+    p_rxd.add_argument("--input", required=True, type=Path)
+    p_rxd.add_argument("--speed", type=float, default=1.0)
 
-    p_replay_xdotool = sub.add_parser(
-        "replay-xdotool",
-        help="Emit normalized xdotool actions to stdout with recorded timing",
-    )
-    p_replay_xdotool.add_argument("--input", required=True, type=Path)
-    p_replay_xdotool.add_argument(
-        "--speed", type=float, default=1.0, help="1.0=original speed, 2.0=2x faster"
-    )
-
-    p_app_meta = sub.add_parser("app-meta", help="Read effective #APP metadata from a macro file")
-    p_app_meta.add_argument("--input", required=True, type=Path)
-    p_app_meta.add_argument("--format", choices=["shell", "tsv"], default="shell")
+    p_meta = sub.add_parser("app-meta", help="Read metadata from a .🦜 recording")
+    p_meta.add_argument("--input",  required=True, type=Path)
+    p_meta.add_argument("--format", choices=["shell", "tsv"], default="shell")
 
     return parser
 
 
 def main() -> int:
-    parser = build_parser()
-    args = parser.parse_args()
+    args = _build_parser().parse_args()
 
     if args.cmd == "record":
         return cmd_record(
             args.output,
             args.screenshot_key,
             args.stop_key,
-            {
-                "startcommand": args.app_startcommand,
-                "windowtitle": args.app_windowtitle,
-                "windowclass": args.app_windowclass,
-            },
+            {"startcommand": args.app_startcommand,
+             "windowtitle":  args.app_windowtitle,
+             "windowclass":  args.app_windowclass},
+            container=args.container,
+            container_repo=args.container_repo,
         )
-    if args.cmd == "replay":
-        return cmd_replay(args.input, args.speed)
     if args.cmd == "replay-xdotool":
         return cmd_replay_xdotool(args.input, args.speed)
     if args.cmd == "app-meta":
         return cmd_app_meta(args.input, args.format)
 
-    parser.error("unknown command")
+    _build_parser().error("unknown command")
     return 2
 
 

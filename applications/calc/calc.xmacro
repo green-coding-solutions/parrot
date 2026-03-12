@@ -1,0 +1,2338 @@
+# xtest timed xmacro v1
+#APP startcommand=gnome-calculator
+#APP windowtitle=Calculator
+#APP windowclass=gnome-calculator
+#WAIT_SEC 7.319125
+MotionNotify 617 12
+#WAIT_SEC 0.000011
+KeyStrPress F6
+#WAIT_SEC 0.119056
+KeyStrRelease F6
+#WAIT_SEC 1.452264
+Check calc/calc-check-001.png
+#WAIT_SEC 3.567591
+MotionNotify 684 585
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.103532
+ButtonRelease 1
+#WAIT_SEC 1.092904
+KeyStrPress KP_Right
+#WAIT_SEC 0.047187
+KeyStrPress KP_Left
+#WAIT_SEC 0.015785
+KeyStrRelease KP_Right
+#WAIT_SEC 0.050813
+KeyStrRelease KP_Left
+#WAIT_SEC 0.078768
+KeyStrPress KP_Right
+#WAIT_SEC 0.047406
+KeyStrPress KP_Left
+#WAIT_SEC 0.033037
+KeyStrRelease KP_Right
+#WAIT_SEC 0.038545
+KeyStrRelease KP_Left
+#WAIT_SEC 0.064360
+KeyStrPress KP_Right
+#WAIT_SEC 0.047618
+KeyStrPress KP_Left
+#WAIT_SEC 0.015409
+KeyStrRelease KP_Right
+#WAIT_SEC 0.048426
+KeyStrRelease KP_Left
+#WAIT_SEC 0.064945
+KeyStrPress KP_Right
+#WAIT_SEC 0.041529
+KeyStrPress KP_Left
+#WAIT_SEC 0.026151
+KeyStrRelease KP_Right
+#WAIT_SEC 0.051431
+KeyStrRelease KP_Left
+#WAIT_SEC 0.067538
+KeyStrPress KP_Right
+#WAIT_SEC 0.056671
+KeyStrRelease KP_Right
+#WAIT_SEC 0.003557
+KeyStrPress KP_Home
+#WAIT_SEC 0.007827
+KeyStrRelease KP_Home
+#WAIT_SEC 0.008143
+KeyStrPress KP_Left
+#WAIT_SEC 0.026251
+KeyStrRelease KP_Left
+#WAIT_SEC 0.070488
+KeyStrPress KP_Right
+#WAIT_SEC 0.041629
+KeyStrPress KP_Left
+#WAIT_SEC 0.026266
+KeyStrRelease KP_Right
+#WAIT_SEC 0.056945
+KeyStrRelease KP_Left
+#WAIT_SEC 0.078322
+KeyStrPress KP_Left
+#WAIT_SEC 0.000010
+KeyStrPress KP_Right
+#WAIT_SEC 0.027794
+KeyStrRelease KP_Right
+#WAIT_SEC 0.031849
+KeyStrRelease KP_Left
+#WAIT_SEC 0.388285
+KeyStrPress Num_Lock
+#WAIT_SEC 0.077170
+KeyStrRelease Num_Lock
+#WAIT_SEC 0.178881
+KeyStrPress KP_Right
+#WAIT_SEC 0.061043
+KeyStrPress KP_Left
+#WAIT_SEC 0.007133
+KeyStrRelease KP_Right
+#WAIT_SEC 0.064372
+KeyStrRelease KP_Left
+#WAIT_SEC 0.083436
+KeyStrPress KP_Right
+#WAIT_SEC 0.030694
+KeyStrPress KP_Begin
+#WAIT_SEC 0.021500
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000019
+KeyStrPress KP_Left
+#WAIT_SEC 0.000003
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.052597
+KeyStrRelease KP_Left
+#WAIT_SEC 0.068131
+KeyStrPress KP_Right
+#WAIT_SEC 0.015252
+KeyStrPress KP_Begin
+#WAIT_SEC 0.042051
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000082
+KeyStrPress KP_Left
+#WAIT_SEC 0.005611
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.058008
+KeyStrRelease KP_Left
+#WAIT_SEC 0.062797
+KeyStrPress KP_Right
+#WAIT_SEC 0.026025
+KeyStrPress KP_Begin
+#WAIT_SEC 0.030720
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000016
+KeyStrPress KP_Left
+#WAIT_SEC 0.006266
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.048429
+KeyStrRelease KP_Left
+#WAIT_SEC 0.064175
+KeyStrPress KP_Right
+#WAIT_SEC 0.025571
+KeyStrPress KP_Begin
+#WAIT_SEC 0.030762
+KeyStrRelease KP_Right
+#WAIT_SEC 0.011484
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000007
+KeyStrPress KP_Left
+#WAIT_SEC 0.061982
+KeyStrRelease KP_Left
+#WAIT_SEC 0.067862
+KeyStrPress KP_Next
+#WAIT_SEC 0.018239
+KeyStrPress KP_Begin
+#WAIT_SEC 0.024228
+KeyStrRelease KP_Next
+#WAIT_SEC 0.010414
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005216
+KeyStrPress KP_Left
+#WAIT_SEC 0.048625
+KeyStrRelease KP_Left
+#WAIT_SEC 0.056030
+KeyStrPress KP_Right
+#WAIT_SEC 0.025617
+KeyStrPress KP_Begin
+#WAIT_SEC 0.046489
+KeyStrRelease KP_Right
+#WAIT_SEC 0.005171
+KeyStrPress KP_Left
+#WAIT_SEC 0.000005
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.067624
+KeyStrRelease KP_Left
+#WAIT_SEC 0.038860
+KeyStrPress KP_Right
+#WAIT_SEC 0.025577
+KeyStrPress KP_Up
+#WAIT_SEC 0.031448
+KeyStrRelease KP_Up
+#WAIT_SEC 0.010665
+KeyStrRelease KP_Right
+#WAIT_SEC 0.003758
+KeyStrPress KP_Left
+#WAIT_SEC 0.057817
+KeyStrRelease KP_Left
+#WAIT_SEC 0.057141
+KeyStrPress KP_Right
+#WAIT_SEC 0.021603
+KeyStrPress KP_Begin
+#WAIT_SEC 0.009578
+KeyStrPress KP_Left
+#WAIT_SEC 0.046385
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015947
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015648
+KeyStrRelease KP_Left
+#WAIT_SEC 0.841527
+KeyStrPress KP_Add
+#WAIT_SEC 0.067895
+KeyStrRelease KP_Add
+#WAIT_SEC 0.171793
+KeyStrPress KP_Right
+#WAIT_SEC 0.031131
+KeyStrPress KP_Begin
+#WAIT_SEC 0.025685
+KeyStrPress KP_Left
+#WAIT_SEC 0.013834
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000011
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.048992
+KeyStrRelease KP_Left
+#WAIT_SEC 0.095719
+KeyStrPress KP_Right
+#WAIT_SEC 0.025593
+KeyStrPress KP_Begin
+#WAIT_SEC 0.022611
+KeyStrPress KP_Left
+#WAIT_SEC 0.019702
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015618
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.020325
+KeyStrRelease KP_Left
+#WAIT_SEC 0.096770
+KeyStrPress KP_Right
+#WAIT_SEC 0.016437
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015864
+KeyStrPress KP_Left
+#WAIT_SEC 0.027136
+KeyStrRelease KP_Right
+#WAIT_SEC 0.003111
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.032661
+KeyStrRelease KP_Left
+#WAIT_SEC 0.114578
+KeyStrPress KP_Right
+#WAIT_SEC 0.021284
+KeyStrPress KP_Begin
+#WAIT_SEC 0.020243
+KeyStrPress KP_Left
+#WAIT_SEC 0.011611
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000016
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.023936
+KeyStrRelease KP_Left
+#WAIT_SEC 0.131021
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000016
+KeyStrPress KP_Right
+#WAIT_SEC 0.005029
+KeyStrPress KP_Left
+#WAIT_SEC 0.035997
+KeyStrRelease KP_Right
+#WAIT_SEC 0.003801
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.020895
+KeyStrRelease KP_Left
+#WAIT_SEC 0.131849
+KeyStrPress KP_Left
+#WAIT_SEC 0.000015
+KeyStrPress KP_Up
+#WAIT_SEC 0.000004
+KeyStrPress KP_Prior
+#WAIT_SEC 0.036245
+KeyStrRelease KP_Up
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Prior
+#WAIT_SEC 0.011030
+KeyStrRelease KP_Left
+#WAIT_SEC 0.145590
+KeyStrPress KP_Left
+#WAIT_SEC 0.000010
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000003
+KeyStrPress KP_Right
+#WAIT_SEC 0.038389
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000010
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000003
+KeyStrRelease KP_Right
+#WAIT_SEC 0.144442
+KeyStrPress KP_Down
+#WAIT_SEC 0.000008
+KeyStrPress KP_Next
+#WAIT_SEC 0.000003
+KeyStrPress KP_End
+#WAIT_SEC 0.036169
+KeyStrRelease KP_Down
+#WAIT_SEC 0.000010
+KeyStrRelease KP_Next
+#WAIT_SEC 0.000003
+KeyStrRelease KP_End
+#WAIT_SEC 0.132079
+KeyStrPress KP_Next
+#WAIT_SEC 0.000013
+KeyStrPress KP_End
+#WAIT_SEC 0.007063
+KeyStrPress KP_Down
+#WAIT_SEC 0.034160
+KeyStrRelease KP_Down
+#WAIT_SEC 0.013881
+KeyStrRelease KP_Next
+#WAIT_SEC 0.000173
+KeyStrRelease KP_End
+#WAIT_SEC 0.130451
+KeyStrPress KP_Right
+#WAIT_SEC 0.005358
+KeyStrPress KP_Left
+#WAIT_SEC 0.000007
+KeyStrPress KP_Begin
+#WAIT_SEC 0.025975
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000010
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005629
+KeyStrRelease KP_Right
+#WAIT_SEC 0.136867
+KeyStrPress KP_Left
+#WAIT_SEC 0.000015
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000007
+KeyStrPress KP_Right
+#WAIT_SEC 0.025866
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.013682
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000017
+KeyStrRelease KP_Right
+#WAIT_SEC 0.120142
+KeyStrPress KP_Right
+#WAIT_SEC 0.007994
+KeyStrPress KP_Left
+#WAIT_SEC 0.000013
+KeyStrPress KP_Begin
+#WAIT_SEC 0.018159
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005296
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000008
+KeyStrRelease KP_Left
+#WAIT_SEC 0.145472
+KeyStrPress KP_Left
+#WAIT_SEC 0.000014
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000003
+KeyStrPress KP_Right
+#WAIT_SEC 0.031106
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000011
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005041
+KeyStrRelease KP_Right
+#WAIT_SEC 0.131139
+KeyStrPress KP_Down
+#WAIT_SEC 0.000013
+KeyStrPress KP_Next
+#WAIT_SEC 0.000007
+KeyStrPress KP_End
+#WAIT_SEC 0.026106
+KeyStrRelease KP_Down
+#WAIT_SEC 0.013215
+KeyStrRelease KP_Next
+#WAIT_SEC 0.000084
+KeyStrRelease KP_End
+#WAIT_SEC 0.312910
+KeyStrPress KP_Begin
+#WAIT_SEC 0.007580
+KeyStrPress KP_Left
+#WAIT_SEC 0.000008
+KeyStrPress KP_Right
+#WAIT_SEC 0.007445
+KeyStrRelease KP_Left
+#WAIT_SEC 0.024144
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000020
+KeyStrRelease KP_Right
+#WAIT_SEC 0.617783
+KeyStrPress KP_Enter
+#WAIT_SEC 0.067695
+KeyStrRelease KP_Enter
+#WAIT_SEC 0.290893
+KeyStrPress KP_Right
+#WAIT_SEC 0.016051
+KeyStrPress KP_Begin
+#WAIT_SEC 0.020390
+KeyStrPress KP_Left
+#WAIT_SEC 0.031532
+KeyStrRelease KP_Right
+#WAIT_SEC 0.004044
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.023994
+KeyStrRelease KP_Left
+#WAIT_SEC 0.152763
+KeyStrPress KP_Right
+#WAIT_SEC 0.015573
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015658
+KeyStrPress KP_Left
+#WAIT_SEC 0.015787
+KeyStrRelease KP_Right
+#WAIT_SEC 0.020101
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.003561
+KeyStrRelease KP_Left
+#WAIT_SEC 0.137043
+KeyStrPress KP_Right
+#WAIT_SEC 0.007746
+KeyStrPress KP_Left
+#WAIT_SEC 0.000009
+KeyStrPress KP_Begin
+#WAIT_SEC 0.032191
+KeyStrRelease KP_Right
+#WAIT_SEC 0.010855
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.004465
+KeyStrRelease KP_Left
+#WAIT_SEC 0.148278
+KeyStrPress KP_Left
+#WAIT_SEC 0.000009
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000003
+KeyStrPress KP_Right
+#WAIT_SEC 0.028300
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.007450
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000015
+KeyStrRelease KP_Right
+#WAIT_SEC 0.136935
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000016
+KeyStrPress KP_Right
+#WAIT_SEC 0.007719
+KeyStrPress KP_Left
+#WAIT_SEC 0.033868
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000014
+KeyStrRelease KP_Left
+#WAIT_SEC 0.013730
+KeyStrRelease KP_Right
+#WAIT_SEC 0.128488
+KeyStrPress KP_Left
+#WAIT_SEC 0.000013
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000259
+KeyStrPress KP_Right
+#WAIT_SEC 0.039209
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000013
+KeyStrRelease KP_Right
+#WAIT_SEC 0.010404
+KeyStrRelease KP_Left
+#WAIT_SEC 0.145845
+KeyStrPress KP_Left
+#WAIT_SEC 0.000018
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000005
+KeyStrPress KP_Right
+#WAIT_SEC 0.036011
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000021
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015664
+KeyStrRelease KP_Right
+#WAIT_SEC 0.213453
+KeyStrPress KP_Add
+#WAIT_SEC 0.051693
+KeyStrRelease KP_Add
+#WAIT_SEC 0.183431
+KeyStrPress KP_Begin
+#WAIT_SEC 0.007566
+KeyStrPress KP_Left
+#WAIT_SEC 0.008064
+KeyStrRelease KP_Left
+#WAIT_SEC 0.031823
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.156073
+KeyStrPress KP_Begin
+#WAIT_SEC 0.012299
+KeyStrPress KP_Left
+#WAIT_SEC 0.000010
+KeyStrPress KP_Right
+#WAIT_SEC 0.023713
+KeyStrRelease KP_Left
+#WAIT_SEC 0.015988
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Right
+#WAIT_SEC 0.128408
+KeyStrPress KP_Left
+#WAIT_SEC 0.007913
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000048
+KeyStrPress KP_Right
+#WAIT_SEC 0.039603
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000016
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000003
+KeyStrRelease KP_Right
+#WAIT_SEC 0.146254
+KeyStrPress KP_Down
+#WAIT_SEC 0.000018
+KeyStrPress KP_Next
+#WAIT_SEC 0.000005
+KeyStrPress KP_End
+#WAIT_SEC 0.037844
+KeyStrRelease KP_End
+#WAIT_SEC 0.020863
+KeyStrRelease KP_Down
+#WAIT_SEC 0.000006
+KeyStrRelease KP_Next
+#WAIT_SEC 0.119852
+KeyStrPress KP_Down
+#WAIT_SEC 0.000007
+KeyStrPress KP_Next
+#WAIT_SEC 0.000003
+KeyStrPress KP_End
+#WAIT_SEC 0.047375
+KeyStrRelease KP_Down
+#WAIT_SEC 0.000016
+KeyStrRelease KP_Next
+#WAIT_SEC 0.000005
+KeyStrRelease KP_End
+#WAIT_SEC 0.140287
+KeyStrPress KP_End
+#WAIT_SEC 0.015573
+KeyStrPress KP_Down
+#WAIT_SEC 0.000018
+KeyStrPress KP_Next
+#WAIT_SEC 0.032027
+KeyStrRelease KP_End
+#WAIT_SEC 0.015602
+KeyStrRelease KP_Down
+#WAIT_SEC 0.007937
+KeyStrRelease KP_Next
+#WAIT_SEC 0.285201
+KeyStrPress KP_Enter
+#WAIT_SEC 0.055849
+KeyStrRelease KP_Enter
+#WAIT_SEC 0.219608
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000023
+KeyStrPress KP_Right
+#WAIT_SEC 0.015314
+KeyStrPress KP_Left
+#WAIT_SEC 0.024054
+KeyStrRelease KP_Right
+#WAIT_SEC 0.021023
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.016088
+KeyStrRelease KP_Left
+#WAIT_SEC 0.140589
+KeyStrPress KP_Left
+#WAIT_SEC 0.000013
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000005
+KeyStrPress KP_Right
+#WAIT_SEC 0.038313
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.010497
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Right
+#WAIT_SEC 0.141944
+KeyStrPress KP_Left
+#WAIT_SEC 0.000012
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015471
+KeyStrPress KP_Right
+#WAIT_SEC 0.021140
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000013
+KeyStrRelease KP_Right
+#WAIT_SEC 0.011111
+KeyStrRelease KP_Left
+#WAIT_SEC 0.128341
+KeyStrPress KP_Left
+#WAIT_SEC 0.000011
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000003
+KeyStrPress KP_Right
+#WAIT_SEC 0.031825
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005105
+KeyStrRelease KP_Right
+#WAIT_SEC 0.002321
+KeyStrRelease KP_Left
+#WAIT_SEC 0.129477
+KeyStrPress KP_Right
+#WAIT_SEC 0.015256
+KeyStrPress KP_Left
+#WAIT_SEC 0.000011
+KeyStrPress KP_Begin
+#WAIT_SEC 0.032235
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000015
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.011508
+KeyStrRelease KP_Right
+#WAIT_SEC 0.164734
+KeyStrPress KP_Add
+#WAIT_SEC 0.063651
+KeyStrRelease KP_Add
+#WAIT_SEC 0.177195
+KeyStrPress KP_Begin
+#WAIT_SEC 0.006124
+KeyStrPress KP_Right
+#WAIT_SEC 0.024717
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015102
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.176971
+KeyStrPress KP_Left
+#WAIT_SEC 0.000017
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000005
+KeyStrPress KP_Right
+#WAIT_SEC 0.047363
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000018
+KeyStrRelease KP_Right
+#WAIT_SEC 0.010479
+KeyStrRelease KP_Left
+#WAIT_SEC 0.125984
+KeyStrPress KP_Left
+#WAIT_SEC 0.000019
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000005
+KeyStrPress KP_Right
+#WAIT_SEC 0.047565
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000023
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.010276
+KeyStrRelease KP_Right
+#WAIT_SEC 0.130086
+KeyStrPress KP_Begin
+#WAIT_SEC 0.011617
+KeyStrPress KP_Left
+#WAIT_SEC 0.000012
+KeyStrPress KP_Right
+#WAIT_SEC 0.032146
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000023
+KeyStrRelease KP_Right
+#WAIT_SEC 0.011065
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.120022
+KeyStrPress KP_Left
+#WAIT_SEC 0.000018
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000005
+KeyStrPress KP_Right
+#WAIT_SEC 0.046509
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000013
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.010518
+KeyStrRelease KP_Right
+#WAIT_SEC 0.120170
+KeyStrPress KP_Right
+#WAIT_SEC 0.011685
+KeyStrPress KP_Left
+#WAIT_SEC 0.000007
+KeyStrPress KP_Begin
+#WAIT_SEC 0.031627
+KeyStrRelease KP_Left
+#WAIT_SEC 0.010360
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000006
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.129794
+KeyStrPress KP_Left
+#WAIT_SEC 0.000009
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000002
+KeyStrPress KP_Right
+#WAIT_SEC 0.059773
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.020999
+KeyStrRelease KP_Right
+#WAIT_SEC 0.163429
+KeyStrPress KP_Right
+#WAIT_SEC 0.000008
+KeyStrPress KP_Up
+#WAIT_SEC 0.007260
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000007
+KeyStrRelease KP_Up
+#WAIT_SEC 0.122461
+KeyStrPress KP_Prior
+#WAIT_SEC 0.013802
+KeyStrPress KP_Home
+#WAIT_SEC 0.000007
+KeyStrPress KP_Up
+#WAIT_SEC 0.059125
+KeyStrRelease KP_Prior
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Home
+#WAIT_SEC 0.000003
+KeyStrRelease KP_Up
+#WAIT_SEC 0.135608
+KeyStrPress KP_Down
+#WAIT_SEC 0.000012
+KeyStrPress KP_Next
+#WAIT_SEC 0.000003
+KeyStrPress KP_End
+#WAIT_SEC 0.056739
+KeyStrRelease KP_Down
+#WAIT_SEC 0.000012
+KeyStrRelease KP_End
+#WAIT_SEC 0.004750
+KeyStrRelease KP_Next
+#WAIT_SEC 0.128173
+KeyStrPress KP_Next
+#WAIT_SEC 0.000007
+KeyStrPress KP_Insert
+#WAIT_SEC 0.048203
+KeyStrRelease KP_Next
+#WAIT_SEC 0.015899
+KeyStrRelease KP_Insert
+#WAIT_SEC 0.328387
+KeyStrPress KP_Left
+#WAIT_SEC 0.000009
+KeyStrPress KP_Right
+#WAIT_SEC 0.015247
+KeyStrPress KP_Begin
+#WAIT_SEC 0.042148
+KeyStrRelease KP_Left
+#WAIT_SEC 0.005737
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.010565
+KeyStrRelease KP_Right
+#WAIT_SEC 0.422588
+KeyStrPress KP_Enter
+#WAIT_SEC 0.067025
+KeyStrRelease KP_Enter
+#WAIT_SEC 0.267668
+KeyStrPress KP_Right
+#WAIT_SEC 0.024422
+KeyStrPress KP_Begin
+#WAIT_SEC 0.032831
+KeyStrPress KP_Left
+#WAIT_SEC 0.023394
+KeyStrRelease KP_Right
+#WAIT_SEC 0.008160
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.047620
+KeyStrRelease KP_Left
+#WAIT_SEC 0.095798
+KeyStrPress KP_Right
+#WAIT_SEC 0.025654
+KeyStrPress KP_Begin
+#WAIT_SEC 0.014224
+KeyStrPress KP_Left
+#WAIT_SEC 0.027476
+KeyStrRelease KP_Right
+#WAIT_SEC 0.012664
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.032190
+KeyStrRelease KP_Left
+#WAIT_SEC 0.104131
+KeyStrPress KP_Right
+#WAIT_SEC 0.025605
+KeyStrPress KP_Begin
+#WAIT_SEC 0.014566
+KeyStrPress KP_Left
+#WAIT_SEC 0.015942
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015361
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.032545
+KeyStrRelease KP_Left
+#WAIT_SEC 0.104609
+KeyStrPress KP_Right
+#WAIT_SEC 0.015527
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015538
+KeyStrPress KP_Left
+#WAIT_SEC 0.026155
+KeyStrRelease KP_Right
+#WAIT_SEC 0.005333
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.032525
+KeyStrRelease KP_Left
+#WAIT_SEC 0.130253
+KeyStrPress KP_Right
+#WAIT_SEC 0.014229
+KeyStrPress KP_Begin
+#WAIT_SEC 0.017093
+KeyStrPress KP_Left
+#WAIT_SEC 0.015679
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015629
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.026113
+KeyStrRelease KP_Left
+#WAIT_SEC 0.109678
+KeyStrPress KP_Right
+#WAIT_SEC 0.016433
+KeyStrPress KP_Begin
+#WAIT_SEC 0.009648
+KeyStrPress KP_Left
+#WAIT_SEC 0.021334
+KeyStrRelease KP_Right
+#WAIT_SEC 0.032227
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015859
+KeyStrRelease KP_Left
+#WAIT_SEC 0.120189
+KeyStrPress KP_Right
+#WAIT_SEC 0.007584
+KeyStrPress KP_Begin
+#WAIT_SEC 0.018181
+KeyStrPress KP_Left
+#WAIT_SEC 0.021948
+KeyStrRelease KP_Right
+#WAIT_SEC 0.019176
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015497
+KeyStrRelease KP_Left
+#WAIT_SEC 0.133418
+KeyStrPress KP_Right
+#WAIT_SEC 0.025731
+KeyStrPress KP_Left
+#WAIT_SEC 0.000048
+KeyStrPress KP_Begin
+#WAIT_SEC 0.022144
+KeyStrRelease KP_Right
+#WAIT_SEC 0.019177
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.020871
+KeyStrRelease KP_Left
+#WAIT_SEC 0.290839
+KeyStrPress KP_End
+#WAIT_SEC 0.046152
+KeyStrPress KP_Next
+#WAIT_SEC 0.006585
+KeyStrPress KP_Down
+#WAIT_SEC 0.008177
+KeyStrRelease KP_End
+#WAIT_SEC 0.039998
+KeyStrRelease KP_Next
+#WAIT_SEC 0.010553
+KeyStrRelease KP_Down
+#WAIT_SEC 0.119402
+KeyStrPress KP_Right
+#WAIT_SEC 0.054325
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015431
+KeyStrRelease KP_Right
+#WAIT_SEC 0.016810
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015764
+KeyStrPress KP_Left
+#WAIT_SEC 0.041957
+KeyStrRelease KP_Left
+#WAIT_SEC 0.046801
+KeyStrPress KP_Right
+#WAIT_SEC 0.007008
+KeyStrPress KP_Up
+#WAIT_SEC 0.056134
+KeyStrRelease KP_Up
+#WAIT_SEC 0.008036
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000008
+KeyStrPress KP_Left
+#WAIT_SEC 0.039809
+KeyStrRelease KP_Left
+#WAIT_SEC 0.872245
+MotionNotify 791 260
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.000002
+MotionNotify 790 260
+#WAIT_SEC 0.029435
+MotionNotify 789 260
+#WAIT_SEC 0.021537
+MotionNotify 786 262
+#WAIT_SEC 0.000006
+MotionNotify 781 264
+#WAIT_SEC 0.017063
+MotionNotify 779 264
+#WAIT_SEC 0.000007
+ButtonRelease 1
+#WAIT_SEC 0.108710
+MotionNotify 677 332
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.021630
+MotionNotify 660 348
+#WAIT_SEC 0.005615
+MotionNotify 642 364
+#WAIT_SEC 0.016611
+MotionNotify 604 394
+#WAIT_SEC 0.012744
+MotionNotify 547 422
+#WAIT_SEC 0.000007
+ButtonRelease 1
+#WAIT_SEC 0.115287
+MotionNotify 468 591
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.016221
+MotionNotify 468 592
+#WAIT_SEC 0.016759
+MotionNotify 471 591
+#WAIT_SEC 0.011522
+MotionNotify 474 582
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.213889
+MotionNotify 572 332
+#WAIT_SEC 0.000008
+ButtonPress 1
+#WAIT_SEC 0.000002
+MotionNotify 571 333
+#WAIT_SEC 0.016058
+MotionNotify 568 336
+#WAIT_SEC 0.017056
+MotionNotify 555 350
+#WAIT_SEC 0.017435
+MotionNotify 547 356
+#WAIT_SEC 0.015184
+MotionNotify 506 343
+#WAIT_SEC 0.000005
+ButtonRelease 1
+#WAIT_SEC 0.104388
+MotionNotify 252 308
+#WAIT_SEC 0.000005
+ButtonPress 1
+#WAIT_SEC 0.025939
+MotionNotify 252 309
+#WAIT_SEC 0.021764
+MotionNotify 252 311
+#WAIT_SEC 0.005648
+MotionNotify 250 315
+#WAIT_SEC 0.017788
+MotionNotify 249 317
+#WAIT_SEC 0.000005
+MotionNotify 249 318
+#WAIT_SEC 0.000002
+ButtonRelease 1
+#WAIT_SEC 0.112526
+MotionNotify 283 588
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.023739
+MotionNotify 282 595
+#WAIT_SEC 0.000005
+MotionNotify 279 601
+#WAIT_SEC 0.017276
+MotionNotify 276 612
+#WAIT_SEC 0.015802
+MotionNotify 274 617
+#WAIT_SEC 0.000008
+ButtonRelease 1
+#WAIT_SEC 0.102747
+MotionNotify 257 737
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.024335
+MotionNotify 257 738
+#WAIT_SEC 0.021678
+MotionNotify 256 738
+#WAIT_SEC 0.005374
+MotionNotify 256 735
+#WAIT_SEC 0.004398
+MotionNotify 253 721
+#WAIT_SEC 0.000008
+ButtonRelease 1
+#WAIT_SEC 0.112589
+MotionNotify 193 498
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.023467
+MotionNotify 194 497
+#WAIT_SEC 0.000008
+MotionNotify 195 497
+#WAIT_SEC 0.016992
+MotionNotify 197 492
+#WAIT_SEC 0.018410
+MotionNotify 208 464
+#WAIT_SEC 0.011372
+MotionNotify 227 430
+#WAIT_SEC 0.000004
+ButtonRelease 1
+#WAIT_SEC 0.105801
+MotionNotify 347 331
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.023525
+MotionNotify 348 331
+#WAIT_SEC 0.016832
+MotionNotify 350 329
+#WAIT_SEC 0.016276
+MotionNotify 384 307
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.096075
+MotionNotify 709 299
+#WAIT_SEC 0.000007
+ButtonPress 1
+#WAIT_SEC 0.026643
+MotionNotify 716 302
+#WAIT_SEC 0.021387
+MotionNotify 730 304
+#WAIT_SEC 0.000007
+MotionNotify 753 304
+#WAIT_SEC 0.015701
+MotionNotify 780 299
+#WAIT_SEC 0.000005
+ButtonRelease 1
+#WAIT_SEC 0.103481
+MotionNotify 1016 423
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.020309
+MotionNotify 1016 428
+#WAIT_SEC 0.004349
+MotionNotify 1016 432
+#WAIT_SEC 0.016016
+MotionNotify 1012 439
+#WAIT_SEC 0.000005
+ButtonRelease 1
+#WAIT_SEC 0.351919
+MotionNotify 649 872
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.054384
+MotionNotify 650 872
+#WAIT_SEC 0.024363
+MotionNotify 651 872
+#WAIT_SEC 0.019763
+MotionNotify 651 871
+#WAIT_SEC 0.035299
+MotionNotify 653 856
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.145903
+MotionNotify 634 782
+#WAIT_SEC 0.000012
+ButtonPress 1
+#WAIT_SEC 0.084423
+MotionNotify 633 779
+#WAIT_SEC 0.000012
+ButtonRelease 1
+#WAIT_SEC 0.131881
+MotionNotify 559 773
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.033159
+MotionNotify 559 772
+#WAIT_SEC 0.013086
+MotionNotify 559 766
+#WAIT_SEC 0.016889
+MotionNotify 559 752
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.089737
+MotionNotify 568 706
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.011918
+MotionNotify 568 707
+#WAIT_SEC 0.028252
+MotionNotify 568 708
+#WAIT_SEC 0.021017
+MotionNotify 567 709
+#WAIT_SEC 0.000013
+MotionNotify 567 710
+#WAIT_SEC 0.018393
+MotionNotify 567 709
+#WAIT_SEC 0.011672
+MotionNotify 569 708
+#WAIT_SEC 0.000031
+ButtonRelease 1
+#WAIT_SEC 0.111996
+MotionNotify 646 772
+#WAIT_SEC 0.000013
+ButtonPress 1
+#WAIT_SEC 0.027157
+MotionNotify 646 774
+#WAIT_SEC 0.000010
+MotionNotify 646 777
+#WAIT_SEC 0.016981
+MotionNotify 645 778
+#WAIT_SEC 0.026343
+ButtonRelease 1
+#WAIT_SEC 0.091297
+MotionNotify 657 792
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.021607
+MotionNotify 658 792
+#WAIT_SEC 0.021753
+MotionNotify 659 792
+#WAIT_SEC 0.005407
+MotionNotify 664 785
+#WAIT_SEC 0.000010
+MotionNotify 670 776
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.105607
+MotionNotify 719 757
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.055193
+MotionNotify 719 755
+#WAIT_SEC 0.000016
+ButtonRelease 1
+#WAIT_SEC 0.102170
+MotionNotify 681 735
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.000451
+MotionNotify 680 737
+#WAIT_SEC 0.017501
+MotionNotify 677 740
+#WAIT_SEC 0.017117
+MotionNotify 666 749
+#WAIT_SEC 0.017759
+MotionNotify 656 754
+#WAIT_SEC 0.026427
+MotionNotify 639 751
+#WAIT_SEC 0.011824
+MotionNotify 631 746
+#WAIT_SEC 0.000005
+MotionNotify 627 744
+#WAIT_SEC 0.000002
+ButtonRelease 1
+#WAIT_SEC 0.093963
+MotionNotify 602 761
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.028201
+MotionNotify 602 762
+#WAIT_SEC 0.018715
+MotionNotify 601 762
+#WAIT_SEC 0.000009
+MotionNotify 600 762
+#WAIT_SEC 0.016393
+MotionNotify 594 751
+#WAIT_SEC 0.000013
+ButtonRelease 1
+#WAIT_SEC 0.116007
+MotionNotify 565 745
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.018330
+MotionNotify 560 748
+#WAIT_SEC 0.017349
+MotionNotify 549 752
+#WAIT_SEC 0.019834
+MotionNotify 538 753
+#WAIT_SEC 0.017152
+MotionNotify 531 753
+#WAIT_SEC 0.003583
+MotionNotify 524 753
+#WAIT_SEC 0.000159
+ButtonRelease 1
+#WAIT_SEC 0.096521
+MotionNotify 480 783
+#WAIT_SEC 0.000008
+ButtonPress 1
+#WAIT_SEC 0.039438
+ButtonRelease 1
+#WAIT_SEC 0.127031
+MotionNotify 466 825
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.033258
+MotionNotify 467 825
+#WAIT_SEC 0.034388
+ButtonRelease 1
+#WAIT_SEC 0.109752
+MotionNotify 439 798
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.017810
+MotionNotify 438 792
+#WAIT_SEC 0.013469
+MotionNotify 434 775
+#WAIT_SEC 0.000012
+ButtonRelease 1
+#WAIT_SEC 0.105234
+MotionNotify 400 644
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.055312
+MotionNotify 401 644
+#WAIT_SEC 0.032269
+MotionNotify 405 639
+#WAIT_SEC 0.011754
+MotionNotify 409 633
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.176269
+MotionNotify 646 839
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.027574
+MotionNotify 647 839
+#WAIT_SEC 0.062971
+MotionNotify 647 835
+#WAIT_SEC 0.046330
+MotionNotify 650 822
+#WAIT_SEC 0.000016
+ButtonRelease 1
+#WAIT_SEC 0.149552
+MotionNotify 785 353
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.084920
+ButtonRelease 1
+#WAIT_SEC 0.121673
+MotionNotify 596 277
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.014197
+MotionNotify 595 277
+#WAIT_SEC 0.016555
+MotionNotify 593 278
+#WAIT_SEC 0.039856
+MotionNotify 593 276
+#WAIT_SEC 0.000009
+MotionNotify 593 274
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.133313
+MotionNotify 674 303
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.010392
+MotionNotify 674 304
+#WAIT_SEC 0.032036
+ButtonRelease 1
+#WAIT_SEC 0.320509
+MotionNotify 668 301
+#WAIT_SEC 0.000013
+KeyStrPress KP_Right
+#WAIT_SEC 0.017207
+KeyStrPress KP_Begin
+#WAIT_SEC 0.016917
+KeyStrPress KP_Left
+#WAIT_SEC 0.037108
+KeyStrRelease KP_Right
+#WAIT_SEC 0.003134
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.022360
+KeyStrRelease KP_Left
+#WAIT_SEC 0.119095
+KeyStrPress KP_Right
+#WAIT_SEC 0.024041
+KeyStrPress KP_Left
+#WAIT_SEC 0.000016
+KeyStrPress KP_Begin
+#WAIT_SEC 0.039743
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015880
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000020
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.112702
+KeyStrPress KP_Right
+#WAIT_SEC 0.047705
+KeyStrPress KP_Left
+#WAIT_SEC 0.007299
+KeyStrRelease KP_Right
+#WAIT_SEC 0.007959
+KeyStrRelease KP_Left
+#WAIT_SEC 0.128929
+KeyStrPress KP_Left
+#WAIT_SEC 0.015608
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000157
+KeyStrPress KP_Right
+#WAIT_SEC 0.031440
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000027
+KeyStrRelease KP_Right
+#WAIT_SEC 0.017686
+KeyStrRelease KP_Left
+#WAIT_SEC 0.104603
+KeyStrPress KP_Right
+#WAIT_SEC 0.005626
+KeyStrPress KP_Left
+#WAIT_SEC 0.000017
+KeyStrPress KP_Begin
+#WAIT_SEC 0.034420
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.005503
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000020
+KeyStrRelease KP_Left
+#WAIT_SEC 0.160948
+KeyStrPress KP_Right
+#WAIT_SEC 0.003044
+KeyStrPress KP_Up
+#WAIT_SEC 0.011965
+KeyStrRelease KP_Up
+#WAIT_SEC 0.016051
+KeyStrRelease KP_Right
+#WAIT_SEC 0.321339
+KeyStrPress KP_Enter
+#WAIT_SEC 0.047042
+KeyStrRelease KP_Enter
+#WAIT_SEC 0.264224
+KeyStrPress KP_Right
+#WAIT_SEC 0.055991
+KeyStrRelease KP_Right
+#WAIT_SEC 0.192504
+KeyStrPress KP_Right
+#WAIT_SEC 0.006948
+KeyStrPress KP_Left
+#WAIT_SEC 0.000018
+KeyStrPress KP_Begin
+#WAIT_SEC 0.048419
+KeyStrRelease KP_Right
+#WAIT_SEC 0.015895
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000013
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.169191
+KeyStrPress KP_Next
+#WAIT_SEC 0.014926
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015616
+KeyStrPress KP_Left
+#WAIT_SEC 0.015693
+KeyStrRelease KP_Next
+#WAIT_SEC 0.016050
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.024558
+KeyStrRelease KP_Left
+#WAIT_SEC 0.169013
+KeyStrPress KP_Right
+#WAIT_SEC 0.014675
+KeyStrPress KP_Begin
+#WAIT_SEC 0.008150
+KeyStrPress KP_Left
+#WAIT_SEC 0.018020
+KeyStrRelease KP_Right
+#WAIT_SEC 0.021798
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.008184
+KeyStrRelease KP_Left
+#WAIT_SEC 0.170395
+KeyStrPress KP_Right
+#WAIT_SEC 0.029935
+KeyStrPress KP_Left
+#WAIT_SEC 0.000019
+KeyStrPress KP_Begin
+#WAIT_SEC 0.015963
+KeyStrRelease KP_Right
+#WAIT_SEC 0.016038
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.015454
+KeyStrRelease KP_Left
+#WAIT_SEC 0.136680
+KeyStrPress KP_Right
+#WAIT_SEC 0.007503
+KeyStrPress KP_Begin
+#WAIT_SEC 0.016391
+KeyStrPress KP_Left
+#WAIT_SEC 0.023551
+KeyStrRelease KP_Right
+#WAIT_SEC 0.016434
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.009499
+KeyStrRelease KP_Left
+#WAIT_SEC 0.150498
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000019
+KeyStrPress KP_Right
+#WAIT_SEC 0.015368
+KeyStrPress KP_Left
+#WAIT_SEC 0.034993
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.000017
+KeyStrRelease KP_Left
+#WAIT_SEC 0.004787
+KeyStrRelease KP_Right
+#WAIT_SEC 0.224616
+KeyStrPress KP_Enter
+#WAIT_SEC 0.079382
+KeyStrRelease KP_Enter
+#WAIT_SEC 0.193561
+KeyStrPress KP_Begin
+#WAIT_SEC 0.003036
+KeyStrPress KP_Right
+#WAIT_SEC 0.052693
+KeyStrRelease KP_Right
+#WAIT_SEC 0.016012
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.175734
+KeyStrPress KP_Right
+#WAIT_SEC 0.015971
+KeyStrPress KP_Begin
+#WAIT_SEC 0.007513
+KeyStrPress KP_Left
+#WAIT_SEC 0.033372
+KeyStrRelease KP_Right
+#WAIT_SEC 0.014120
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.007811
+KeyStrRelease KP_Left
+#WAIT_SEC 0.161134
+KeyStrPress KP_Right
+#WAIT_SEC 0.007478
+KeyStrPress KP_Begin
+#WAIT_SEC 0.007940
+KeyStrPress KP_Left
+#WAIT_SEC 0.031982
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.007776
+KeyStrRelease KP_Right
+#WAIT_SEC 0.008163
+KeyStrRelease KP_Left
+#WAIT_SEC 0.152305
+KeyStrPress KP_Left
+#WAIT_SEC 0.000008
+KeyStrPress KP_Begin
+#WAIT_SEC 0.000003
+KeyStrPress KP_Right
+#WAIT_SEC 0.039561
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.016400
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000008
+KeyStrRelease KP_Right
+#WAIT_SEC 0.120130
+KeyStrPress KP_Right
+#WAIT_SEC 0.007600
+KeyStrPress KP_Left
+#WAIT_SEC 0.000011
+KeyStrPress KP_Begin
+#WAIT_SEC 0.050637
+KeyStrRelease KP_Right
+#WAIT_SEC 0.000012
+KeyStrRelease KP_Left
+#WAIT_SEC 0.000003
+KeyStrRelease KP_Begin
+#WAIT_SEC 0.223264
+KeyStrPress KP_Enter
+#WAIT_SEC 0.046622
+KeyStrRelease KP_Enter
+#WAIT_SEC 1.208005
+MotionNotify 600 718
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.023288
+MotionNotify 600 719
+#WAIT_SEC 0.032188
+ButtonRelease 1
+#WAIT_SEC 0.141745
+MotionNotify 548 770
+#WAIT_SEC 0.000008
+ButtonPress 1
+#WAIT_SEC 0.035316
+ButtonRelease 1
+#WAIT_SEC 0.095461
+MotionNotify 567 796
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.041397
+MotionNotify 569 796
+#WAIT_SEC 0.000013
+MotionNotify 575 793
+#WAIT_SEC 0.000003
+ButtonRelease 1
+#WAIT_SEC 0.110609
+MotionNotify 649 779
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.025962
+MotionNotify 649 778
+#WAIT_SEC 0.000912
+MotionNotify 650 776
+#WAIT_SEC 0.016969
+MotionNotify 651 774
+#WAIT_SEC 0.005911
+ButtonRelease 1
+#WAIT_SEC 0.040246
+MotionNotify 652 773
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.016764
+MotionNotify 653 773
+#WAIT_SEC 0.017881
+MotionNotify 653 774
+#WAIT_SEC 0.016378
+MotionNotify 654 774
+#WAIT_SEC 0.017573
+MotionNotify 655 772
+#WAIT_SEC 0.016771
+MotionNotify 656 752
+#WAIT_SEC 0.000008
+ButtonRelease 1
+#WAIT_SEC 0.086928
+MotionNotify 650 733
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.021977
+MotionNotify 651 734
+#WAIT_SEC 0.040378
+MotionNotify 651 717
+#WAIT_SEC 0.012364
+MotionNotify 641 659
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.178843
+MotionNotify 362 299
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.021679
+MotionNotify 361 299
+#WAIT_SEC 0.020450
+MotionNotify 361 301
+#WAIT_SEC 0.000014
+MotionNotify 359 306
+#WAIT_SEC 0.018310
+MotionNotify 356 309
+#WAIT_SEC 0.012042
+MotionNotify 352 311
+#WAIT_SEC 0.000008
+ButtonRelease 1
+#WAIT_SEC 0.089669
+MotionNotify 280 357
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.001060
+MotionNotify 276 364
+#WAIT_SEC 0.017688
+MotionNotify 270 371
+#WAIT_SEC 0.017103
+MotionNotify 264 381
+#WAIT_SEC 0.013415
+MotionNotify 262 385
+#WAIT_SEC 0.000114
+ButtonRelease 1
+#WAIT_SEC 0.255204
+MotionNotify 357 607
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.011472
+MotionNotify 357 614
+#WAIT_SEC 0.015935
+MotionNotify 355 619
+#WAIT_SEC 0.016002
+MotionNotify 354 621
+#WAIT_SEC 0.025707
+ButtonRelease 1
+#WAIT_SEC 0.092859
+MotionNotify 351 636
+#WAIT_SEC 0.000007
+ButtonPress 1
+#WAIT_SEC 0.025410
+MotionNotify 351 637
+#WAIT_SEC 0.022327
+MotionNotify 351 638
+#WAIT_SEC 0.016368
+ButtonRelease 1
+#WAIT_SEC 0.118983
+MotionNotify 334 625
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.000004
+MotionNotify 334 626
+#WAIT_SEC 0.017031
+MotionNotify 333 626
+#WAIT_SEC 0.016941
+MotionNotify 332 626
+#WAIT_SEC 0.027136
+MotionNotify 328 620
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.095000
+MotionNotify 272 527
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.035650
+MotionNotify 272 525
+#WAIT_SEC 0.023913
+MotionNotify 272 521
+#WAIT_SEC 0.000008
+MotionNotify 268 479
+#WAIT_SEC 0.000005
+ButtonRelease 1
+#WAIT_SEC 0.112928
+MotionNotify 273 370
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.024010
+MotionNotify 274 370
+#WAIT_SEC 0.000008
+MotionNotify 274 369
+#WAIT_SEC 0.017111
+MotionNotify 279 367
+#WAIT_SEC 0.015937
+MotionNotify 306 336
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.113260
+MotionNotify 539 308
+#WAIT_SEC 0.000007
+ButtonPress 1
+#WAIT_SEC 0.021847
+MotionNotify 541 309
+#WAIT_SEC 0.000269
+MotionNotify 542 309
+#WAIT_SEC 0.018254
+MotionNotify 549 311
+#WAIT_SEC 0.016435
+MotionNotify 565 309
+#WAIT_SEC 0.003566
+MotionNotify 590 300
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.090993
+MotionNotify 764 354
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.017820
+MotionNotify 766 356
+#WAIT_SEC 0.019680
+MotionNotify 767 356
+#WAIT_SEC 0.016875
+MotionNotify 772 353
+#WAIT_SEC 0.000007
+ButtonRelease 1
+#WAIT_SEC 0.103888
+MotionNotify 963 403
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.023128
+MotionNotify 964 403
+#WAIT_SEC 0.017306
+MotionNotify 970 403
+#WAIT_SEC 0.015479
+MotionNotify 981 396
+#WAIT_SEC 0.000010
+ButtonRelease 1
+#WAIT_SEC 0.114775
+MotionNotify 1035 399
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.005140
+MotionNotify 1036 401
+#WAIT_SEC 0.017149
+MotionNotify 1036 403
+#WAIT_SEC 0.017302
+MotionNotify 1036 406
+#WAIT_SEC 0.020522
+MotionNotify 1037 407
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.128408
+MotionNotify 1142 585
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.023173
+MotionNotify 1142 589
+#WAIT_SEC 0.000003
+MotionNotify 1142 594
+#WAIT_SEC 0.016352
+MotionNotify 1138 602
+#WAIT_SEC 0.000040
+ButtonRelease 1
+#WAIT_SEC 0.105858
+MotionNotify 1151 708
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.018774
+MotionNotify 1150 713
+#WAIT_SEC 0.016498
+MotionNotify 1149 713
+#WAIT_SEC 0.019104
+MotionNotify 1148 713
+#WAIT_SEC 0.000084
+ButtonRelease 1
+#WAIT_SEC 0.104623
+MotionNotify 1142 717
+#WAIT_SEC 0.000011
+ButtonPress 1
+#WAIT_SEC 0.011474
+MotionNotify 1140 719
+#WAIT_SEC 0.016047
+MotionNotify 1138 720
+#WAIT_SEC 0.017665
+MotionNotify 1133 721
+#WAIT_SEC 0.017030
+MotionNotify 1126 719
+#WAIT_SEC 0.011732
+MotionNotify 1108 707
+#WAIT_SEC 0.000010
+ButtonRelease 1
+#WAIT_SEC 0.404710
+MotionNotify 714 751
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.014100
+MotionNotify 714 752
+#WAIT_SEC 0.043102
+MotionNotify 714 751
+#WAIT_SEC 0.015842
+MotionNotify 711 749
+#WAIT_SEC 0.000103
+ButtonRelease 1
+#WAIT_SEC 0.127079
+MotionNotify 581 756
+#WAIT_SEC 0.000013
+ButtonPress 1
+#WAIT_SEC 0.015050
+MotionNotify 566 757
+#WAIT_SEC 0.016169
+MotionNotify 556 755
+#WAIT_SEC 0.017405
+MotionNotify 551 751
+#WAIT_SEC 0.015664
+MotionNotify 544 743
+#WAIT_SEC 0.000008
+ButtonRelease 1
+#WAIT_SEC 0.079151
+MotionNotify 540 741
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.053829
+MotionNotify 539 740
+#WAIT_SEC 0.012731
+MotionNotify 537 737
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.096033
+MotionNotify 530 725
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.011524
+MotionNotify 531 725
+#WAIT_SEC 0.026147
+MotionNotify 532 725
+#WAIT_SEC 0.021898
+MotionNotify 535 722
+#WAIT_SEC 0.005845
+MotionNotify 539 717
+#WAIT_SEC 0.016675
+MotionNotify 543 710
+#WAIT_SEC 0.000012
+MotionNotify 544 708
+#WAIT_SEC 0.000003
+ButtonRelease 1
+#WAIT_SEC 0.076401
+MotionNotify 560 708
+#WAIT_SEC 0.000013
+ButtonPress 1
+#WAIT_SEC 0.017247
+MotionNotify 563 710
+#WAIT_SEC 0.016716
+MotionNotify 566 711
+#WAIT_SEC 0.013852
+MotionNotify 570 711
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.072351
+MotionNotify 620 746
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.015849
+MotionNotify 628 754
+#WAIT_SEC 0.016395
+MotionNotify 639 769
+#WAIT_SEC 0.016965
+MotionNotify 641 773
+#WAIT_SEC 0.017281
+MotionNotify 641 774
+#WAIT_SEC 0.020955
+ButtonRelease 1
+#WAIT_SEC 0.108626
+MotionNotify 546 812
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.035109
+MotionNotify 521 812
+#WAIT_SEC 0.000015
+MotionNotify 502 803
+#WAIT_SEC 0.017890
+MotionNotify 474 779
+#WAIT_SEC 0.000127
+ButtonRelease 1
+#WAIT_SEC 0.131637
+MotionNotify 440 737
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.000005
+MotionNotify 441 736
+#WAIT_SEC 0.017213
+MotionNotify 443 731
+#WAIT_SEC 0.003351
+MotionNotify 446 728
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.111290
+MotionNotify 562 721
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.035172
+MotionNotify 567 722
+#WAIT_SEC 0.000010
+MotionNotify 572 723
+#WAIT_SEC 0.015691
+MotionNotify 576 722
+#WAIT_SEC 0.015510
+MotionNotify 580 722
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.068913
+MotionNotify 611 748
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.018193
+MotionNotify 618 760
+#WAIT_SEC 0.000007
+MotionNotify 626 780
+#WAIT_SEC 0.016886
+MotionNotify 630 792
+#WAIT_SEC 0.017560
+MotionNotify 630 796
+#WAIT_SEC 0.036406
+MotionNotify 629 796
+#WAIT_SEC 0.000014
+MotionNotify 627 796
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.111100
+MotionNotify 581 811
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.017059
+MotionNotify 577 808
+#WAIT_SEC 0.016038
+MotionNotify 567 793
+#WAIT_SEC 0.016394
+MotionNotify 554 772
+#WAIT_SEC 0.000092
+ButtonRelease 1
+#WAIT_SEC 0.099125
+MotionNotify 533 736
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.020348
+MotionNotify 533 735
+#WAIT_SEC 0.000015
+MotionNotify 533 732
+#WAIT_SEC 0.014137
+MotionNotify 538 715
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.098138
+MotionNotify 605 704
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.036279
+MotionNotify 611 719
+#WAIT_SEC 0.000008
+MotionNotify 615 732
+#WAIT_SEC 0.018065
+MotionNotify 617 735
+#WAIT_SEC 0.037193
+ButtonRelease 1
+#WAIT_SEC 0.083032
+MotionNotify 615 752
+#WAIT_SEC 0.000018
+ButtonPress 1
+#WAIT_SEC 0.011712
+MotionNotify 610 763
+#WAIT_SEC 0.016161
+MotionNotify 606 768
+#WAIT_SEC 0.016883
+MotionNotify 605 768
+#WAIT_SEC 0.016754
+MotionNotify 603 767
+#WAIT_SEC 0.011998
+MotionNotify 597 758
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.111266
+MotionNotify 574 738
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.016002
+MotionNotify 575 740
+#WAIT_SEC 0.012683
+MotionNotify 577 746
+#WAIT_SEC 0.028968
+MotionNotify 580 747
+#WAIT_SEC 0.021005
+MotionNotify 593 748
+#WAIT_SEC 0.000012
+MotionNotify 630 750
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.236741
+MotionNotify 694 748
+#WAIT_SEC 0.000016
+ButtonPress 1
+#WAIT_SEC 0.055369
+MotionNotify 694 747
+#WAIT_SEC 0.019533
+MotionNotify 694 746
+#WAIT_SEC 0.000014
+MotionNotify 695 741
+#WAIT_SEC 0.000004
+ButtonRelease 1
+#WAIT_SEC 0.135125
+MotionNotify 703 716
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.025450
+MotionNotify 703 715
+#WAIT_SEC 0.016845
+MotionNotify 702 715
+#WAIT_SEC 0.015732
+MotionNotify 685 707
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.090158
+MotionNotify 622 682
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.005445
+MotionNotify 620 687
+#WAIT_SEC 0.026520
+MotionNotify 611 695
+#WAIT_SEC 0.021800
+MotionNotify 606 700
+#WAIT_SEC 0.005813
+MotionNotify 603 700
+#WAIT_SEC 0.017076
+MotionNotify 599 698
+#WAIT_SEC 0.000012
+MotionNotify 596 697
+#WAIT_SEC 0.000004
+ButtonRelease 1
+#WAIT_SEC 0.114303
+MotionNotify 573 748
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.011930
+MotionNotify 571 751
+#WAIT_SEC 0.017549
+MotionNotify 567 755
+#WAIT_SEC 0.016667
+MotionNotify 565 756
+#WAIT_SEC 0.015941
+MotionNotify 561 756
+#WAIT_SEC 0.000018
+ButtonRelease 1
+#WAIT_SEC 0.088499
+MotionNotify 553 762
+#WAIT_SEC 0.000022
+ButtonPress 1
+#WAIT_SEC 0.026033
+MotionNotify 552 763
+#WAIT_SEC 0.020893
+MotionNotify 550 764
+#WAIT_SEC 0.000016
+MotionNotify 547 765
+#WAIT_SEC 0.018318
+MotionNotify 536 762
+#WAIT_SEC 0.000014
+ButtonRelease 1
+#WAIT_SEC 0.127115
+MotionNotify 466 736
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.022341
+MotionNotify 466 735
+#WAIT_SEC 0.018868
+MotionNotify 468 732
+#WAIT_SEC 0.016896
+MotionNotify 470 729
+#WAIT_SEC 0.000010
+ButtonRelease 1
+#WAIT_SEC 0.061736
+MotionNotify 472 726
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.016380
+MotionNotify 472 728
+#WAIT_SEC 0.048310
+MotionNotify 473 728
+#WAIT_SEC 0.011769
+MotionNotify 475 727
+#WAIT_SEC 0.000013
+MotionNotify 477 726
+#WAIT_SEC 0.000004
+ButtonRelease 1
+#WAIT_SEC 0.370437
+MotionNotify 785 802
+#WAIT_SEC 0.000021
+ButtonPress 1
+#WAIT_SEC 0.000004
+MotionNotify 785 803
+#WAIT_SEC 0.019452
+MotionNotify 784 803
+#WAIT_SEC 0.053234
+ButtonRelease 1
+#WAIT_SEC 0.194459
+MotionNotify 685 780
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.053228
+MotionNotify 684 778
+#WAIT_SEC 0.011581
+MotionNotify 679 767
+#WAIT_SEC 0.000007
+ButtonRelease 1
+#WAIT_SEC 0.115880
+MotionNotify 622 700
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.064668
+MotionNotify 623 699
+#WAIT_SEC 0.000015
+ButtonRelease 1
+#WAIT_SEC 0.103278
+MotionNotify 624 713
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.003866
+MotionNotify 624 714
+#WAIT_SEC 0.017327
+MotionNotify 621 719
+#WAIT_SEC 0.017102
+MotionNotify 619 720
+#WAIT_SEC 0.017750
+ButtonRelease 1
+#WAIT_SEC 0.129173
+MotionNotify 590 737
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.018778
+MotionNotify 588 737
+#WAIT_SEC 0.012295
+MotionNotify 587 737
+#WAIT_SEC 0.000012
+ButtonRelease 1
+#WAIT_SEC 0.132736
+MotionNotify 581 735
+#WAIT_SEC 0.000012
+ButtonPress 1
+#WAIT_SEC 0.019223
+MotionNotify 580 735
+#WAIT_SEC 0.018160
+ButtonRelease 1
+#WAIT_SEC 0.094643
+MotionNotify 522 669
+#WAIT_SEC 0.000014
+ButtonPress 1
+#WAIT_SEC 0.024528
+MotionNotify 520 669
+#WAIT_SEC 0.000010
+MotionNotify 517 669
+#WAIT_SEC 0.054957
+MotionNotify 517 665
+#WAIT_SEC 0.000477
+MotionNotify 517 660
+#WAIT_SEC 0.000011
+ButtonRelease 1
+#WAIT_SEC 0.096624
+MotionNotify 525 676
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.014987
+MotionNotify 526 679
+#WAIT_SEC 0.018371
+MotionNotify 529 688
+#WAIT_SEC 0.016769
+MotionNotify 529 689
+#WAIT_SEC 0.020988
+ButtonRelease 1
+#WAIT_SEC 0.100525
+MotionNotify 530 717
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.020730
+MotionNotify 530 718
+#WAIT_SEC 0.005041
+MotionNotify 530 719
+#WAIT_SEC 0.017072
+MotionNotify 529 720
+#WAIT_SEC 0.000013
+ButtonRelease 1
+#WAIT_SEC 0.136097
+MotionNotify 543 772
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.030662
+MotionNotify 544 772
+#WAIT_SEC 0.000010
+MotionNotify 545 771
+#WAIT_SEC 0.011702
+MotionNotify 548 769
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.086133
+MotionNotify 567 778
+#WAIT_SEC 0.000015
+ButtonPress 1
+#WAIT_SEC 0.017934
+MotionNotify 567 780
+#WAIT_SEC 0.016854
+MotionNotify 568 781
+#WAIT_SEC 0.047729
+MotionNotify 569 780
+#WAIT_SEC 0.013708
+MotionNotify 569 779
+#WAIT_SEC 0.000009
+MotionNotify 569 778
+#WAIT_SEC 0.000080
+ButtonRelease 1
+#WAIT_SEC 0.276939
+MotionNotify 617 353
+#WAIT_SEC 0.000016
+ButtonPress 3
+#WAIT_SEC 0.021418
+MotionNotify 617 354
+#WAIT_SEC 0.006781
+MotionNotify 617 356
+#WAIT_SEC 0.016236
+MotionNotify 616 357
+#WAIT_SEC 0.011895
+MotionNotify 616 358
+#WAIT_SEC 0.000003
+ButtonRelease 3
+#WAIT_SEC 0.150883
+ButtonPress 3
+#WAIT_SEC 0.021472
+MotionNotify 616 359
+#WAIT_SEC 0.014008
+ButtonRelease 3
+#WAIT_SEC 0.144646
+MotionNotify 579 247
+#WAIT_SEC 0.000004
+ButtonPress 1
+#WAIT_SEC 0.024770
+MotionNotify 579 248
+#WAIT_SEC 0.000140
+MotionNotify 578 256
+#WAIT_SEC 0.017494
+MotionNotify 578 261
+#WAIT_SEC 0.018048
+MotionNotify 578 264
+#WAIT_SEC 0.034925
+MotionNotify 577 264
+#WAIT_SEC 0.000003
+ButtonRelease 1
+#WAIT_SEC 0.119496
+MotionNotify 572 260
+#WAIT_SEC 0.000003
+ButtonPress 1
+#WAIT_SEC 0.000003
+MotionNotify 571 260
+#WAIT_SEC 0.017007
+MotionNotify 570 262
+#WAIT_SEC 0.017148
+MotionNotify 568 268
+#WAIT_SEC 0.017073
+MotionNotify 566 269
+#WAIT_SEC 0.016647
+MotionNotify 565 270
+#WAIT_SEC 0.000003
+ButtonRelease 1
+#WAIT_SEC 0.076703
+MotionNotify 561 268
+#WAIT_SEC 0.000003
+ButtonPress 3
+#WAIT_SEC 0.016594
+MotionNotify 555 271
+#WAIT_SEC 0.016568
+MotionNotify 533 282
+#WAIT_SEC 0.018150
+MotionNotify 502 296
+#WAIT_SEC 0.015862
+MotionNotify 488 303
+#WAIT_SEC 0.021656
+ButtonPress 1
+#WAIT_SEC 0.014621
+MotionNotify 490 303
+#WAIT_SEC 0.000003
+MotionNotify 493 301
+#WAIT_SEC 0.000002
+ButtonRelease 3
+#WAIT_SEC 0.021553
+MotionNotify 507 296
+#WAIT_SEC 0.003418
+MotionNotify 528 281
+#WAIT_SEC 0.018307
+MotionNotify 529 276
+#WAIT_SEC 0.015767
+ButtonRelease 1
+#WAIT_SEC 0.069943
+MotionNotify 530 275
+#WAIT_SEC 0.000002
+ButtonPress 3
+#WAIT_SEC 0.000003
+MotionNotify 529 275
+#WAIT_SEC 0.016279
+MotionNotify 524 277
+#WAIT_SEC 0.016781
+MotionNotify 521 279
+#WAIT_SEC 0.038420
+MotionNotify 523 278
+#WAIT_SEC 0.000003
+MotionNotify 524 278
+#WAIT_SEC 0.000157
+ButtonPress 1
+#WAIT_SEC 0.020392
+ButtonRelease 3
+#WAIT_SEC 0.000003
+MotionNotify 525 277
+#WAIT_SEC 0.005150
+MotionNotify 526 276
+#WAIT_SEC 0.016833
+MotionNotify 528 274
+#WAIT_SEC 0.012855
+MotionNotify 526 253
+#WAIT_SEC 0.000219
+ButtonRelease 1
+#WAIT_SEC 0.154282
+MotionNotify 446 185
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.013720
+MotionNotify 445 185
+#WAIT_SEC 0.017463
+MotionNotify 438 184
+#WAIT_SEC 0.015851
+MotionNotify 422 174
+#WAIT_SEC 0.011298
+MotionNotify 411 167
+#WAIT_SEC 0.000005
+ButtonRelease 1
+#WAIT_SEC 0.141017
+MotionNotify 308 201
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.023950
+MotionNotify 302 205
+#WAIT_SEC 0.000008
+MotionNotify 291 210
+#WAIT_SEC 0.011464
+MotionNotify 265 210
+#WAIT_SEC 0.000010
+ButtonRelease 1
+#WAIT_SEC 0.182427
+MotionNotify 204 248
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.020492
+MotionNotify 204 249
+#WAIT_SEC 0.017197
+MotionNotify 204 251
+#WAIT_SEC 0.022673
+MotionNotify 203 251
+#WAIT_SEC 0.011494
+MotionNotify 203 252
+#WAIT_SEC 0.000006
+ButtonRelease 1
+#WAIT_SEC 0.125836
+MotionNotify 187 364
+#WAIT_SEC 0.000007
+ButtonPress 1
+#WAIT_SEC 0.021647
+MotionNotify 188 369
+#WAIT_SEC 0.005523
+MotionNotify 189 377
+#WAIT_SEC 0.025697
+MotionNotify 193 396
+#WAIT_SEC 0.021337
+MotionNotify 193 417
+#WAIT_SEC 0.000642
+MotionNotify 194 424
+#WAIT_SEC 0.014231
+MotionNotify 195 430
+#WAIT_SEC 0.000004
+ButtonRelease 1
+#WAIT_SEC 0.077140
+MotionNotify 184 481
+#WAIT_SEC 0.000005
+ButtonPress 3
+#WAIT_SEC 0.000326
+MotionNotify 179 496
+#WAIT_SEC 0.018638
+MotionNotify 177 510
+#WAIT_SEC 0.016834
+MotionNotify 179 513
+#WAIT_SEC 0.012715
+MotionNotify 182 516
+#WAIT_SEC 0.000009
+ButtonPress 1
+#WAIT_SEC 0.000003
+ButtonRelease 3
+#WAIT_SEC 0.016375
+MotionNotify 185 518
+#WAIT_SEC 0.018298
+MotionNotify 192 523
+#WAIT_SEC 0.021626
+MotionNotify 204 537
+#WAIT_SEC 0.000008
+MotionNotify 213 553
+#WAIT_SEC 0.000009
+ButtonRelease 1
+#WAIT_SEC 0.144054
+MotionNotify 473 885
+#WAIT_SEC 0.000006
+ButtonPress 1
+#WAIT_SEC 0.116517
+MotionNotify 473 884
+#WAIT_SEC 0.005629
+MotionNotify 473 879
+#WAIT_SEC 0.000045
+ButtonRelease 1
+#WAIT_SEC 0.165213
+MotionNotify 526 740
+#WAIT_SEC 0.000010
+ButtonPress 1
+#WAIT_SEC 0.000002
+MotionNotify 525 740
+#WAIT_SEC 0.017285
+MotionNotify 524 741
+#WAIT_SEC 0.017676
+MotionNotify 521 743
+#WAIT_SEC 0.016945
+MotionNotify 520 744
+#WAIT_SEC 0.018805
+MotionNotify 520 743
+#WAIT_SEC 0.011661
+MotionNotify 520 741
+#WAIT_SEC 0.000003
+ButtonRelease 1

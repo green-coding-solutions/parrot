@@ -1,0 +1,24 @@
+name: Parrot Firefox
+author: Didi <didi@green-coding.io>
+description: Benchmarks Firefox using Parrot
+
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    ports:
+      - "6080:6080" # noVNC (open in browser)
+      - "5900:5900" # raw VNC
+    environment:
+      DEBUG: 1
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/firefox/install.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/firefox/firefox.🦜
