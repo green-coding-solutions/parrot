@@ -6,11 +6,11 @@ description: Benchmarks Firefox using Parrot
 services:
   window-container:
     image: ribalba/xwindow-server
-    ports:
-      - "6080:6080" # noVNC (open in browser)
-      - "5900:5900" # raw VNC
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
     environment:
-      DEBUG: 1
+      DEBUG: 0
 
     setup-commands:
       - command: bash /tmp/repo/applications/firefox/install.sh
