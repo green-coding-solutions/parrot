@@ -78,6 +78,32 @@ def _xmacro_to_parrot(line: str) -> str | None:
     return f"{verb} {args}".strip()
 
 
+def _resolve_display(container: str, override: str | None) -> str:
+    if override:
+        return override
+    result = subprocess.run(
+        ["docker", "exec", container, "printenv", "DISPLAY"],
+        capture_output=True,
+        text=True,
+    )
+    display = result.stdout.strip()
+    if result.returncode == 0 and display:
+        return display
+    return ":99"
+
+
+def _derive_check_paths(output_path: Path, index: int) -> tuple[str, Path, str, str]:
+    """Return (app_name, host_dir, png_name, ref) for a check screenshot."""
+    app_name = output_path.stem
+    host_dir = output_path.parent
+    if host_dir.name != app_name:
+        host_dir = host_dir / app_name
+
+    png_name = f"{app_name}-check-{index:03d}.png"
+    ref = f"{app_name}/{png_name}"
+    return app_name, host_dir, png_name, ref
+
+
 # ---------------------------------------------------------------------------
 # Recording
 # ---------------------------------------------------------------------------
@@ -86,32 +112,25 @@ def _capture_screenshot(
     output_path: Path,
     index: int,
     app_meta: dict[str, str],
+    display: str,
     container: str,
-    container_repo: str,
 ) -> str:
     """
     Screenshot the app window inside *container* and save it alongside the recording.
 
     Returns the ref string written into the .🦜 file, e.g. 'firefox/firefox-check-001.png'.
-    The image is saved to  <app_dir>/<app_name>-check-<NNN>.png  on both the host
-    (via the bind-mount) and equivalently inside the container at
-    <container_repo>/<rel_to_cwd>/<png_name>.
+    The image is captured inside the container and then copied back to the host
+    next to the recording so replay can read it via the readonly repo bind-mount.
     """
-    app_name = output_path.parent.name              # e.g. 'firefox'
-    png_name = f"{app_name}-check-{index:03d}.png"  # e.g. 'firefox-check-001.png'
-    ref      = f"{app_name}/{png_name}"             # written into the recording
+    app_name, host_dir, png_name, ref = _derive_check_paths(output_path, index)
+    container_dir = f"/tmp/parrot-checks/{app_name}"
+    container_out = f"{container_dir.rstrip('/')}/{png_name}"
+    host_out = host_dir / png_name
+    host_dir.mkdir(parents=True, exist_ok=True)
 
-    # Container path: project root is bind-mounted at container_repo
-    try:
-        rel = output_path.parent.resolve().relative_to(Path.cwd().resolve())
-        container_out = f"{container_repo}/{rel.as_posix()}/{png_name}"
-    except ValueError:
-        container_out = f"{container_repo}/applications/{app_name}/{png_name}"
-
-    display = os.environ.get("DISPLAY", ":99")
     proc = subprocess.run(
         [
-            "docker", "exec", "-T",
+            "docker", "exec",
             "-e", f"DISPLAY={display}",
             "-e", f"SNAPSHOT_OUT={container_out}",
             "-e", f"APP_WINDOW_CLASS={app_meta.get('windowclass', '')}",
@@ -139,6 +158,19 @@ def _capture_screenshot(
     if proc.returncode != 0:
         detail = (proc.stderr or proc.stdout or f"exit={proc.returncode}").strip()
         raise RuntimeError(f"screenshot capture failed: {detail}")
+
+    copy_proc = subprocess.run(
+        ["docker", "cp", f"{container}:{container_out}", str(host_out)],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False,
+    )
+    if copy_proc.returncode != 0:
+        detail = (copy_proc.stderr or copy_proc.stdout or f"exit={copy_proc.returncode}").strip()
+        raise RuntimeError(f"screenshot copy failed: {detail}")
+
+    subprocess.run(
+        ["docker", "exec", container, "rm", "-f", container_out],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False,
+    )
     return ref
 
 
@@ -147,6 +179,8 @@ def cmd_record(
     screenshot_key: str | None,
     stop_key: str | None,
     app_meta_raw: dict[str, str] | None,
+    display: str | None = None,
+    save_dir: str | None = None,
     container: str = "window-container",
     container_repo: str = "/tmp/repo",
 ) -> int:
@@ -157,7 +191,7 @@ def cmd_record(
     screenshot_key_norm = screenshot_key.upper() if screenshot_key else None
     stop_key_norm       = stop_key.upper()       if stop_key       else None
     app_meta = normalize_app_meta(app_meta_raw)
-
+    display = _resolve_display(container, display)
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
         f.write(f"{PARROT_HEADER}\n\n")
         for line in format_metadata_lines(app_meta):
@@ -186,7 +220,8 @@ def cmd_record(
                         try:
                             ref = _capture_screenshot(
                                 output_path, check_count, app_meta,
-                                container=container, container_repo=container_repo,
+                                display,
+                                container=container,
                             )
                         except Exception as exc:
                             print(str(exc), file=sys.stderr)
@@ -335,6 +370,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_rec.add_argument("--app-startcommand", default="")
     p_rec.add_argument("--app-windowtitle",  default="")
     p_rec.add_argument("--app-windowclass",  default="")
+    p_rec.add_argument("--display",          default=None)
+    p_rec.add_argument("--save-dir",         default=None)
     p_rec.add_argument("--container",        default="window-container")
     p_rec.add_argument("--container-repo",   default="/tmp/repo")
 
@@ -360,6 +397,8 @@ def main() -> int:
             {"startcommand": args.app_startcommand,
              "windowtitle":  args.app_windowtitle,
              "windowclass":  args.app_windowclass},
+            display=args.display,
+            save_dir=args.save_dir,
             container=args.container,
             container_repo=args.container_repo,
         )

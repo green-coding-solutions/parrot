@@ -31,7 +31,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--startcommand", default="",   help="Command to launch the app")
     parser.add_argument("--windowtitle",  default="",   help="Window title for app detection")
     parser.add_argument("--windowclass",  default="",   help="WM_CLASS for app detection")
-    parser.add_argument("--display",   default=os.environ.get("DISPLAY", ":99"))
+    parser.add_argument(
+        "--display",
+        default=None,
+        help="X display to use (default: container $DISPLAY or :99)",
+    )
+    parser.add_argument(
+        "--save-dir",
+        default=None,
+        help="Container path for screenshots (default: /save_dir if it exists)",
+    )
     parser.add_argument("--container", default="window-container", help="Docker container name")
     parser.add_argument("--container-repo", default="/tmp/repo",
                         help="Path where the project repo is mounted in the container")
@@ -54,6 +63,23 @@ def _find_window(container: str, display: str, window_class: str, window_title: 
     return None
 
 
+def _get_display_geometry(container: str, display: str) -> tuple[int, int] | None:
+    result = subprocess.run(
+        ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "getdisplaygeometry"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return None
+    parts = result.stdout.strip().split()
+    if len(parts) != 2:
+        return None
+    try:
+        width, height = int(parts[0]), int(parts[1])
+    except ValueError:
+        return None
+    return width, height
+
+
 def focus_app(container: str, display: str, start_cmd: str, win_class: str, win_title: str) -> None:
     """Ensure the app is running and focused inside the container."""
     win = _find_window(container, display, win_class, win_title)
@@ -68,20 +94,62 @@ def focus_app(container: str, display: str, start_cmd: str, win_class: str, win_
         win = _find_window(container, display, win_class, win_title)
 
     if win:
+        geometry = _get_display_geometry(container, display)
+        if geometry:
+            width, height = geometry
+            subprocess.run(
+                ["docker", "exec", "-e", f"DISPLAY={display}", container,
+                 "xdotool", "windowsize", win, str(width), str(height)],
+                check=False,
+            )
+            subprocess.run(
+                ["docker", "exec", "-e", f"DISPLAY={display}", container,
+                 "xdotool", "windowmove", win, "0", "0"],
+                check=False,
+            )
         subprocess.run(
-            ["docker", "exec", "-T", "-e", f"DISPLAY={display}", container, "xdotool", "windowraise", win],
+            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowraise", win],
             check=False,
         )
         subprocess.run(
-            ["docker", "exec", "-T", "-e", f"DISPLAY={display}", container, "xdotool", "windowfocus", win],
+            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowfocus", win],
             check=False,
         )
     else:
         print("[record] warning: app window not found")
 
 
+def _resolve_display(container: str, override: str | None) -> str:
+    if override:
+        return override
+    result = subprocess.run(
+        ["docker", "exec", container, "printenv", "DISPLAY"],
+        capture_output=True,
+        text=True,
+    )
+    display = result.stdout.strip()
+    if result.returncode == 0 and display:
+        return display
+    return ":99"
+
+
+def _resolve_save_dir(container: str, override: str | None) -> str | None:
+    if override:
+        return override
+    result = subprocess.run(
+        ["docker", "exec", container, "test", "-d", "/save_dir"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return "/save_dir"
+    return None
+
+
 def main() -> int:
     args = parse_args()
+    args.display = _resolve_display(args.container, args.display)
+    args.save_dir = _resolve_save_dir(args.container, args.save_dir)
 
     stop_key  = os.environ.get("STOP_KEYSYM",  "Pause")
     check_key = os.environ.get("CHECK_KEYSYM", "F2")
@@ -102,7 +170,7 @@ def main() -> int:
 
     # Start xmacrorec2 inside the container; auto-arm it by injecting the stop key once.
     recorder_cmd = [
-        "docker", "exec", "-T", "-e", f"DISPLAY={args.display}", args.container,
+        "docker", "exec", "-e", f"DISPLAY={args.display}", args.container,
         "bash", "-lc",
         (
             f"export DISPLAY={shlex.quote(args.display)}; "
@@ -121,9 +189,12 @@ def main() -> int:
         "--app-startcommand", args.startcommand,
         "--app-windowtitle",  args.windowtitle,
         "--app-windowclass",  args.windowclass,
+        "--display",          args.display,
         "--container",        args.container,
         "--container-repo",   args.container_repo,
     ]
+    if args.save_dir:
+        timed_cmd.extend(["--save-dir", args.save_dir])
 
     producer = subprocess.Popen(recorder_cmd, stdout=subprocess.PIPE)
     assert producer.stdout is not None

@@ -1,220 +1,166 @@
-# xtest: Record and Replay GUI Macros in Docker (Firefox example)
+# Parrot — Record and Replay X Application Interactions
 
-This project runs a GUI app in a Docker container on an isolated X server (`Xvfb`), exposes it through VNC/noVNC, and records/replays mouse/keyboard automation against the app window.
+Parrot lets you record mouse clicks, keyboard input, and navigation paths through any X11 GUI application, then replay those interactions automatically. It is designed for benchmarking and testing desktop applications in a reproducible, sandboxed environment.
 
-The included example is Firefox (`docker-compose-firefox.yml`), but the recording/replay flow is generic and can be reused for other GUI apps by changing compose environment values.
+Everything runs inside Docker, so there are no security implications for the host system and results are fully reproducible across machines.
 
-## What Is Included
+## How It Works
 
-- Containerized GUI stack: `Xvfb` + window manager + `x11vnc` + noVNC
-- Host-side recorder: `record-macro.py`
-- Host-side replayer: `replay-macro.py`
-- Timed macro converter/player: `timed_xmacro.py`
-- Screenshot assertions during replay via `Check ...` lines (`check-image.sh`)
-- `#APP` metadata stored inside recordings so replay can find/start the right window
+1. **Record** — Interact with any X application through a browser-based VNC viewer. Parrot captures every mouse movement, click, and keystroke. It also takes care of setting the screen and application size correctly.
+2. **Replay** — Play back the recorded session against the same application. Parrot finds the correct window, replays each action with correct timing, and optionally asserts on screenshots.
+3. **Benchmark** — Plug the replay into the [Green Metrics Tool](https://www.green-coding.io/projects/green-metrics-tool/) via a `usage_scenario.yml` to measure energy and performance.
 
-## Quick Start (Firefox)
+## Example Applications
 
-Start the container:
+| Application | Path |
+|-------------|------|
+| Firefox | `applications/firefox/` |
+| LibreOffice Calc | `applications/calc/` |
+| VLC | `applications/vlc/` |
+| Okular (PDF viewer) | `applications/pdf_viewers/okular/` |
 
-```bash
-docker compose -f docker-compose-firefox.yml up --build
-```
+Each application directory contains the recorded `.🦜` macro file and a `usage_scenario.yml` for use with the Green Metrics Tool.
 
-Open the GUI in your browser:
+## Quick Start
 
-- `http://localhost:6080/vnc.html`
+### 1. Start the Window Container
 
-The compose file starts Firefox and exposes the isolated display through noVNC.
-
-## Record a Macro
-
-Record against the Firefox compose file:
+Every application ships with a Docker Compose file (or uses the shared `ribalba/xwindow-server` image). To bring up Firefox:
 
 ```bash
-./record-macro.py docker-compose-firefox.yml
+docker compose -f applications/firefox/usage_scenario.yml up --build
 ```
 
-During recording:
+Open the GUI in your browser at `http://localhost:6080/vnc.html`.
 
-1. Open noVNC (`http://localhost:6080/vnc.html`)
-2. Interact with the app
-3. Press `Pause` to stop recording (default stop key)
-4. Press `F2` anytime to capture a screenshot and insert a `Check ...` line (default screenshot/check key)
-
-Default hotkeys:
-
-- `STOP_KEYSYM=Pause`
-- `CHECK_KEYSYM=F2`
-
-Override if your browser/keyboard/noVNC intercepts them:
+### 2. Record a Macro
 
 ```bash
-STOP_KEYSYM=F9 CHECK_KEYSYM=F3 ./record-macro.py docker-compose-firefox.yml
+./record-macro.py applications/firefox/usage_scenario.yml
 ```
 
-Notes:
+- Interact with the application in the browser-based VNC viewer.
+- Press `Pause` to stop recording.
+- Press `F2` at any point to capture a reference screenshot (inserts a `Check` assertion into the macro).
 
-- `record-macro.py` auto-arms the recorder and injects the stop key for `xmacrorec2`.
-- `CHECK_KEYSYM` and `STOP_KEYSYM` must be different.
-- `F2` is the default to avoid Firefox focus behavior triggered by `F6`.
-
-### Output Files
-
-For `docker-compose-firefox.yml`, the derived run name is `firefox`, so outputs go to:
-
-- `recordings/firefox/firefox.xmacro`
-- `recordings/firefox/firefox-check-001.png`
-- `recordings/firefox/firefox-check-002.png`
-
-## Replay a Macro
-
-Replay the recorded macro:
+Override the hotkeys if your browser intercepts them:
 
 ```bash
-./replay-macro.py docker-compose-firefox.yml
+STOP_KEYSYM=F9 CHECK_KEYSYM=F3 ./record-macro.py applications/firefox/usage_scenario.yml
 ```
 
-Optional speed override:
+Output files are written to `recordings/<app-name>/`:
+
+```
+recordings/firefox/firefox.🦜
+recordings/firefox/firefox-check-001.png
+```
+
+### 3. Replay a Macro
 
 ```bash
-REPLAY_SPEED=2.0 ./replay-macro.py docker-compose-firefox.yml
-REPLAY_SPEED=0.5 ./replay-macro.py docker-compose-firefox.yml
+./replay.py applications/firefox/usage_scenario.yml
 ```
 
-`replay-macro.py`:
+Optional speed multiplier:
 
-- Loads `recordings/<run-name>/<run-name>.xmacro`
-- Reads `#APP` metadata from the recording
-- Focuses/positions the app window in the container
-- Replays actions using `xdotool`
-- Executes screenshot checks when it encounters `Check ...` lines
-
-If a `Check` fails, replay exits non-zero.
-
-## `#APP` Metadata in Macros
-
-Recorded macros include metadata lines like:
-
-```text
-#APP startcommand='firefox https://browserbench.org/Speedometer3.1/ --no-default-browser-check'
-#APP windowtitle=Firefox
-#APP windowclass=firefox
+```bash
+REPLAY_SPEED=2.0 ./replay.py applications/firefox/usage_scenario.yml   # faster
+REPLAY_SPEED=0.5 ./replay.py applications/firefox/usage_scenario.yml   # slower
 ```
 
-These are used by replay (and screenshot checks) to find the app window by class/title and optionally start the app if the window is missing.
+Replay finds the application window by class/title metadata embedded in the macro, focuses it, and plays back every action. Any `Check` line triggers a screenshot comparison against the saved reference image. A failed check exits non-zero.
 
-Supported fields:
+## Recording Any X Application
 
-- `startcommand` (optional): shell command to launch inside the container
-- `windowtitle`: matcher for `xdotool search --name`
-- `windowclass`: matcher for `xdotool search --class`
-
-### Recording-Time Metadata Source
-
-`record-macro.py` reads defaults from the compose file environment:
-
-- `APP_STARTCOMMAND`
-- `APP_WINDOW_TITLE`
-- `APP_WINDOW_CLASS`
-
-You can override them at record time with host environment variables:
+Parrot is not limited to the bundled applications. You can record interactions with any X11 GUI application by supplying the relevant metadata at record time:
 
 ```bash
 APP_STARTCOMMAND='xterm' \
 APP_WINDOW_TITLE='xterm' \
 APP_WINDOW_CLASS='xterm' \
-./record-macro.py docker-compose-firefox.yml
+./record-macro.py <your-compose-file.yml>
 ```
 
-## `Check` Screenshot Assertions
+Metadata is embedded into the `.🦜` macro file and used by replay to locate and focus the correct window.
 
-During recording, pressing `F2` inserts a line like:
+## Macro File Format
 
-```text
-Check firefox/firefox-check-001.png
+Recorded macros (`.🦜` files) contain:
+
+- `#APP` metadata lines — window class, title, and optional start command
+- Timed xmacro events — `MotionNotify`, `ButtonPress`, `KeyStrPress`, etc.
+- `#WAIT_SEC <seconds>` — timing gaps between events
+- `Check <path>.png` — screenshot assertion lines
+
+Example header:
+
+```
+#APP startcommand='firefox https://browserbench.org/Speedometer3.1/'
+#APP windowtitle=Firefox
+#APP windowclass=firefox
 ```
 
-During replay, the container script:
+## Screenshot Assertions
 
-1. Finds the app window (using `#APP` class/title metadata)
-2. Captures the current window image
-3. Compares it to the reference image
-4. Fails replay if the RMSE exceeds the threshold
+Press `F2` during recording to insert a checkpoint. During replay, Parrot compares the current window screenshot to the saved reference using RMSE.
 
-### Tuning Image Comparison
-
-Default threshold:
-
-- `CHECK_MAX_RMSE=0.01`
-
-Example override:
+Tune the comparison:
 
 ```bash
-CHECK_MAX_RMSE=0.02 ./replay-macro.py docker-compose-firefox.yml
+# Loosen the threshold
+CHECK_MAX_RMSE=0.02 ./replay.py applications/firefox/usage_scenario.yml
+
+# Ignore dynamic regions (e.g. toolbars, clocks) — format: x,y,width,height
+CHECK_IGNORE_RECT=0,0,420,40 ./replay.py applications/firefox/usage_scenario.yml
+
+# Multiple regions (semicolon-separated)
+CHECK_IGNORE_RECT="0,0,420,40;300,580,120,30" ./replay.py applications/firefox/usage_scenario.yml
 ```
 
-Ignore dynamic regions (toolbars, timestamps, animations):
+## Green Metrics Tool Integration
 
-```bash
-CHECK_IGNORE_RECT=0,0,420,40 ./replay-macro.py docker-compose-firefox.yml
+Parrot has native support for the [Green Metrics Tool](https://www.green-coding.io/projects/green-metrics-tool/). Each application includes a `usage_scenario.yml` that defines the container setup and the replay command:
+
+```yaml
+name: Parrot Firefox
+author: Didi <didi@green-coding.io>
+description: Benchmarks Firefox using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    environment:
+      DEBUG: 0
+    setup-commands:
+      - command: bash /tmp/repo/applications/firefox/install.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/firefox/firefox.🦜
 ```
 
-Multiple rectangles (semicolon-separated):
+Point the Green Metrics Tool at the repository and it will set up the container, run the replay, and collect energy and performance metrics automatically.
 
-```bash
-CHECK_IGNORE_RECT="0,0,420,40;300,580,120,30" ./replay-macro.py docker-compose-firefox.yml
-```
+## Deterministic Window Layout
 
-Rectangle format is `x,y,width,height`.
+To keep click coordinates and screenshots stable across runs, configure fixed window geometry in the compose environment:
 
-## Macro Format Notes
-
-The recorded `.xmacro` files are timed macros generated by `timed_xmacro.py` and include:
-
-- `#WAIT_SEC <seconds>` comments between events
-- `#APP ...` metadata lines
-- xmacro events (`MotionNotify`, `ButtonPress`, `KeyStrPress`, etc.)
-- `Check <path>.png` assertion lines
-
-## Window Positioning / Deterministic Layout
-
-The container can force the app window to a fixed size/position before replay/checking. Configure in compose environment:
-
-- `AUTO_POSITION` (`1` or `0`)
-- `WINDOW_X`
-- `WINDOW_Y`
-- `WINDOW_WIDTH`
-- `WINDOW_HEIGHT`
-- `APP_WINDOW_CLASS`
-- `APP_WINDOW_TITLE`
-
-This helps keep screenshots and click coordinates stable.
-
-## Useful Low-Level Tool (`timed_xmacro.py`)
-
-`timed_xmacro.py` also exposes subcommands directly:
-
-- `record`: read `xmacrorec2` output and write timed macro
-- `replay`: emit timed xmacro lines to stdout
-- `replay-xdotool`: emit normalized `xdotool` actions to stdout
-- `app-meta`: read effective `#APP` metadata from a macro file
-
-Example:
-
-```bash
-python3 timed_xmacro.py app-meta --input recordings/firefox/firefox.xmacro --format tsv
-```
+| Variable | Description |
+|----------|-------------|
+| `AUTO_POSITION` | `1` to enable, `0` to disable |
+| `WINDOW_X` / `WINDOW_Y` | Window position |
+| `WINDOW_WIDTH` / `WINDOW_HEIGHT` | Window size |
+| `APP_WINDOW_CLASS` | xdotool window class matcher |
+| `APP_WINDOW_TITLE` | xdotool window title matcher |
 
 ## Troubleshooting
 
-- If the stop key does not work in noVNC/browser, set `STOP_KEYSYM` to another key (for example `F9`).
-- If screenshot/check hotkey affects app UI (Firefox `F6` focuses toolbar), use a different `CHECK_KEYSYM`. The default is `F2`.
-- If screenshot checks fail due to minor UI variation, increase `CHECK_MAX_RMSE` slightly or mask dynamic regions with `CHECK_IGNORE_RECT`.
-- If window geometry or theme changes move UI elements, rebuild/restart and re-record the macro.
-
-## Security / Demo Caveats
-
-- X access control is disabled (`Xvfb -ac`) for local convenience.
-- VNC/noVNC is exposed without a password in this demo setup.
-- Use only on a trusted local machine/network unless you harden the configuration.
+- **Stop key not working in browser** — set `STOP_KEYSYM` to another key, e.g. `F9`.
+- **Check hotkey affects the app** — Firefox `F6` focuses the toolbar; use `F2` (the default) or another key via `CHECK_KEYSYM`.
+- **Screenshot checks fail due to minor UI variation** — increase `CHECK_MAX_RMSE` slightly or mask dynamic regions with `CHECK_IGNORE_RECT`.
+- **Click coordinates are off** — rebuild/restart the container and re-record; window geometry may have shifted.

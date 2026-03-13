@@ -1,0 +1,28 @@
+name: Parrot Okular
+author: Didi <didi@green-coding.io>
+description: Drives Okular using Parrot
+
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    ports:
+      - "6080:6080" # noVNC (open in browser)
+      - "5900:5900" # raw VNC
+    volumes:
+      - .:/save_dir
+    environment:
+      DEBUG: 1
+
+
+    setup-commands:
+      - command: apt update
+      - command: apt install okular -y
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/okular.parrot
