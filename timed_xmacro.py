@@ -104,6 +104,57 @@ def _derive_check_paths(output_path: Path, index: int) -> tuple[str, Path, str, 
     return app_name, host_dir, png_name, ref
 
 
+def load_checkpoint_notes(script_path: Path | None) -> list[str]:
+    """Load trimmed note lines from a script file, skipping blanks and comments."""
+    if script_path is None:
+        return []
+
+    notes: list[str] = []
+    with script_path.open("r", encoding="utf-8") as f:
+        for raw_line in f:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            notes.append(line)
+    return notes
+
+
+class CheckpointProgressReporter:
+    """Render checkpoint progress for a script-backed recording session."""
+
+    def __init__(self, items: list[str], stream = sys.stderr) -> None:
+        self.items = items
+        self.stream = stream
+        self._last_line_count = 0
+        self._is_tty = hasattr(stream, "isatty") and stream.isatty()
+        self._use_color = self._is_tty and os.environ.get("NO_COLOR") is None
+
+    def render(self, completed: int) -> None:
+        if not self.items:
+            return
+        lines = self._build_lines(completed)
+        if self._is_tty and self._last_line_count:
+            self._clear_previous_render()
+        self.stream.write("\n".join(lines) + "\n")
+        self.stream.flush()
+        self._last_line_count = len(lines)
+
+    def _build_lines(self, completed: int) -> list[str]:
+        lines: list[str] = []
+        next_index = completed if completed < len(self.items) else None
+        for index, item in enumerate(self.items, start=1):
+            checked = "x" if index <= completed else " "
+            line = f"[{checked}] {index} {item}"
+            if next_index is not None and index == next_index + 1 and self._use_color:
+                line = f"\033[32m{line}\033[0m"
+            lines.append(line)
+        return lines
+
+    def _clear_previous_render(self) -> None:
+        for _ in range(self._last_line_count):
+            self.stream.write("\033[1A\033[2K\r")
+
+
 # ---------------------------------------------------------------------------
 # Recording
 # ---------------------------------------------------------------------------
@@ -178,6 +229,7 @@ def cmd_record(
     output_path: Path,
     screenshot_key: str | None,
     stop_key: str | None,
+    script_path: Path | None,
     app_meta_raw: dict[str, str] | None,
     display: str | None = None,
     save_dir: str | None = None,
@@ -190,6 +242,14 @@ def cmd_record(
     event_count = check_count = 0
     screenshot_key_norm = screenshot_key.upper() if screenshot_key else None
     stop_key_norm       = stop_key.upper()       if stop_key       else None
+    try:
+        checkpoint_notes = load_checkpoint_notes(script_path)
+    except OSError as exc:
+        print(f"Failed to read script file {script_path}: {exc}", file=sys.stderr)
+        return 1
+    if script_path is not None and not checkpoint_notes:
+        print(f"No checkpoint notes loaded from {script_path}", file=sys.stderr)
+    progress = CheckpointProgressReporter(checkpoint_notes)
     app_meta = normalize_app_meta(app_meta_raw)
     display = _resolve_display(container, display)
     with output_path.open("w", encoding="utf-8", newline="\n") as f:
@@ -197,6 +257,8 @@ def cmd_record(
         for line in format_metadata_lines(app_meta):
             f.write(f"{line}\n")
         f.write("\n")
+
+        progress.render(check_count)
 
         for raw in sys.stdin:
             line = raw.rstrip("\n")
@@ -227,11 +289,23 @@ def cmd_record(
                             print(str(exc), file=sys.stderr)
                             return 1
                         f.write(f"wait {delay:.6f}\n")
+                        note_index = check_count - 1
+                        if note_index < len(checkpoint_notes):
+                            f.write(f"log {checkpoint_notes[note_index]}\n")
+                            event_count += 1
+                        elif script_path is not None:
+                            print(
+                                f"No checkpoint note configured for check {check_count}",
+                                file=sys.stderr,
+                            )
                         f.write(f"check {ref}\n")
                         f.flush()
                         last_ts = now
                         event_count += 1
-                        print(f"Inserted check {ref}", file=sys.stderr)
+                        if checkpoint_notes:
+                            progress.render(check_count)
+                        else:
+                            print(f"Inserted check {ref}", file=sys.stderr)
                     continue  # consume both press and release for the hotkey
 
             parrot_line = _xmacro_to_parrot(line)
@@ -245,6 +319,9 @@ def cmd_record(
 
         f.flush()
 
+    unused_notes = len(checkpoint_notes) - check_count
+    if unused_notes > 0:
+        print(f"Unused checkpoint notes: {unused_notes}", file=sys.stderr)
     print(f"Saved {event_count} events to {output_path} (checks: {check_count})", file=sys.stderr)
     return 0
 
@@ -294,16 +371,22 @@ def parse_xmacro_event(line: str) -> tuple | None:
         'keydown Alt_L'      →  ('keydown', 'Alt_L')
         'check foo/bar.png'  →  ('check', 'foo/bar.png')
     """
-    parts = line.split()
+    parts = line.split(None, 1)
     if not parts:
         return None
     verb = parts[0].lower()
-    if verb == "mousemove"  and len(parts) >= 3: return ("mousemove", parts[1], parts[2])
-    if verb == "mousedown"  and len(parts) >= 2: return ("mousedown", parts[1])
-    if verb == "mouseup"    and len(parts) >= 2: return ("mouseup",   parts[1])
-    if verb == "keydown"    and len(parts) >= 2: return ("keydown",   parts[1])
-    if verb == "keyup"      and len(parts) >= 2: return ("keyup",     parts[1])
-    if verb == "check"      and len(parts) >= 2: return ("check",     parts[1])
+    args = parts[1] if len(parts) > 1 else ""
+    if verb == "mousemove":
+        coords = args.split()
+        if len(coords) >= 2:
+            return ("mousemove", coords[0], coords[1])
+        return None
+    if verb == "mousedown"  and args: return ("mousedown", args)
+    if verb == "mouseup"    and args: return ("mouseup",   args)
+    if verb == "keydown"    and args: return ("keydown",   args)
+    if verb == "keyup"      and args: return ("keyup",     args)
+    if verb == "check"      and args: return ("check",     args)
+    if verb == "log"        and args: return ("log",       args)
     return None
 
 
@@ -319,6 +402,9 @@ def cmd_replay_xdotool(input_path: Path, speed: float) -> int:
     for line in iter_replay_lines(input_path, speed):
         action = parse_xmacro_event(line)
         if action is None:
+            skipped += 1
+            continue
+        if action[0] == "log":
             skipped += 1
             continue
         try:
@@ -367,6 +453,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p_rec.add_argument("--output",           required=True, type=Path)
     p_rec.add_argument("--screenshot-key",   default=None)
     p_rec.add_argument("--stop-key",         default=None)
+    p_rec.add_argument("--script",           default=None, type=Path)
     p_rec.add_argument("--app-startcommand", default="")
     p_rec.add_argument("--app-windowtitle",  default="")
     p_rec.add_argument("--app-windowclass",  default="")
@@ -394,6 +481,7 @@ def main() -> int:
             args.output,
             args.screenshot_key,
             args.stop_key,
+            args.script,
             {"startcommand": args.app_startcommand,
              "windowtitle":  args.app_windowtitle,
              "windowclass":  args.app_windowclass},

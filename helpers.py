@@ -17,7 +17,7 @@ DEFAULT_APP_META = {
 
 # First token of any event line in a .🦜 file.
 # Lines whose first token is NOT one of these are treated as metadata.
-EVENT_VERBS = frozenset({"wait", "mousemove", "mousedown", "mouseup", "keydown", "keyup", "check"})
+EVENT_VERBS = frozenset({"wait", "mousemove", "mousedown", "mouseup", "keydown", "keyup", "check", "log"})
 
 
 def normalize_app_meta(meta: dict[str, str] | None) -> dict[str, str]:

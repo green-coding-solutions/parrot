@@ -23,13 +23,48 @@ CHECK_IGNORE_RECT="${CHECK_IGNORE_RECT:-}"
 APP_WINDOW_CLASS="${APP_WINDOW_CLASS:-gnome-calculator}"
 APP_WINDOW_TITLE="${APP_WINDOW_TITLE:-Calculator}"
 
+window_area() {
+  local window_id="$1"
+  local geom width height
+
+  geom="$(xdotool getwindowgeometry --shell "$window_id" 2>/dev/null || true)"
+  width="$(printf '%s\n' "$geom" | awk -F= '/^WIDTH=/{print $2; exit}')"
+  height="$(printf '%s\n' "$geom" | awk -F= '/^HEIGHT=/{print $2; exit}')"
+
+  if [[ ! "$width" =~ ^[0-9]+$ || ! "$height" =~ ^[0-9]+$ ]]; then
+    return 1
+  fi
+
+  printf '%s\n' "$((width * height))"
+}
+
+find_matching_window() {
+  local flag="$1"
+  local value="$2"
+  local window_id area
+  local best_id=""
+  local best_area=-1
+
+  while IFS= read -r window_id; do
+    [[ -n "$window_id" ]] || continue
+    area="$(window_area "$window_id" || echo 0)"
+    if (( area > best_area )); then
+      best_area="$area"
+      best_id="$window_id"
+    fi
+  done < <(xdotool search --onlyvisible "$flag" "$value" 2>/dev/null || true)
+
+  [[ -n "$best_id" ]] || return 1
+  printf '%s\n' "$best_id"
+}
+
 find_app_window() {
   local win=""
   if [[ -n "$APP_WINDOW_CLASS" ]]; then
-    win="$(xdotool search --onlyvisible --class "$APP_WINDOW_CLASS" 2>/dev/null | head -n1 || true)"
+    win="$(find_matching_window --class "$APP_WINDOW_CLASS" || true)"
   fi
   if [[ -z "$win" && -n "$APP_WINDOW_TITLE" ]]; then
-    win="$(xdotool search --onlyvisible --name "$APP_WINDOW_TITLE" 2>/dev/null | head -n1 || true)"
+    win="$(find_matching_window --name "$APP_WINDOW_TITLE" || true)"
   fi
   [[ -n "$win" ]] || return 1
   printf '%s\n' "$win"
@@ -140,7 +175,7 @@ if [[ -z "$rmse_norm" ]]; then
 fi
 
 if awk -v actual="$rmse_norm" -v max="$CHECK_MAX_RMSE" 'BEGIN { exit (actual <= max ? 0 : 1) }'; then
-  echo "[check-image] PASS ref=$(basename "$ref_path") rmse=${rmse_norm} max=${CHECK_MAX_RMSE}"
+  echo "[check-image] PASS ref=$(basename "$ref_path") rmse=${rmse_norm} max=${CHECK_MAX_RMSE}" >&2
   exit 0
 fi
 

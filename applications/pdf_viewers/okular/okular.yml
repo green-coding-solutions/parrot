@@ -13,6 +13,7 @@ services:
       - .:/save_dir
     environment:
       DEBUG: 1
+      RESOLUTION: 1440x900
 
 
     setup-commands:
@@ -25,4 +26,5 @@ flow:
     container: window-container
     commands:
       - type: console
-        command: python3 /usr/local/bin/replay.py /tmp/repo/okular.parrot
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/okular/okular.parrot
+        read-notes-stdout: true

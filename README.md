@@ -41,7 +41,9 @@ Open the GUI in your browser at `http://localhost:6080/vnc.html`.
 
 - Interact with the application in the browser-based VNC viewer.
 - Press `Pause` to stop recording.
-- Press `F2` at any point to capture a reference screenshot (inserts a `Check` assertion into the macro).
+- Press `Scroll Lock` at any point to capture a reference screenshot (inserts a `Check` assertion into the macro).
+- Pass `--script path/to/script.md` to attach one note per checkpoint; trimmed blank lines and lines starting with `#` are ignored.
+- When a script is provided, recording shows a live checklist and highlights the next pending item in green.
 
 Override the hotkeys if your browser intercepts them:
 
@@ -92,6 +94,7 @@ Recorded macros (`.🦜` files) contain:
 - Timed xmacro events — `MotionNotify`, `ButtonPress`, `KeyStrPress`, etc.
 - `#WAIT_SEC <seconds>` — timing gaps between events
 - `Check <path>.png` — screenshot assertion lines
+- `log <text>` — note lines emitted to stdout during replay as `<timestamp_microseconds> <text>`
 
 Example header:
 
@@ -103,7 +106,7 @@ Example header:
 
 ## Screenshot Assertions
 
-Press `F2` during recording to insert a checkpoint. During replay, Parrot compares the current window screenshot to the saved reference using RMSE.
+Press `Scroll Lock` during recording to insert a checkpoint. During replay, Parrot compares the current window screenshot to the saved reference using RMSE.
 
 Tune the comparison:
 
@@ -161,6 +164,6 @@ To keep click coordinates and screenshots stable across runs, configure fixed wi
 ## Troubleshooting
 
 - **Stop key not working in browser** — set `STOP_KEYSYM` to another key, e.g. `F9`.
-- **Check hotkey affects the app** — Firefox `F6` focuses the toolbar; use `F2` (the default) or another key via `CHECK_KEYSYM`.
+- **Check hotkey affects the app** — `Scroll Lock` is the default; if your keyboard or environment handles it poorly, choose another key via `CHECK_KEYSYM`.
 - **Screenshot checks fail due to minor UI variation** — increase `CHECK_MAX_RMSE` slightly or mask dynamic regions with `CHECK_IGNORE_RECT`.
 - **Click coordinates are off** — rebuild/restart the container and re-record; window geometry may have shifted.

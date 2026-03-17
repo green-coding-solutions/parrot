@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -92,8 +93,31 @@ def infer_window_size(macro_file: Path) -> tuple[int, int] | None:
 # App window management
 # ---------------------------------------------------------------------------
 
+def _window_area(display: str, window_id: str) -> int:
+    """Return the visible area for a window ID, or 0 if it cannot be read."""
+    env = {**os.environ, "DISPLAY": display}
+    result = subprocess.run(
+        ["xdotool", "getwindowgeometry", "--shell", window_id],
+        env=env, capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        return 0
+
+    width = height = None
+    for line in result.stdout.splitlines():
+        if line.startswith("WIDTH="):
+            width = line.split("=", 1)[1]
+        elif line.startswith("HEIGHT="):
+            height = line.split("=", 1)[1]
+
+    try:
+        return int(width) * int(height)
+    except (TypeError, ValueError):
+        return 0
+
+
 def _find_window(display: str, window_class: str, window_title: str) -> str | None:
-    """Return the first visible xdotool window ID matching class or title."""
+    """Return the largest visible xdotool window ID matching class or title."""
     env = {**os.environ, "DISPLAY": display}
     for flag, value in [("--class", window_class), ("--name", window_title)]:
         if not value:
@@ -104,7 +128,7 @@ def _find_window(display: str, window_class: str, window_title: str) -> str | No
         )
         ids = result.stdout.strip().splitlines()
         if ids:
-            return ids[0]
+            return max(ids, key=lambda window_id: _window_area(display, window_id))
     return None
 
 
@@ -125,7 +149,7 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
     win = _find_window(display, win_class, win_title)
 
     if win is None and start_cmd:
-        print(f"[replay] window not found — launching: {start_cmd}")
+        print(f"[replay] window not found — launching: {start_cmd}", file=sys.stderr)
         with open("/tmp/xtest-app-launch.log", "w") as log:
             subprocess.Popen(["bash", "-lc", start_cmd], env=env, stdout=log, stderr=log)
         time.sleep(1)
@@ -137,6 +161,11 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
         "APP_WINDOW_TITLE": win_title,
     }
     if window_size is not None:
+        # Reference screenshots are captured from the window itself, so placing
+        # the replay window at the origin avoids needless WM clipping when the
+        # window size matches the full virtual display.
+        pos_env.setdefault("WINDOW_X", "0")
+        pos_env.setdefault("WINDOW_Y", "0")
         pos_env.setdefault("WINDOW_WIDTH",  str(window_size[0]))
         pos_env.setdefault("WINDOW_HEIGHT", str(window_size[1]))
     subprocess.run([POSITION_WINDOW_SCRIPT], env=pos_env, check=False)
@@ -226,6 +255,9 @@ def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Pat
             "CHECK_IGNORE_RECT": os.environ.get("CHECK_IGNORE_RECT", ""),
         }
         subprocess.run([CHECK_IMAGE_SCRIPT, ref], env=check_env, check=True)
+    elif op == "log":
+        sys.stdout.write(f"{time.time_ns() // 1000} {action[1]}\n")
+        sys.stdout.flush()
 
 
 # ---------------------------------------------------------------------------
@@ -237,12 +269,12 @@ def main() -> int:
 
     macro_file = Path(args.macro_file).resolve()
     if not macro_file.is_file():
-        print(f"Macro file not found: {macro_file}")
+        print(f"Macro file not found: {macro_file}", file=sys.stderr)
         return 1
 
     display = args.display
     if not display:
-        print("--display must not be empty")
+        print("--display must not be empty", file=sys.stderr)
         return 1
 
     speed    = parse_speed()
@@ -251,13 +283,16 @@ def main() -> int:
 
     window_size = infer_window_size(macro_file)
 
-    print(f"Replaying : {macro_file}")
-    print(f"Display   : {display}  speed={speed}")
-    print(f"App class : {app_meta.get('windowclass', '')}  title: {app_meta.get('windowtitle', '')}")
+    print(f"Replaying : {macro_file}", file=sys.stderr)
+    print(f"Display   : {display}  speed={speed}", file=sys.stderr)
+    print(
+        f"App class : {app_meta.get('windowclass', '')}  title: {app_meta.get('windowtitle', '')}",
+        file=sys.stderr,
+    )
     if app_meta.get("startcommand"):
-        print(f"Start cmd : {app_meta['startcommand']}")
+        print(f"Start cmd : {app_meta['startcommand']}", file=sys.stderr)
     if window_size:
-        print(f"Win size  : {window_size[0]}x{window_size[1]} (from check image)")
+        print(f"Win size  : {window_size[0]}x{window_size[1]} (from check image)", file=sys.stderr)
 
     # 1. Ensure the app is running and focused.
     focus_app(app_meta, display, window_size)

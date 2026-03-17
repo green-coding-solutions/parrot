@@ -21,6 +21,21 @@ import time
 from pathlib import Path
 
 
+def _status(message: str) -> None:
+    """Emit startup/status output immediately to preserve terminal ordering."""
+    print(message, flush=True)
+
+
+def _run_quiet(cmd: list[str]) -> subprocess.CompletedProcess:
+    """Run a subprocess without letting incidental tool output disrupt the checklist."""
+    return subprocess.run(
+        cmd,
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Record a .🦜 macro from a running container",
@@ -31,6 +46,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--startcommand", default="",   help="Command to launch the app")
     parser.add_argument("--windowtitle",  default="",   help="Window title for app detection")
     parser.add_argument("--windowclass",  default="",   help="WM_CLASS for app detection")
+    parser.add_argument(
+        "--script",
+        type=Path,
+        default=None,
+        help="Optional checkpoint note script; one trimmed non-comment line is used per Scroll Lock checkpoint",
+    )
     parser.add_argument(
         "--display",
         default=None,
@@ -48,7 +69,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def _find_window(container: str, display: str, window_class: str, window_title: str) -> str | None:
-    """Return the first visible xdotool window ID from inside the container."""
+    """Return the largest visible xdotool window ID from inside the container."""
     for flag, value in [("--class", window_class), ("--name", window_title)]:
         if not value:
             continue
@@ -59,7 +80,29 @@ def _find_window(container: str, display: str, window_class: str, window_title: 
         )
         ids = result.stdout.strip().splitlines()
         if ids:
-            return ids[0]
+            best_id = None
+            best_area = -1
+            for window_id in ids:
+                geom = subprocess.run(
+                    ["docker", "exec", "-e", f"DISPLAY={display}", container,
+                     "xdotool", "getwindowgeometry", "--shell", window_id],
+                    capture_output=True, text=True,
+                )
+                width = height = None
+                for line in geom.stdout.splitlines():
+                    if line.startswith("WIDTH="):
+                        width = line.split("=", 1)[1]
+                    elif line.startswith("HEIGHT="):
+                        height = line.split("=", 1)[1]
+                try:
+                    area = int(width) * int(height)
+                except (TypeError, ValueError):
+                    area = 0
+                if area > best_area:
+                    best_area = area
+                    best_id = window_id
+            if best_id:
+                return best_id
     return None
 
 
@@ -85,10 +128,9 @@ def focus_app(container: str, display: str, start_cmd: str, win_class: str, win_
     win = _find_window(container, display, win_class, win_title)
 
     if win is None and start_cmd:
-        print(f"[record] window not found — launching: {start_cmd}")
-        subprocess.run(
-            ["docker", "exec", "-d", "-e", f"DISPLAY={display}", container, "bash", "-lc", start_cmd],
-            check=False,
+        _status(f"[record] window not found — launching: {start_cmd}")
+        _run_quiet(
+            ["docker", "exec", "-d", "-e", f"DISPLAY={display}", container, "bash", "-lc", start_cmd]
         )
         time.sleep(1)
         win = _find_window(container, display, win_class, win_title)
@@ -97,26 +139,22 @@ def focus_app(container: str, display: str, start_cmd: str, win_class: str, win_
         geometry = _get_display_geometry(container, display)
         if geometry:
             width, height = geometry
-            subprocess.run(
+            _run_quiet(
                 ["docker", "exec", "-e", f"DISPLAY={display}", container,
-                 "xdotool", "windowsize", win, str(width), str(height)],
-                check=False,
+                 "xdotool", "windowsize", win, str(width), str(height)]
             )
-            subprocess.run(
+            _run_quiet(
                 ["docker", "exec", "-e", f"DISPLAY={display}", container,
-                 "xdotool", "windowmove", win, "0", "0"],
-                check=False,
+                 "xdotool", "windowmove", win, "0", "0"]
             )
-        subprocess.run(
-            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowraise", win],
-            check=False,
+        _run_quiet(
+            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowraise", win]
         )
-        subprocess.run(
-            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowfocus", win],
-            check=False,
+        _run_quiet(
+            ["docker", "exec", "-e", f"DISPLAY={display}", container, "xdotool", "windowfocus", win]
         )
     else:
-        print("[record] warning: app window not found")
+        _status("[record] warning: app window not found")
 
 
 def _resolve_display(container: str, override: str | None) -> str:
@@ -152,19 +190,21 @@ def main() -> int:
     args.save_dir = _resolve_save_dir(args.container, args.save_dir)
 
     stop_key  = os.environ.get("STOP_KEYSYM",  "Pause")
-    check_key = os.environ.get("CHECK_KEYSYM", "F2")
+    check_key = os.environ.get("CHECK_KEYSYM", "Scroll_Lock")
     if stop_key.upper() == check_key.upper():
-        print(f"CHECK_KEYSYM and STOP_KEYSYM must be different (got {check_key})")
+        _status(f"CHECK_KEYSYM and STOP_KEYSYM must be different (got {check_key})")
         return 1
 
-    print(f"Recording to  : {args.output}")
-    print(f"Container     : {args.container}  display: {args.display}")
-    print(f"App class     : {args.windowclass}  title: {args.windowtitle}")
+    _status(f"Recording to  : {args.output}")
+    _status(f"Container     : {args.container}  display: {args.display}")
+    _status(f"App class     : {args.windowclass}  title: {args.windowtitle}")
     if args.startcommand:
-        print(f"Start command : {args.startcommand}")
-    print(f"Stop key      : {stop_key}  (press in VNC session to finish)")
-    print(f"Check key     : {check_key}  (press to capture a reference screenshot)")
-    print("Open noVNC at http://localhost:6080/vnc.html, interact, then press the stop key.")
+        _status(f"Start command : {args.startcommand}")
+    if args.script:
+        _status(f"Checkpoint script : {args.script}")
+    _status(f"Stop key      : {stop_key}  (press in VNC session to finish)")
+    _status(f"Check key     : {check_key}  (press to capture a reference screenshot)")
+    _status("Open noVNC at http://localhost:6080/vnc.html, interact, then press the stop key.")
 
     focus_app(args.container, args.display, args.startcommand, args.windowclass, args.windowtitle)
 
@@ -193,10 +233,16 @@ def main() -> int:
         "--container",        args.container,
         "--container-repo",   args.container_repo,
     ]
+    if args.script:
+        timed_cmd.extend(["--script", str(args.script)])
     if args.save_dir:
         timed_cmd.extend(["--save-dir", args.save_dir])
 
-    producer = subprocess.Popen(recorder_cmd, stdout=subprocess.PIPE)
+    producer = subprocess.Popen(
+        recorder_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
     assert producer.stdout is not None
     consumer = subprocess.Popen(timed_cmd, stdin=producer.stdout)
     producer.stdout.close()
