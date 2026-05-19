@@ -20,6 +20,7 @@ fi
 export DISPLAY="${DISPLAY:-:99}"
 CHECK_MAX_RMSE="${CHECK_MAX_RMSE:-0.2}"
 CHECK_IGNORE_RECT="${CHECK_IGNORE_RECT:-}"
+CHECK_SCALE_ON_MISMATCH="${CHECK_SCALE_ON_MISMATCH:-0}"
 APP_WINDOW_CLASS="${APP_WINDOW_CLASS:-gnome-calculator}"
 APP_WINDOW_TITLE="${APP_WINDOW_TITLE:-Calculator}"
 
@@ -133,6 +134,17 @@ preserve_failure_artifacts() {
   elif [[ -f "$diff_img" ]]; then
     echo "[check-image] Diff highlight image: $diff_img" >&2
   fi
+
+  # If a host debug directory is mounted at PARROT_DEBUG_DIR, copy all
+  # artifacts there so they survive container exit and are accessible on the host.
+  if [[ -n "${PARROT_DEBUG_DIR:-}" && -d "$PARROT_DEBUG_DIR" ]]; then
+    local ref_slug dest_dir
+    ref_slug="$(basename "$ref_path" .png)_$(date +%Y%m%d_%H%M%S)"
+    dest_dir="$PARROT_DEBUG_DIR/$ref_slug"
+    mkdir -p "$dest_dir"
+    cp -r "$tmp_dir"/. "$dest_dir/"
+    echo "[check-image] Debug artifacts copied to $dest_dir" >&2
+  fi
 }
 
 # Capture the current app window image.
@@ -144,9 +156,15 @@ cp "$ref_path" "$ref_copy"
 ref_size="$(identify -format '%wx%h' "$ref_cmp")"
 actual_size="$(identify -format '%wx%h' "$actual_cmp")"
 if [[ "$ref_size" != "$actual_size" ]]; then
-  preserve_failure_artifacts "size-mismatch"
-  echo "[check-image] size mismatch: actual=$actual_size ref=$ref_size" >&2
-  exit 1
+  if [[ "$CHECK_SCALE_ON_MISMATCH" == "1" ]]; then
+    echo "[check-image] WARNING: size mismatch (actual=$actual_size ref=$ref_size) — scaling actual to ref size for comparison" >&2
+    convert "$actual_cmp" -resize "${ref_size}!" "$actual_cmp"
+    actual_size="$ref_size"
+  else
+    preserve_failure_artifacts "size-mismatch"
+    echo "[check-image] size mismatch: actual=$actual_size ref=$ref_size" >&2
+    exit 1
+  fi
 fi
 
 if [[ -n "$CHECK_IGNORE_RECT" ]]; then

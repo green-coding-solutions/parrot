@@ -9,7 +9,9 @@ services:
       - "5900:5900" # raw VNC
     volumes:
       - ./recordings:/recordings
+      - /tmp/parrot-debug:/debug   # remove when not debugging
     environment:
+      PARROT_DEBUG_DIR: /debug
       DISPLAY: ":99"
       SCREEN_SIZE: "1440x900x24"
       APP_STARTCOMMAND: "gnome-calculator"

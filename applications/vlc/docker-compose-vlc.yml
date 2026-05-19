@@ -10,7 +10,9 @@ services:
     volumes:
       - ./recordings:/recordings
       - ./recordings/vlc/example.mp4:/home/vlcuser/example.mp4:ro
+      - /tmp/parrot-debug:/debug   # remove when not debugging
     environment:
+      PARROT_DEBUG_DIR: /debug
       DISPLAY: ":99"
       SCREEN_SIZE: "1440x900x24"
       APP_STARTCOMMAND: "su -m vlcuser -c 'XDG_RUNTIME_DIR=/tmp/runtime-vlcuser vlc --no-audio --play-and-exit --vout xcb_x11 /home/vlcuser/example.mp4'"

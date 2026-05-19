@@ -4,1705 +4,654 @@ startcommand = okular
 windowtitle = Okular
 windowclass = okular
 
-wait 2.200826
-mousemove 659 708
-wait 0.000037
+wait 1.000000
+mousemove 180 541
+wait 0.000023
 mousedown 1
-wait 0.083776
+wait 0.060815
 mouseup 1
-wait 2.424273
+wait 1.802299
 log * Load app
 check okular/okular-check-001.png
-wait 1.969683
-mousemove 481 660
-wait 0.000018
+wait 1.741246
+mousemove 417 659
+wait 0.000020
 mousedown 1
-wait 0.105858
+wait 0.105100
 mouseup 1
-wait 0.946159
+wait 1.178039
 keydown slash
-wait 0.081082
+wait 0.073540
 keyup slash
-wait 0.510877
+wait 0.200828
 keydown t
-wait 0.104180
+wait 0.068583
 keyup t
-wait 0.083278
+wait 0.216662
 keydown m
-wait 0.103209
+wait 0.040295
+keydown p
+wait 0.057736
 keyup m
-wait 0.121976
-keydown p
-wait 0.103698
+wait 0.054600
 keyup p
-wait 0.410171
+wait 0.193850
 keydown slash
-wait 0.120576
+wait 0.068808
 keyup slash
-wait 0.389270
-keydown r
-wait 0.114618
-keydown e
-wait 0.045083
-keyup r
-wait 0.082575
-keyup e
-wait 0.171285
+wait 0.720640
 keydown p
-wait 0.038713
-keydown o
-wait 0.096055
+wait 0.064683
 keyup p
-wait 0.055649
-keyup o
-wait 0.249856
-keydown slash
-wait 0.134278
-keyup slash
-wait 0.196444
-keydown a
-wait 0.109457
-keyup a
-wait 0.026260
-keydown p
-wait 0.076881
-keyup p
-wait 0.074567
-keydown p
-wait 0.105656
-keyup p
-wait 0.438645
-keydown Down
-wait 0.167687
-keyup Down
-wait 0.209709
-keydown Return
-wait 0.117703
-keyup Return
-wait 1.580259
-keydown p
-wait 0.100335
-keyup p
-wait 0.144919
+wait 0.200019
 keydown d
-wait 0.082614
+wait 0.095138
 keydown f
-wait 0.060576
+wait 0.040185
 keyup d
-wait 0.089147
+wait 0.055573
 keyup f
-wait 0.286375
-keydown Down
-wait 0.128476
-keyup Down
-wait 0.266466
+wait 0.120586
+keydown period
+wait 0.063296
+keyup period
+wait 0.155986
+keydown p
+wait 0.076530
+keyup p
+wait 0.032992
+keydown d
+wait 0.039163
+keydown f
+wait 0.057403
+keyup d
+wait 0.061935
+keyup f
+wait 0.368281
 keydown Return
-wait 0.141559
+wait 0.111252
 keyup Return
-wait 0.562200
-keydown Down
-wait 0.109924
-keyup Down
-wait 0.088528
-keydown Down
-wait 0.127483
-keyup Down
-wait 0.848252
-keydown Return
-wait 0.127259
-keyup Return
-wait 1.985832
+wait 1.240464
 log * Open the document [20yearsofKDE.pdf](20yearsofKDE.pdf) from the local disk
 check okular/okular-check-002.png
-wait 2.789086
-mousemove 720 40
-wait 0.000023
+wait 3.039298
+mousemove 714 39
+wait 0.000019
 mousedown 1
-wait 0.162161
+wait 0.167543
 mouseup 1
-wait 1.257833
-keydown BackSpace
-wait 0.181470
-keyup BackSpace
-wait 1.560515
+wait 1.319787
 keydown 8
-wait 0.144849
-keyup 8
-wait 0.448291
+wait 0.057940
 keydown 1
-wait 0.136251
+wait 0.039930
+keyup 8
+wait 0.082065
 keyup 1
-wait 0.861886
+wait 0.664342
 keydown Return
-wait 0.147669
+wait 0.076928
 keyup Return
-wait 2.020266
+wait 1.288159
 log * Jump to page 81 by entering the page number
 check okular/okular-check-003.png
-wait 1.981028
-mousemove 802 289
-wait 0.000019
+wait 1.793254
+mousemove 783 322
+wait 0.000021
 mousedown 5
-wait 0.000005
+wait 0.000007
 mouseup 5
-wait 0.071296
+wait 0.073131
 mousedown 5
-wait 0.000024
+wait 0.000020
 mouseup 5
-wait 0.065625
+wait 0.098960
 mousedown 5
-wait 0.068538
+wait 0.000020
 mouseup 5
-wait 0.000315
+wait 0.114696
 mousedown 5
 wait 0.000023
 mouseup 5
-wait 0.098072
-mousedown 5
-wait 0.068588
-mouseup 5
-wait 0.027642
-mousedown 5
-wait 0.067609
-mouseup 5
-wait 0.076856
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.078485
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.223457
+wait 0.197662
 mousedown 5
 wait 0.000020
 mouseup 5
-wait 1.182718
-mousemove 1215 34
-wait 0.000026
+wait 0.095509
+mousedown 5
+wait 0.067758
+mouseup 5
+wait 0.491590
+mousedown 5
+wait 0.000020
+mouseup 5
+wait 1.540389
+mousemove 1362 37
+wait 0.000018
 mousedown 1
-wait 0.103309
+wait 0.062883
 mouseup 1
-wait 1.121576
-mousemove 378 103
-wait 0.000020
+wait 1.112037
+mousemove 367 321
+wait 0.000027
 mousedown 1
-wait 0.039382
-mousemove 379 103
-wait 0.015829
-mousemove 380 103
-wait 0.000017
-mousemove 383 104
-wait 0.025320
-mousemove 387 104
-wait 0.000020
-mousemove 389 105
-wait 0.000006
-mousemove 392 107
-wait 0.015294
-mousemove 396 108
-wait 0.000024
-mousemove 402 111
-wait 0.017402
-mousemove 409 114
+wait 0.062964
+mousemove 368 320
+wait 0.000018
+mousemove 371 320
+wait 0.016526
+mousemove 374 320
+wait 0.026937
+mousemove 378 320
+wait 0.022507
+mousemove 381 320
+wait 0.006205
+mousemove 389 321
+wait 0.025361
+mousemove 398 325
+wait 0.021405
+mousemove 406 328
+wait 0.000021
+mousemove 417 331
+wait 0.027433
+mousemove 433 335
+wait 0.022224
+mousemove 451 342
+wait 0.007603
+mousemove 474 348
+wait 0.026811
+mousemove 501 358
+wait 0.019849
+mousemove 529 370
+wait 0.000019
+mousemove 560 380
+wait 0.017810
+mousemove 598 396
+wait 0.016470
+mousemove 628 404
+wait 0.028267
+mousemove 658 414
+wait 0.022902
+mousemove 673 419
 wait 0.000028
-mousemove 415 118
-wait 0.012912
-mousemove 426 121
-wait 0.000025
-mousemove 437 126
-wait 0.016782
-mousemove 448 130
-wait 0.000016
-mousemove 460 135
-wait 0.016227
-mousemove 475 141
-wait 0.000040
-mousemove 488 144
-wait 0.017772
-mousemove 502 148
+mousemove 685 426
+wait 0.026965
+mousemove 700 431
+wait 0.022660
+mousemove 715 441
+wait 0.005365
+mousemove 727 445
+wait 0.026957
+mousemove 733 449
+wait 0.020830
+mousemove 742 452
+wait 0.000021
+mousemove 748 455
+wait 0.017330
+mousemove 756 461
+wait 0.017114
+mousemove 767 467
+wait 0.017585
+mousemove 784 475
+wait 0.017239
+mousemove 812 495
+wait 0.017831
+mousemove 831 507
+wait 0.033362
+mousemove 851 516
+wait 0.000018
+mousemove 873 529
+wait 0.020270
+mousemove 895 542
+wait 0.030489
+mousemove 929 561
+wait 0.000019
+mousemove 937 566
+wait 0.021371
+mousemove 947 572
+wait 0.012554
+mousemove 952 575
+wait 0.017183
+mousemove 960 579
+wait 0.017671
+mousemove 968 583
+wait 0.029095
+mousemove 979 587
+wait 0.021912
+mousemove 985 590
+wait 0.000024
+mousemove 990 593
+wait 0.019484
+mousemove 998 599
+wait 0.032704
+mousemove 1011 606
+wait 0.000020
+mousemove 1019 611
+wait 0.017437
+mousemove 1030 622
+wait 0.019701
+mousemove 1040 628
+wait 0.014827
+mousemove 1055 638
+wait 0.017440
+mousemove 1068 649
+wait 0.016317
+mousemove 1082 661
+wait 0.021234
+mousemove 1101 675
+wait 0.014966
+mousemove 1125 695
+wait 0.027821
+mousemove 1143 706
+wait 0.023039
+mousemove 1154 713
+wait 0.000030
+mousemove 1165 723
+wait 0.029832
+mousemove 1172 728
+wait 0.021674
+mousemove 1177 732
+wait 0.000020
+mousemove 1182 735
+wait 0.016468
+mousemove 1185 739
+wait 0.017857
+mousemove 1188 741
+wait 0.026967
+mousemove 1190 743
+wait 0.022415
+mousemove 1192 745
+wait 0.001378
+mousemove 1193 746
+wait 0.016718
+mousemove 1194 747
+wait 0.016655
+mousemove 1197 748
+wait 0.017869
+mousemove 1200 751
+wait 0.017594
+mousemove 1204 752
+wait 0.017191
+mousemove 1205 754
+wait 0.016644
+mousemove 1207 755
+wait 0.017819
+mousemove 1208 756
+wait 0.033575
+mousemove 1211 758
 wait 0.000023
-mousemove 520 153
-wait 0.014024
-mousemove 535 159
-wait 0.000027
-mousemove 555 164
-wait 0.024561
-mousemove 574 170
-wait 0.000018
-mousemove 592 173
-wait 0.000005
-mousemove 607 177
-wait 0.007910
-mousemove 624 183
-wait 0.007489
-mousemove 641 188
-wait 0.016578
-mousemove 654 192
-wait 0.000022
-mousemove 669 197
-wait 0.015535
-mousemove 682 203
-wait 0.000021
-mousemove 694 210
-wait 0.023866
-mousemove 707 216
-wait 0.000018
-mousemove 720 223
-wait 0.000005
-mousemove 732 231
-wait 0.014905
-mousemove 744 239
-wait 0.000024
-mousemove 755 245
-wait 0.016946
-mousemove 771 250
-wait 0.000019
-mousemove 783 263
-wait 0.016589
-mousemove 793 271
-wait 0.000015
-mousemove 802 277
-wait 0.023492
-mousemove 813 285
-wait 0.000018
-mousemove 823 292
-wait 0.000003
-mousemove 829 297
-wait 0.016007
-mousemove 836 301
-wait 0.000042
-mousemove 843 309
-wait 0.024052
-mousemove 851 316
-wait 0.000021
-mousemove 859 324
-wait 0.000005
-mousemove 867 332
-wait 0.016157
-mousemove 874 338
-wait 0.000018
-mousemove 884 346
-wait 0.023649
-mousemove 890 354
-wait 0.000026
-mousemove 898 359
-wait 0.000006
-mousemove 903 362
-wait 0.016008
-mousemove 910 371
-wait 0.000020
-mousemove 920 379
-wait 0.018320
-mousemove 930 387
-wait 0.000020
-mousemove 938 394
-wait 0.012812
-mousemove 944 400
-wait 0.000017
-mousemove 952 408
-wait 0.017707
-mousemove 962 420
-wait 0.000017
-mousemove 970 427
-wait 0.014935
-mousemove 978 434
-wait 0.000017
-mousemove 987 441
-wait 0.016404
-mousemove 993 447
-wait 0.000016
-mousemove 999 451
-wait 0.011674
-mousemove 1008 459
-wait 0.005256
-mousemove 1014 463
-wait 0.017401
-mousemove 1020 467
-wait 0.000021
-mousemove 1025 471
-wait 0.012669
-mousemove 1029 474
-wait 0.000028
-mousemove 1034 480
-wait 0.018373
-mousemove 1040 485
-wait 0.000016
-mousemove 1044 489
-wait 0.014786
-mousemove 1049 492
-wait 0.000019
-mousemove 1053 496
-wait 0.016832
-mousemove 1060 500
-wait 0.000018
-mousemove 1066 505
-wait 0.014271
-mousemove 1073 511
-wait 0.000017
-mousemove 1076 515
-wait 0.016531
-mousemove 1081 521
-wait 0.000019
-mousemove 1086 525
-wait 0.016369
-mousemove 1094 529
-wait 0.000022
-mousemove 1097 534
-wait 0.017046
-mousemove 1101 538
-wait 0.000021
-mousemove 1104 541
-wait 0.014272
-mousemove 1107 544
-wait 0.000021
-mousemove 1109 546
-wait 0.024085
-mousemove 1113 550
-wait 0.000022
-mousemove 1116 552
-wait 0.000006
-mousemove 1117 553
-wait 0.015989
-mousemove 1121 556
-wait 0.000018
-mousemove 1121 558
-wait 0.016658
-mousemove 1123 561
-wait 0.000017
-mousemove 1124 561
-wait 0.015438
-mousemove 1125 564
-wait 0.000020
-mousemove 1126 565
-wait 0.016575
-mousemove 1128 566
-wait 0.000015
-mousemove 1130 567
-wait 0.015829
-mousemove 1132 568
-wait 0.000029
-mousemove 1133 570
-wait 0.017062
-mousemove 1134 572
-wait 0.000018
-mousemove 1135 573
-wait 0.014515
-mousemove 1135 578
-wait 0.000010
-mousemove 1137 578
-wait 0.016607
-mousemove 1140 580
-wait 0.000013
-mousemove 1142 581
-wait 0.015239
-mousemove 1145 584
-wait 0.000020
-mousemove 1147 584
-wait 0.023939
-mousemove 1149 585
-wait 0.000019
-mousemove 1152 587
-wait 0.000005
-mousemove 1154 588
-wait 0.015520
-mousemove 1157 591
-wait 0.000027
-mousemove 1160 594
-wait 0.017609
-mousemove 1161 595
-wait 0.000013
-mousemove 1163 597
-wait 0.014166
-mousemove 1167 600
-wait 0.000017
-mousemove 1171 603
-wait 0.016428
-mousemove 1173 603
-wait 0.000019
-mousemove 1178 606
-wait 0.016457
-mousemove 1183 609
-wait 0.000021
-mousemove 1188 615
-wait 0.016869
-mousemove 1189 617
-wait 0.000017
-mousemove 1192 617
-wait 0.014755
-mousemove 1194 620
-wait 0.000019
-mousemove 1196 620
-wait 0.016788
-mousemove 1198 621
-wait 0.000020
-mousemove 1200 622
-wait 0.015197
-mousemove 1202 622
-wait 0.000020
-mousemove 1204 623
-wait 0.016601
-mousemove 1207 624
-wait 0.000026
-mousemove 1208 624
-wait 0.015623
-mousemove 1210 624
-wait 0.000020
-mousemove 1212 625
-wait 0.016674
-mousemove 1213 625
-wait 0.000021
-mousemove 1214 625
-wait 0.015374
-mousemove 1215 626
-wait 0.000018
-mousemove 1216 626
-wait 0.311495
+mousemove 1212 758
+wait 0.016689
+mousemove 1215 760
+wait 0.017384
+mousemove 1217 761
+wait 0.017806
+mousemove 1220 763
+wait 0.017346
+mousemove 1221 763
+wait 0.016818
+mousemove 1223 764
+wait 0.016597
+mousemove 1228 767
+wait 0.016659
+mousemove 1230 768
+wait 0.017640
+mousemove 1231 769
+wait 0.016928
+mousemove 1232 769
+wait 0.027077
+mousemove 1233 771
+wait 0.033269
+mousemove 1234 771
+wait 0.201553
 mouseup 1
-wait 1.467587
+wait 2.103451
 log * Highlight text of last paragraph on page 81
 check okular/okular-check-004.png
-wait 2.325685
-mousemove 273 8
+wait 3.602976
+mousemove 66 11
 wait 0.000017
 mousedown 1
-wait 0.118944
+wait 0.126011
 mouseup 1
-wait 1.793072
-mousemove 333 179
-wait 0.000023
-mousedown 1
-wait 0.105190
-mouseup 1
-wait 1.599331
-mousemove 464 82
-wait 0.000019
-mousedown 1
-wait 0.079568
-mouseup 1
-wait 1.015985
-mousemove 415 648
-wait 0.000020
-mousedown 1
-wait 0.104387
-mouseup 1
-wait 1.033912
-keydown Shift_R
-wait 0.167870
-keydown t
-wait 0.101567
-keyup Shift_R
-wait 0.007939
-keyup t
-wait 0.098857
-keydown h
-wait 0.087917
-keydown i
-wait 0.045312
-keyup h
-wait 0.049209
-keydown s
-wait 0.014413
-keyup i
-wait 0.098707
-keyup s
-wait 0.029396
-keydown space
-wait 0.083124
-keydown i
-wait 0.004804
-keyup space
-wait 0.112226
-keyup i
-wait 0.032066
-keydown s
-wait 0.119707
-keyup s
-wait 0.024503
-keydown space
-wait 0.127268
-keyup space
-wait 0.065074
-keydown a
-wait 0.111423
-keyup a
-wait 0.040711
-keydown n
-wait 0.097214
-keydown space
-wait 0.062556
-keyup n
-wait 0.047293
-keyup space
-wait 0.433090
-keydown i
-wait 0.110947
-keyup i
-wait 0.128853
-keydown m
-wait 0.111107
-keyup m
-wait 0.128122
-keydown p
-wait 0.087773
-keyup p
-wait 0.096361
-keydown o
-wait 0.088708
-keyup o
-wait 0.042507
+wait 2.497043
+keydown e
+wait 0.101332
+keyup e
+wait 2.033301
 keydown r
-wait 0.125334
+wait 0.158751
 keyup r
-wait 0.231695
-keydown t
-wait 0.113213
-keyup t
-wait 0.166163
-keydown a
-wait 0.145356
-keyup a
-wait 0.071230
-keydown n
-wait 0.095837
-keyup n
-wait 0.007865
-keydown t
-wait 0.120356
-keyup t
-wait 0.040015
-keydown space
-wait 0.129380
-keyup space
-wait 1.306160
-keydown b
-wait 0.116035
-keyup b
-wait 0.184346
-keydown i
-wait 0.104080
-keyup i
-wait 0.000025
-keydown t
-wait 0.080444
-keyup t
-wait 0.041985
-keydown space
-wait 0.076973
-keyup space
-wait 0.015791
-keydown o
-wait 0.096889
-keyup o
-wait 0.039636
-keydown f
-wait 0.111879
-keyup f
-wait 0.400327
-keydown space
-wait 0.112237
-keyup space
-wait 0.386739
-keydown h
-wait 0.092621
-keyup h
-wait 0.137564
-keydown i
-wait 0.110389
-keyup i
-wait 0.034196
-keydown s
-wait 0.109749
-keyup s
-wait 0.073642
-keydown t
-wait 0.110431
-keyup t
-wait 0.007801
-keydown o
-wait 0.112433
-keyup o
-wait 0.000315
-keydown r
-wait 0.105599
-keyup r
-wait 0.062650
-keydown y
-wait 0.110890
-keyup y
-wait 1.102937
-keydown Return
-wait 0.132053
-keyup Return
-wait 1.821012
-log * Add a pop-up note "This is an important bit of history"
-check okular/okular-check-005.png
-wait 2.882981
-mousemove 528 117
-wait 0.000028
-mousedown 1
-wait 0.085703
-mouseup 1
-wait 0.738111
-mousemove 494 70
-wait 0.000020
-mousedown 1
-wait 0.103213
-mouseup 1
-wait 1.633616
-mousemove 75 7
-wait 0.000027
-mousedown 1
-wait 0.127630
-mouseup 1
-wait 1.485572
-mousemove 113 244
-wait 0.000018
-mousedown 1
-wait 0.124961
-mouseup 1
-wait 1.177353
-mousemove 367 272
-wait 0.000023
-mousedown 1
-wait 0.099930
-mouseup 1
-wait 2.000633
+wait 1.831734
 log * Rotate the page right
-check okular/okular-check-006.png
-wait 2.306159
-mousemove 300 39
-wait 0.000019
+check okular/okular-check-005.png
+wait 2.008213
+mousemove 287 30
+wait 0.000034
 mousedown 1
-wait 0.102301
+wait 0.053277
 mouseup 1
-wait 0.919651
+wait 0.085616
 mousedown 1
-wait 0.079914
+wait 0.086529
 mouseup 1
-wait 1.522773
+wait 0.087056
 mousedown 1
-wait 0.084303
+wait 0.086777
 mouseup 1
-wait 0.057185
-mousedown 1
-wait 0.104275
-mouseup 1
-wait 0.857522
-keydown BackSpace
-wait 0.087435
-keyup BackSpace
-wait 0.062850
-keydown BackSpace
-wait 0.081694
-keyup BackSpace
-wait 0.063345
-keydown BackSpace
-wait 0.086252
-keyup BackSpace
-wait 0.066765
-keydown BackSpace
-wait 0.088001
-keyup BackSpace
-wait 0.055606
-keydown BackSpace
-wait 0.086167
-keyup BackSpace
-wait 0.088001
-keydown BackSpace
-wait 0.103491
-keyup BackSpace
-wait 1.576898
+wait 0.631139
+mousemove 288 30
+wait 0.000025
 keydown 2
-wait 0.120802
+wait 0.073094
 keyup 2
-wait 0.303811
+wait 0.153654
 keydown 0
-wait 0.111608
+wait 0.062285
 keyup 0
-wait 0.303552
+wait 0.080302
 keydown 0
-wait 0.135846
+wait 0.079692
 keyup 0
-wait 1.104248
+wait 0.536838
 keydown Return
-wait 0.143878
+wait 0.119684
 keyup Return
-wait 2.352185
+wait 1.128846
 log * Zoom in to 200 %
-check okular/okular-check-007.png
-wait 1.461468
+check okular/okular-check-006.png
+wait 0.986500
 mousedown 1
-wait 0.085629
+wait 0.104523
 mouseup 1
-wait 0.085316
+wait 0.085326
 mousedown 1
-wait 0.063975
+wait 0.109099
 mouseup 1
-wait 0.085802
+wait 0.254392
 mousedown 1
-wait 0.106420
+wait 0.141186
 mouseup 1
-wait 0.783075
-keydown BackSpace
-wait 0.143974
-keyup BackSpace
-wait 1.560048
+wait 0.982785
 keydown 5
-wait 0.103379
-keydown 0
-wait 0.016133
+wait 0.073808
 keyup 5
-wait 0.087919
+wait 0.000458
+keydown 0
+wait 0.069066
 keyup 0
-wait 0.385428
+wait 0.406570
 keydown Return
-wait 0.134693
+wait 0.089292
 keyup Return
-wait 1.994096
+wait 1.864679
 log * Zoom out to 50 %
-check okular/okular-check-008.png
-wait 2.857818
-mousemove 812 440
-wait 0.000023
-mousedown 4
-wait 0.000009
-mouseup 4
-wait 0.471944
-mousedown 4
-wait 0.000023
-mouseup 4
-wait 0.224415
-mousedown 4
-wait 0.000027
-mouseup 4
-wait 0.249142
-mousedown 4
-wait 0.000036
-mouseup 4
-wait 0.277799
-mousedown 4
-wait 0.000022
-mouseup 4
-wait 0.126993
-mousedown 4
-wait 0.000019
-mouseup 4
-wait 0.552863
-mousedown 4
-wait 0.000019
-mouseup 4
-wait 0.124715
-mousedown 4
-wait 0.000034
-mouseup 4
-wait 0.174417
-mousedown 4
-wait 0.000032
-mouseup 4
-wait 0.243067
-mousedown 4
-wait 0.000019
-mouseup 4
-wait 0.281500
-mousemove 812 441
-wait 0.000020
-mousedown 4
-wait 0.000006
-mouseup 4
-wait 0.272858
-mousedown 4
-wait 0.000019
-mouseup 4
-wait 0.481246
-mousedown 4
-wait 0.000020
-mouseup 4
-wait 0.110799
-mousedown 4
-wait 0.000026
-mouseup 4
-wait 0.138736
-mousedown 4
-wait 0.000028
-mouseup 4
-wait 0.180271
-mousedown 4
-wait 0.000040
-mouseup 4
-wait 0.283605
-mousedown 4
-wait 0.000020
-mouseup 4
-wait 2.649086
-log * Go back 4 pages, page by page
-check okular/okular-check-009.png
-wait 3.129509
-mousemove 56 11
-wait 0.000033
-mousedown 1
-wait 0.058340
-mousemove 56 10
-wait 0.053830
-mouseup 1
-wait 1.590794
-mousemove 136 248
-wait 0.000015
-mousedown 1
-wait 0.059288
-mousemove 136 249
-wait 0.063568
-mouseup 1
-wait 2.167659
-mousemove 438 263
+check okular/okular-check-007.png
+wait 2.852678
+mousemove 536 348
 wait 0.000017
-mousedown 1
-wait 0.088606
-mouseup 1
-wait 2.275109
-log * Rotate the page left
-check okular/okular-check-010.png
-wait 2.017206
-mousemove 304 39
-wait 0.000018
-mousedown 1
-wait 0.126180
-mouseup 1
-wait 0.105988
-mousedown 1
-wait 0.086698
-mouseup 1
-wait 0.062221
-mousedown 1
-wait 0.104862
-mouseup 1
-wait 0.734196
-keydown BackSpace
-wait 0.127609
-keyup BackSpace
-wait 0.711128
-keydown 1
-wait 0.120816
-keyup 1
-wait 0.224611
-keydown 5
-wait 0.111623
-keyup 5
-wait 0.226579
-keydown 0
-wait 0.120106
-keyup 0
-wait 0.507907
-keydown Return
-wait 0.185200
-keyup Return
-wait 2.912123
-log * Zoom to 150 %
-check okular/okular-check-011.png
-wait 2.674997
-mousemove 699 29
-wait 0.000033
-mousedown 1
-wait 0.106656
-mouseup 1
-wait 0.076650
-mousedown 1
-wait 0.084776
-mouseup 1
-wait 0.799587
-keydown 9
-wait 0.088869
-keyup 9
-wait 0.408704
-keydown 5
-wait 0.127542
-keyup 5
-wait 0.466209
-keydown Return
-wait 0.101793
-keyup Return
-wait 1.247979
-log * Jump to page 95 by entering the page number
-check okular/okular-check-012.png
-wait 2.822171
-mousemove 559 316
-wait 0.000030
-mousedown 1
-wait 0.093603
-mousemove 560 316
-wait 0.000021
-mousemove 562 316
-wait 0.015615
-mousemove 565 316
-wait 0.000013
-mousemove 566 316
-wait 0.025184
-mousemove 569 317
-wait 0.000025
-mousemove 572 318
-wait 0.000005
-mousemove 575 318
-wait 0.015134
-mousemove 578 318
-wait 0.000046
-mousemove 581 319
-wait 0.017635
-mousemove 584 320
-wait 0.000020
-mousemove 589 320
-wait 0.013658
-mousemove 592 320
-wait 0.000034
-mousemove 597 321
-wait 0.016662
-mousemove 602 322
+mousedown 4
+wait 0.000008
+mouseup 4
+wait 0.566289
+mousedown 4
 wait 0.000022
-mousemove 606 323
-wait 0.015862
-mousemove 613 326
-wait 0.000022
-mousemove 617 329
-wait 0.016495
-mousemove 622 330
-wait 0.000019
-mousemove 631 334
-wait 0.014197
-mousemove 639 335
+mouseup 4
+wait 0.263459
+mousedown 4
 wait 0.000017
-mousemove 645 337
-wait 0.016958
-mousemove 652 340
+mouseup 4
+wait 0.278881
+mousemove 536 349
 wait 0.000017
-mousemove 658 342
-wait 0.016691
-mousemove 666 345
-wait 0.000016
-mousemove 673 350
-wait 0.006132
-mousemove 680 352
-wait 0.017009
-mousemove 686 353
-wait 0.000024
-mousemove 691 355
-wait 0.016588
-mousemove 697 358
-wait 0.000018
-mousemove 705 361
-wait 0.017273
-mousemove 710 362
-wait 0.000015
-mousemove 715 364
-wait 0.013237
-mousemove 718 367
-wait 0.000012
-mousemove 721 368
-wait 0.017612
-mousemove 724 369
-wait 0.000018
-mousemove 728 371
-wait 0.015362
-mousemove 732 372
-wait 0.000025
-mousemove 735 373
-wait 0.017090
-mousemove 738 374
-wait 0.000020
-mousemove 740 374
-wait 0.014565
-mousemove 742 374
-wait 0.000017
-mousemove 746 376
-wait 0.017474
-mousemove 747 376
-wait 0.000018
-mousemove 750 376
-wait 0.015117
-mousemove 752 377
-wait 0.194513
-mouseup 1
-wait 1.066300
-mousemove 753 377
-wait 0.134942
-log * Highlight the text of the title
-check okular/okular-check-013.png
-wait 2.335436
-mousemove 789 539
-wait 0.000019
-mousedown 5
-wait 0.000006
-mouseup 5
-wait 0.189429
-mousedown 5
-wait 0.000030
-mouseup 5
-wait 0.156283
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.140197
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.197189
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.068775
-mousedown 5
+mousedown 4
+wait 0.000004
+mouseup 4
+wait 0.134508
+mousedown 4
 wait 0.000022
-mouseup 5
-wait 0.123802
-mousedown 5
-wait 0.000034
-mouseup 5
-wait 0.146175
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.150385
-mousedown 5
-wait 0.000029
-mouseup 5
-wait 0.424389
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.114937
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.112897
-mousedown 5
-wait 0.000027
-mouseup 5
-wait 0.134224
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.113894
-mousedown 5
-wait 0.000030
-mouseup 5
-wait 0.108585
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.093809
-mousedown 5
-wait 0.000016
-mouseup 5
-wait 0.123696
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.088403
-mousedown 5
-wait 0.067889
-mouseup 5
-wait 0.331985
-mousedown 5
-wait 0.000016
-mouseup 5
-wait 0.141045
-mousedown 5
-wait 0.000035
-mouseup 5
-wait 0.112022
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.088112
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.107906
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.101364
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.122037
-mousedown 5
-wait 0.067838
-mouseup 5
-wait 0.069395
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.399534
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.088994
-mousedown 5
-wait 0.000031
-mouseup 5
-wait 0.088632
-mousedown 5
-wait 0.000041
-mouseup 5
-wait 0.123911
-mousedown 5
-wait 0.000027
-mouseup 5
-wait 0.072265
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.112550
-mousedown 5
-wait 0.067715
-mouseup 5
-wait 0.039261
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.068245
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.592092
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.165394
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.121938
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.123527
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.076378
-mousedown 5
-wait 0.000030
-mouseup 5
-wait 0.121702
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.078308
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.104894
-mousedown 5
-wait 0.068731
-mouseup 5
-wait 0.035418
-mousedown 5
-wait 0.067923
-mouseup 5
-wait 0.044925
-mousedown 5
-wait 0.067612
-mouseup 5
-wait 0.307044
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.072769
-mousedown 5
-wait 0.067955
-mouseup 5
-wait 0.026014
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.098439
-mousedown 5
-wait 0.000031
-mouseup 5
-wait 0.118542
-mousedown 5
-wait 0.000026
-mouseup 5
-wait 0.115295
-mousedown 5
-wait 0.000036
-mouseup 5
-wait 0.125291
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.166901
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.817238
-mousedown 5
-wait 0.000016
-mouseup 5
-wait 0.139121
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.084756
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.088381
-mousedown 5
-wait 0.068026
-mouseup 5
-wait 0.052663
-mousedown 5
-wait 0.000016
-mouseup 5
-wait 0.093693
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.122173
-mousedown 5
-wait 0.067978
-mouseup 5
-wait 0.066452
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.625023
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.096798
-mousedown 5
-wait 0.068263
-mouseup 5
-wait 0.045448
-mousedown 5
-wait 0.067912
-mouseup 5
-wait 0.043996
-mousedown 5
-wait 0.000027
-mouseup 5
-wait 0.118139
-mousedown 5
-wait 0.000042
-mouseup 5
-wait 0.147059
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.156629
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.577483
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.076453
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.119185
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.089406
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.121849
-mousedown 5
-wait 0.067966
-mouseup 5
-wait 0.093626
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.108108
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.129481
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.495781
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.064792
-mousedown 5
-wait 0.067706
-mouseup 5
-wait 0.059642
-mousedown 5
-wait 0.067810
-mouseup 5
-wait 0.044152
-mousedown 5
-wait 0.068110
-mouseup 5
-wait 0.034624
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.104647
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.153042
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.188250
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.498099
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.123908
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.138570
-mousedown 5
-wait 0.000015
-mouseup 5
-wait 0.121617
-mousedown 5
-wait 0.000029
-mouseup 5
-wait 0.121299
-mousedown 5
-wait 0.000016
-mouseup 5
-wait 0.116439
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.097116
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.129450
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.499367
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.060879
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.106273
-mousedown 5
-wait 0.000027
-mouseup 5
-wait 0.086756
-mousedown 5
+mouseup 4
+wait 0.404860
+mousedown 4
 wait 0.000014
-mouseup 5
-wait 0.087904
-mousedown 5
-wait 0.067893
-mouseup 5
-wait 0.020566
-mousedown 5
-wait 0.067851
-mouseup 5
-wait 0.043746
-mousedown 5
-wait 0.067794
-mouseup 5
-wait 0.136950
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.492140
-mousedown 5
-wait 0.000015
-mouseup 5
-wait 0.139385
-mousedown 5
-wait 0.000039
-mouseup 5
-wait 0.142672
-mousedown 5
-wait 0.000032
-mouseup 5
-wait 0.093736
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.070946
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.089723
-mousedown 5
-wait 0.067634
-mouseup 5
-wait 0.051355
-mousedown 5
-wait 0.067986
-mouseup 5
-wait 0.067562
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.558375
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.087084
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.094916
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.112647
-mousedown 5
-wait 0.000028
-mouseup 5
-wait 0.100638
-mousedown 5
-wait 0.000033
-mouseup 5
-wait 0.070755
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.113631
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.117478
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.432901
-mousedown 5
+mouseup 4
+wait 0.571513
+mousedown 4
 wait 0.000019
-mouseup 5
-wait 0.063882
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.090324
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.092688
-mousedown 5
-wait 0.000037
-mouseup 5
-wait 0.088508
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.115162
-mousedown 5
-wait 0.000035
-mouseup 5
-wait 0.118786
-mousedown 5
-wait 0.000023
-mouseup 5
-wait 0.222322
-mousedown 5
-wait 0.000018
-mouseup 5
-wait 0.391954
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.087981
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.071898
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.064407
-mousedown 5
-wait 0.068152
-mouseup 5
-wait 0.015784
-mousedown 5
+mouseup 4
+wait 0.772951
+mousedown 4
+wait 0.000019
+mouseup 4
+wait 0.297513
+mousedown 4
+wait 0.000019
+mouseup 4
+wait 0.328541
+mousedown 4
+wait 0.000019
+mouseup 4
+wait 0.590193
+mousedown 4
 wait 0.000030
-mouseup 5
-wait 0.085256
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.108873
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.123793
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.293379
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.354554
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.076605
-mousedown 5
-wait 0.000034
-mouseup 5
-wait 0.099217
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.097064
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.075388
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.080052
-mousedown 5
-wait 0.068591
-mouseup 5
-wait 0.036226
-mousedown 5
-wait 0.068713
-mouseup 5
-wait 0.059726
-mousedown 5
+mouseup 4
+wait 0.351121
+mousedown 4
+wait 0.000015
+mouseup 4
+wait 0.404285
+mousedown 4
 wait 0.000019
-mouseup 5
-wait 0.611250
-mousedown 5
-wait 0.000021
-mouseup 5
-wait 0.115803
-mousedown 5
-wait 0.000031
-mouseup 5
-wait 0.122884
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 0.094002
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.115118
-mousedown 5
-wait 0.000034
-mouseup 5
-wait 0.121046
-mousedown 5
-wait 0.000027
-mouseup 5
-wait 0.627614
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.097926
-mousedown 5
-wait 0.067900
-mouseup 5
-wait 0.053540
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.069069
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.072990
-mousedown 5
-wait 0.067638
-mouseup 5
-wait 0.020337
-mousedown 5
-wait 0.067649
-mouseup 5
-wait 0.017815
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.100212
-mousedown 5
+mouseup 4
+wait 1.472309
+log * Go back 4 pages, page by page
+check okular/okular-check-008.png
+wait 2.990597
+mousemove 54 8
+wait 0.000038
+mousedown 1
+wait 0.085656
+mouseup 1
+wait 1.946170
+keydown e
+wait 0.078940
+keyup e
+wait 2.696866
+keydown l
+wait 0.063547
+keyup l
+wait 1.959936
+log * Rotate the page left
+check okular/okular-check-009.png
+wait 2.155137
+mousemove 309 38
+wait 0.000019
+mousedown 1
+wait 0.086872
+mouseup 1
+wait 0.061872
+mousedown 1
+wait 0.088450
+mouseup 1
+wait 0.044287
+mousedown 1
+wait 0.098015
+mouseup 1
+wait 0.225508
+keydown 1
+wait 0.097124
+keyup 1
+wait 0.554437
+keydown 5
+wait 0.075851
+keyup 5
+wait 0.000392
+keydown 0
+wait 0.065143
+keyup 0
+wait 0.495096
+keydown Return
+wait 0.119066
+keyup Return
+wait 1.608464
+log * Zoom to 150 %
+check okular/okular-check-010.png
+wait 2.621514
+mousemove 736 36
+wait 0.000015
+mousedown 1
+wait 0.058410
+mouseup 1
+wait 0.086335
+mousedown 1
+wait 0.087085
+mouseup 1
+wait 1.555031
+keydown 9
+wait 0.063320
+keyup 9
+wait 0.243277
+keydown 5
+wait 0.079444
+keyup 5
+wait 0.213289
+keydown Return
+wait 0.103851
+keyup Return
+wait 1.088842
+log * Jump to page 95 by entering the page number
+check okular/okular-check-011.png
+wait 2.217236
+mousemove 564 260
 wait 0.000025
-mouseup 5
-wait 0.500126
-mousedown 5
+mousedown 1
+wait 0.031751
+mousemove 564 261
+wait 0.017301
+mousemove 565 264
+wait 0.027029
+mousemove 570 271
+wait 0.022582
+mousemove 579 279
+wait 0.006409
+mousemove 603 297
+wait 0.026899
+mousemove 618 307
+wait 0.020071
+mousemove 640 318
 wait 0.000019
-mouseup 5
-wait 0.140724
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.061937
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.093834
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.074255
-mousedown 5
-wait 0.000019
-mouseup 5
-wait 0.096873
-mousedown 5
-wait 0.000026
-mouseup 5
-wait 0.046168
-mousedown 5
-wait 0.067587
-mouseup 5
-wait 0.044457
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.071325
-mousedown 5
-wait 0.000024
-mouseup 5
-wait 0.647364
-mousedown 5
-wait 0.000035
-mouseup 5
-wait 0.078455
-mousedown 5
-wait 0.000022
-mouseup 5
-wait 0.113774
-mousedown 5
-wait 0.068483
-mouseup 5
-wait 0.100787
-mousedown 5
-wait 0.000025
-mouseup 5
-wait 0.111454
-mousedown 5
-wait 0.000020
-mouseup 5
-wait 0.234091
-mousedown 5
-wait 0.000017
-mouseup 5
-wait 2.238196
+mousemove 666 333
+wait 0.027834
+mousemove 684 345
+wait 0.021812
+mousemove 700 351
+wait 0.001232
+mousemove 714 357
+wait 0.017332
+mousemove 729 365
+wait 0.017172
+mousemove 744 373
+wait 0.027098
+mousemove 755 376
+wait 0.022530
+mousemove 765 380
+wait 0.006379
+mousemove 773 382
+wait 0.025622
+mousemove 778 384
+wait 0.021321
+mousemove 779 384
+wait 0.000021
+mousemove 780 385
+wait 0.154857
+mouseup 1
+wait 0.902777
+log * Highlight the text of the title
+check okular/okular-check-012.png
+wait 4.656638
+keydown Next
+wait 0.094421
+keyup Next
+wait 0.498432
+keydown Next
+wait 0.150838
+keyup Next
+wait 0.304473
+keydown Next
+wait 0.137338
+keyup Next
+wait 0.326161
+keydown Next
+wait 0.119648
+keyup Next
+wait 0.365962
+keydown Next
+wait 0.132250
+keyup Next
+wait 0.350481
+keydown Next
+wait 0.126521
+keyup Next
+wait 0.391884
+keydown Next
+wait 0.128224
+keyup Next
+wait 0.371339
+keydown Next
+wait 0.117768
+keyup Next
+wait 0.311262
+keydown Next
+wait 0.127673
+keyup Next
+wait 0.283629
+keydown Next
+wait 0.101671
+keyup Next
+wait 0.287258
+keydown Next
+wait 0.121112
+keyup Next
+wait 0.303063
+keydown Next
+wait 0.122663
+keyup Next
+wait 0.293698
+keydown Next
+wait 0.113067
+keyup Next
+wait 0.325776
+keydown Next
+wait 0.114216
+keyup Next
+wait 0.398808
+keydown Next
+wait 0.118956
+keyup Next
+wait 0.370409
+keydown Next
+wait 0.117618
+keyup Next
+wait 0.370547
+keydown Next
+wait 0.117848
+keyup Next
+wait 0.327866
+keydown Next
+wait 0.135436
+keyup Next
+wait 0.353166
+keydown Next
+wait 0.110887
+keyup Next
+wait 0.347851
+keydown Next
+wait 0.108278
+keyup Next
+wait 0.451509
+keydown Next
+wait 0.120047
+keyup Next
+wait 1.277335
 log * Go forward 14 pages, page by page
-check okular/okular-check-014.png
+check okular/okular-check-013.png

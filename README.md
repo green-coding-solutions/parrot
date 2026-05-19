@@ -25,18 +25,12 @@ Each application directory contains the recorded `.🦜` macro file and a `usage
 
 ### 1. Start the Window Container
 
-Every application ships with a Docker Compose file (or uses the shared `ribalba/xwindow-server` image). To bring up Firefox:
-
-```bash
-docker compose -f applications/firefox/usage_scenario.yml up --build
-```
-
-Open the GUI in your browser at `http://localhost:6080/vnc.html`.
+Every application ships with a Docker Compose file (or uses the shared `ribalba/xwindow-server` image).
 
 ### 2. Record a Macro
 
 ```bash
-./record-macro.py applications/firefox/usage_scenario.yml
+./record-macro.py applications/firefox/firefox.parrot
 ```
 
 - Interact with the application in the browser-based VNC viewer.
@@ -48,7 +42,7 @@ Open the GUI in your browser at `http://localhost:6080/vnc.html`.
 Override the hotkeys if your browser intercepts them:
 
 ```bash
-STOP_KEYSYM=F9 CHECK_KEYSYM=F3 ./record-macro.py applications/firefox/usage_scenario.yml
+STOP_KEYSYM=F9 CHECK_KEYSYM=F3 ./record-macro.py applications/firefox/firefox.parrot
 ```
 
 Output files are written to `recordings/<app-name>/`:
@@ -61,14 +55,14 @@ recordings/firefox/firefox-check-001.png
 ### 3. Replay a Macro
 
 ```bash
-./replay.py applications/firefox/usage_scenario.yml
+./replay.py applications/firefox/firefox.parrot
 ```
 
 Optional speed multiplier:
 
 ```bash
-REPLAY_SPEED=2.0 ./replay.py applications/firefox/usage_scenario.yml   # faster
-REPLAY_SPEED=0.5 ./replay.py applications/firefox/usage_scenario.yml   # slower
+REPLAY_SPEED=2.0 ./replay.py applications/firefox/firefox.parrot   # faster
+REPLAY_SPEED=0.5 ./replay.py applications/firefox/firefox.parrot  # slower
 ```
 
 Replay finds the application window by class/title metadata embedded in the macro, focuses it, and plays back every action. Any `Check` line triggers a screenshot comparison against the saved reference image. A failed check exits non-zero.
@@ -81,7 +75,7 @@ Parrot is not limited to the bundled applications. You can record interactions w
 APP_STARTCOMMAND='xterm' \
 APP_WINDOW_TITLE='xterm' \
 APP_WINDOW_CLASS='xterm' \
-./record-macro.py <your-compose-file.yml>
+./record-macro.py <your-parrog-file>
 ```
 
 Metadata is embedded into the `.🦜` macro file and used by replay to locate and focus the correct window.
@@ -167,3 +161,27 @@ To keep click coordinates and screenshots stable across runs, configure fixed wi
 - **Check hotkey affects the app** — `Scroll Lock` is the default; if your keyboard or environment handles it poorly, choose another key via `CHECK_KEYSYM`.
 - **Screenshot checks fail due to minor UI variation** — increase `CHECK_MAX_RMSE` slightly or mask dynamic regions with `CHECK_IGNORE_RECT`.
 - **Click coordinates are off** — rebuild/restart the container and re-record; window geometry may have shifted.
+
+## Workflow to record an application
+
+1. Copy a usage_scenario file into a new folder. Edit it so that the applications are installed in the setup commands section. Also change the paths to the new folder
+
+2. Start the application with the GMT to make sure that everything is set with
+
+   ```bash
+   ./runner.py --uri /home/didi/code/parrot --filename applications/pdf_viewers/okular/okular.yml --dev-no-sleep --allow-unsafe --debug
+   ```
+
+   Then step to the point when the container is started and the setup-commands are exectuted.
+
+3. Connect to the VPN through http://localhost:6080/vnc.html
+
+   You should see a blank screen with no application loaded
+
+4. Start the recording program with
+
+   ```bash
+   ./record-macro.py --script applications/pdf_viewers/script.md --startcommand okular --windowtitle Okular --windowclass okular  applications/pdf_viewers/okular/okular.parrot
+   ```
+
+   make sure to adapt the commands. Now the application should be loaded in the VNC and have the focus. Now everytime you select Scroll Lock the script should advance.

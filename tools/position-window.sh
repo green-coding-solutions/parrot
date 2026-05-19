@@ -69,7 +69,10 @@ if [[ -z "$window_id" ]]; then
 fi
 
 echo "[position-window] setting ${WINDOW_WIDTH}x${WINDOW_HEIGHT} at ${WINDOW_X},${WINDOW_Y} for window ${window_id}"
-xrandr --fb "${WINDOW_WIDTH}x${WINDOW_HEIGHT}" 2>/dev/null || true
+# Use RESOLUTION for the framebuffer so WM decorations (title bar etc.) have
+# room above/below the client window and don't cause the WM to clip it.
+_fb="${RESOLUTION:-${WINDOW_WIDTH}x${WINDOW_HEIGHT}}"
+xrandr --fb "$_fb" 2>/dev/null || true
 xdotool windowsize "$window_id" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" || true
 xdotool windowmove "$window_id" "$WINDOW_X" "$WINDOW_Y" || true
 
