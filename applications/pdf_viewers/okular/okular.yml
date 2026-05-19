@@ -6,14 +6,14 @@ description: Drives Okular using Parrot
 services:
   window-container:
     image: ribalba/xwindow-server
-    ports:
-      - "6080:6080" # noVNC (open in browser)
-      - "5900:5900" # raw VNC
-    volumes:
-      - .:/save_dir
-      - /tmp/parrot-debug:/debug   # remove when not debugging
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    # volumes:
+    #   - .:/save_dir
+    #   - /tmp/parrot-debug:/debug   # remove when not debugging
     environment:
-      DEBUG: 1
+      # DEBUG: 1
       RESOLUTION: 1440x900
       # PARROT_DEBUG_DIR: /debug
 
