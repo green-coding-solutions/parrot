@@ -1,0 +1,37 @@
+name: Parrot qpdfview
+author: Didi <didi@green-coding.io>
+description: Drives qpdfview using Parrot
+
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    ports:
+      - "6080:6080" # noVNC (open in browser)
+      - "5900:5900" # raw VNC
+    volumes:
+      - .:/save_dir
+      - /tmp/parrot-debug:/debug   # remove when not debugging
+    environment:
+      DEBUG: 1
+      RESOLUTION: 1440x900
+      PARROT_DEBUG_DIR: /debug
+      # WINDOW_X: -1
+      # WINDOW_Y: 0
+      # WINDOW_WIDTH: 1440
+      # WINDOW_HEIGHT: 853
+#      CHECK_SCALE_ON_MISMATCH: 1
+
+    setup-commands:
+      - command: apt update
+      - command: apt-get install -y --no-install-recommends qpdfview=0.5.0+ds-4build4
+      - command: bash /usr/local/bin/entrypoint.sh
+      - command: ln -s /tmp/repo/applications/pdf_viewers/20yearsofKDE.pdf /tmp/pdf.pdf # The path rending in the open dialog changes depending on the files so this makes is more fail safe
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/qpdfview/qpdfview.parrot
+        read-notes-stdout: true

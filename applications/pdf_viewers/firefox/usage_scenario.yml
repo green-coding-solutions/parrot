@@ -1,6 +1,6 @@
-name: Parrot xpdf
+name: Parrot Firefox PDF Viewer
 author: Didi <didi@green-coding.io>
-description: Drives xpdf using Parrot
+description: Drives Firefox using Parrot
 
 
 services:
@@ -10,20 +10,20 @@ services:
     #   - "6080:6080" # noVNC (open in browser)
     #   - "5900:5900" # raw VNC
     # volumes:
-    #   - .:/save_dir
-    #   - /tmp/parrot-debug:/debug   # remove when not debugging
+      # - .:/save_dir
+      # - /tmp/parrot-debug:/debug   # remove when not debugging
     environment:
       # DEBUG: 1
       RESOLUTION: 1440x900
-      WINDOW_X: -1
-      WINDOW_Y: 0
-      WINDOW_WIDTH: 1440
-      WINDOW_HEIGHT: 853
+      # WINDOW_X: -1
+      # WINDOW_Y: 0
+      # WINDOW_WIDTH: 1440
+      # WINDOW_HEIGHT: 853
 #      CHECK_SCALE_ON_MISMATCH: 1
 
     setup-commands:
       - command: apt update
-      - command: apt install xpdf -y
+      - command: bash /tmp/repo/applications/firefox/install.sh
       - command: bash /usr/local/bin/entrypoint.sh
       - command: ln -s /tmp/repo/applications/pdf_viewers/20yearsofKDE.pdf /tmp/pdf.pdf # The path rending in the open dialog changes depending on the files so this makes is more fail safe
 
@@ -32,5 +32,5 @@ flow:
     container: window-container
     commands:
       - type: console
-        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/xpdf/xpdf.parrot
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/firefox/firefox.parrot
         read-notes-stdout: true

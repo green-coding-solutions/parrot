@@ -261,6 +261,71 @@ def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Pat
 
 
 # ---------------------------------------------------------------------------
+# Screen recording
+# ---------------------------------------------------------------------------
+
+def _display_size(display: str) -> tuple[int, int]:
+    """Return (width, height) of the X display, falling back to 1024x768."""
+    env = {**os.environ, "DISPLAY": display}
+    result = subprocess.run(
+        ["xdpyinfo"], env=env, capture_output=True, text=True,
+    )
+    for line in result.stdout.splitlines():
+        m = re.search(r"dimensions:\s+(\d+)x(\d+)", line)
+        if m:
+            return int(m.group(1)), int(m.group(2))
+    return (1024, 768)
+
+
+def start_recording(display: str, output_path: str) -> subprocess.Popen:
+    """Start an ffmpeg x11grab recording; return the process handle."""
+    w, h = _display_size(display)
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "x11grab",
+        "-r", "25",
+        "-s", f"{w}x{h}",
+        "-i", display,
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-crf", "23",
+        output_path,
+    ]
+    print(f"[replay] recording screen to {output_path} ({w}x{h})", file=sys.stderr)
+    return subprocess.Popen(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def stop_recording(proc: subprocess.Popen) -> None:
+    """Send SIGINT to ffmpeg so it flushes and writes a valid file."""
+    if proc.poll() is None:
+        proc.send_signal(__import__("signal").SIGINT)
+        try:
+            proc.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+
+
+def resolve_video_output() -> str | None:
+    """
+    Return the output path for screen recording, or None if disabled.
+
+    Set RECORD_VIDEO to a file path, or to '1' / 'true' to use a default
+    path under /tmp.
+    """
+    val = os.environ.get("RECORD_VIDEO", "")
+    if not val:
+        return None
+    if val.lower() in ("1", "true", "yes"):
+        ts = int(time.time())
+        return f"/tmp/parrot-replay-{ts}.mp4"
+    return val
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -302,12 +367,21 @@ def main() -> int:
     normalize_lock_key(display, "Num Lock",    "Num_Lock",    os.environ.get("REPLAY_INIT_NUMLOCK",    "off"))
     normalize_lock_key(display, "Scroll Lock", "Scroll_Lock", os.environ.get("REPLAY_INIT_SCROLLLOCK", "keep"))
 
-    # 3. Parse the recording and replay each event in-process.
+    # 3. Optionally record the screen to a video file.
+    video_output = resolve_video_output()
+    recorder = start_recording(display, video_output) if video_output else None
+
+    # 4. Parse the recording and replay each event in-process.
     #    iter_replay_lines() sleeps between events to honour the recorded timing.
-    for line in iter_replay_lines(macro_file, speed):
-        action = parse_xmacro_event(line)
-        if action is not None:
-            dispatch(action, display, app_meta, app_dir)
+    try:
+        for line in iter_replay_lines(macro_file, speed):
+            action = parse_xmacro_event(line)
+            if action is not None:
+                dispatch(action, display, app_meta, app_dir)
+    finally:
+        if recorder:
+            stop_recording(recorder)
+            print(f"[replay] video saved to {video_output}", file=sys.stderr)
 
     return 0
 

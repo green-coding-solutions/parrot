@@ -13,13 +13,13 @@ Everything runs inside Docker, so there are no security implications for the hos
 ## Example Applications
 
 | Application | Path |
-|-------------|------|
+| ----------- | ---- |
 | Firefox | `applications/firefox/` |
 | LibreOffice Calc | `applications/calc/` |
 | VLC | `applications/vlc/` |
 | Okular (PDF viewer) | `applications/pdf_viewers/okular/` |
 
-Each application directory contains the recorded `.🦜` macro file and a `usage_scenario.yml` for use with the Green Metrics Tool.
+Each application directory contains the recorded `.parrot` macro file and a `usage_scenario.yml` for use with the Green Metrics Tool.
 
 ## Quick Start
 
@@ -47,8 +47,8 @@ STOP_KEYSYM=F9 CHECK_KEYSYM=F3 ./record-macro.py applications/firefox/firefox.pa
 
 Output files are written to `recordings/<app-name>/`:
 
-```
-recordings/firefox/firefox.🦜
+```text
+recordings/firefox/firefox.parrot
 recordings/firefox/firefox-check-001.png
 ```
 
@@ -67,6 +67,20 @@ REPLAY_SPEED=0.5 ./replay.py applications/firefox/firefox.parrot  # slower
 
 Replay finds the application window by class/title metadata embedded in the macro, focuses it, and plays back every action. Any `Check` line triggers a screenshot comparison against the saved reference image. A failed check exits non-zero.
 
+### Screen Recording
+
+Set `RECORD_VIDEO` to capture the full replay as an MP4 video:
+
+```bash
+# Save to a specific file
+RECORD_VIDEO=/tmp/my-replay.mp4 ./replay.py applications/firefox/firefox.parrot
+
+# Auto-generate a timestamped file under /tmp
+RECORD_VIDEO=1 ./replay.py applications/firefox/firefox.parrot
+```
+
+The video is recorded at 25 fps using `ffmpeg`'s `x11grab` input. The output path is printed to stderr at the start and end of the run. If a `Check` step fails and replay exits early, the video is still finalized and saved.
+
 ## Recording Any X Application
 
 Parrot is not limited to the bundled applications. You can record interactions with any X11 GUI application by supplying the relevant metadata at record time:
@@ -78,11 +92,20 @@ APP_WINDOW_CLASS='xterm' \
 ./record-macro.py <your-parrog-file>
 ```
 
-Metadata is embedded into the `.🦜` macro file and used by replay to locate and focus the correct window.
+Metadata is embedded into the `.parrot` macro file and used by replay to locate and focus the correct window.
+
+## File Extension
+
+Parrot macro files support two extensions — `.parrot` and `.🦜` — and both work identically. This documentation uses `.parrot` throughout because it is easier to type in terminals and scripts. Feel free to use `.🦜` if you prefer the native extension:
+
+```bash
+./record-macro.py applications/firefox/firefox.🦜
+./replay.py applications/firefox/firefox.🦜
+```
 
 ## Macro File Format
 
-Recorded macros (`.🦜` files) contain:
+Recorded macros (`.parrot` files) contain:
 
 - `#APP` metadata lines — window class, title, and optional start command
 - Timed xmacro events — `MotionNotify`, `ButtonPress`, `KeyStrPress`, etc.
@@ -92,7 +115,7 @@ Recorded macros (`.🦜` files) contain:
 
 Example header:
 
-```
+```text
 #APP startcommand='firefox https://browserbench.org/Speedometer3.1/'
 #APP windowtitle=Firefox
 #APP windowclass=firefox
@@ -138,7 +161,7 @@ flow:
     container: window-container
     commands:
       - type: console
-        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/firefox/firefox.🦜
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/firefox/firefox.parrot
 ```
 
 Point the Green Metrics Tool at the repository and it will set up the container, run the replay, and collect energy and performance metrics automatically.
@@ -148,12 +171,61 @@ Point the Green Metrics Tool at the repository and it will set up the container,
 To keep click coordinates and screenshots stable across runs, configure fixed window geometry in the compose environment:
 
 | Variable | Description |
-|----------|-------------|
+| -------- | ----------- |
 | `AUTO_POSITION` | `1` to enable, `0` to disable |
 | `WINDOW_X` / `WINDOW_Y` | Window position |
 | `WINDOW_WIDTH` / `WINDOW_HEIGHT` | Window size |
 | `APP_WINDOW_CLASS` | xdotool window class matcher |
 | `APP_WINDOW_TITLE` | xdotool window title matcher |
+
+## Environment Variables
+
+All variables can be set on the command line or, when running inside the Green Metrics Tool, in the `environment:` section of a service in your `usage_scenario.yml`:
+
+```yaml
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    environment:
+      REPLAY_SPEED: "0.8"
+      CHECK_MAX_RMSE: "0.05"
+      PARROT_DEBUG_DIR: /tmp/parrot-debug
+```
+
+### Replay (`replay.py`)
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `DISPLAY` | `:99` | X display to replay on. |
+| `REPLAY_SPEED` | `1.0` | Playback speed multiplier. `2.0` is twice as fast, `0.5` is half speed. |
+| `RECORD_VIDEO` | _(off)_ | Set to a file path to save an MP4 of the replay, or `1`/`true` to auto-generate a timestamped path under `/tmp`. |
+| `REPLAY_INIT_CAPSLOCK` | `off` | Desired Caps Lock state before replay starts (`on`, `off`, or `keep`). |
+| `REPLAY_INIT_NUMLOCK` | `off` | Desired Num Lock state before replay starts (`on`, `off`, or `keep`). |
+| `REPLAY_INIT_SCROLLLOCK` | `keep` | Desired Scroll Lock state before replay starts (`on`, `off`, or `keep`). |
+
+### Screenshot checks (`check-image.sh`)
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `CHECK_MAX_RMSE` | `0.2` | Maximum allowed normalised RMSE between the captured screenshot and the reference image. Lower values are stricter. |
+| `CHECK_IGNORE_RECT` | _(none)_ | Mask one or more regions before comparing. Format: `x,y,width,height`. Separate multiple rectangles with `;`. Useful for toolbars, clocks, or other dynamic areas. |
+| `CHECK_SCALE_ON_MISMATCH` | `0` | Set to `1` to scale the captured screenshot to the reference size when dimensions differ, instead of failing immediately. |
+| `PARROT_DEBUG_DIR` | _(none)_ | Directory where failure artifacts (actual screenshot, diff overlay, metadata) are copied when a check fails. The directory must already exist. When unset, artifacts are only kept in a temporary directory that is deleted on exit. |
+
+### Window server (`entrypoint.sh`)
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `DISPLAY` | `:99` | X display number used by Xvfb and all X tools. |
+| `SCREEN_SIZE` | `1440x900x24` | Virtual display resolution and colour depth passed to Xvfb. |
+| `DEBUG` | `0` | Set to `1` to enable verbose entrypoint logging. |
+
+### Recording (`record-macro.py`)
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `STOP_KEYSYM` | `Pause` | Key that stops the recording session. Override if your browser or OS intercepts the default. |
+| `CHECK_KEYSYM` | `Scroll_Lock` | Key that inserts a screenshot checkpoint during recording. Must differ from `STOP_KEYSYM`. |
 
 ## Troubleshooting
 
@@ -174,7 +246,7 @@ To keep click coordinates and screenshots stable across runs, configure fixed wi
 
    Then step to the point when the container is started and the setup-commands are exectuted.
 
-3. Connect to the VPN through http://localhost:6080/vnc.html
+3. Connect to the VPN through [http://localhost:6080/vnc.html](http://localhost:6080/vnc.html)
 
    You should see a blank screen with no application loaded
 

@@ -1,6 +1,6 @@
-name: Parrot Okular
+name: Parrot atril
 author: Didi <didi@green-coding.io>
-description: Drives Okular using Parrot
+description: Drives atril using Parrot
 
 
 services:
@@ -14,13 +14,12 @@ services:
     #   - /tmp/parrot-debug:/debug   # remove when not debugging
     environment:
       # DEBUG: 1
-      RESOLUTION: 1440x900
       # PARROT_DEBUG_DIR: /debug
-
+      RESOLUTION: 1440x900
 
     setup-commands:
       - command: apt update
-      - command: apt-get install -y --no-install-recommends okular=4:23.08.5-0ubuntu5
+      - command: apt-get install -y --no-install-recommends atril=1.26.2-3build2
       - command: bash /usr/local/bin/entrypoint.sh
       - command: ln -s /tmp/repo/applications/pdf_viewers/20yearsofKDE.pdf /tmp/pdf.pdf # The path rending in the open dialog changes depending on the files so this makes is more fail safe
 
@@ -29,5 +28,5 @@ flow:
     container: window-container
     commands:
       - type: console
-        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/okular/okular.parrot
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/pdf_viewers/atril/atril.parrot
         read-notes-stdout: true
