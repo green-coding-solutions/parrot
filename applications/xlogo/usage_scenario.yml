@@ -1,0 +1,31 @@
+name: Parrot xlogo
+author: Didi <didi@green-coding.io>
+description: Benchmarks xlogo using Parrot
+
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    # volumes:
+    #   - .:/save_dir
+    #   - /tmp/parrot-debug:/debug   # remove when not debugging
+    environment:
+      # DEBUG: 1
+      # PARROT_DEBUG_DIR: /debug
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: apt update
+      - command: apt-get install -y --no-install-recommends x11-apps=7.7+11build3
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/xlogo/xlogo.parrot
+        read-notes-stdout: true
