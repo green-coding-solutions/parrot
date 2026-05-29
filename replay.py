@@ -25,13 +25,41 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Replay a .🦜 xmacro recording inside the current container"
     )
-    parser.add_argument("macro_file", help="Path to the .🦜 recording file")
+    parser.add_argument(
+        "macro_file",
+        help="Path to a .🦜 recording file, or a directory of numbered block "
+             "recordings when --run-to is given",
+    )
     parser.add_argument(
         "--display",
         default=os.environ.get("DISPLAY", ":99"),
         help="X display to use (default: $DISPLAY or :99)",
     )
+    parser.add_argument(
+        "--run-to",
+        type=int,
+        default=None,
+        help="Treat macro_file as a directory and replay every numbered block "
+             "file up to and including this number, ordered by the leading "
+             "number in the filename",
+    )
     return parser.parse_args()
+
+
+def collect_block_files(directory: Path, run_to: int) -> list[Path]:
+    """Return numbered block recordings in *directory* with leading number <= run_to."""
+    blocks: list[tuple[int, Path]] = []
+    for child in directory.iterdir():
+        if not child.is_file():
+            continue
+        m = re.match(r"^(\d+)", child.name)
+        if not m:
+            continue
+        num = int(m.group(1))
+        if num <= run_to:
+            blocks.append((num, child))
+    blocks.sort(key=lambda item: item[0])
+    return [path for _, path in blocks]
 
 
 def parse_speed() -> float:
@@ -63,17 +91,24 @@ def _png_dimensions(path: Path) -> tuple[int, int] | None:
     return (width, height) if width > 0 and height > 0 else None
 
 
-def infer_window_size(macro_file: Path) -> tuple[int, int] | None:
+def infer_window_size(macro_file: Path, app_dir: Path | None = None) -> tuple[int, int] | None:
     """
     Scan the recording for the first Check line and return that image's size.
     Check refs are relative to the application directory, e.g.:
         Check firefox/firefox-check-001.png
-    so we try both macro_file.parent.parent and macro_file.parent as roots.
+    so we try app_dir (when given) plus macro_file.parent.parent and macro_file.parent.
     """
     try:
         lines = macro_file.read_text(encoding="utf-8").splitlines()
     except OSError:
         return None
+
+    roots: list[Path] = []
+    if app_dir is not None:
+        roots.append(app_dir.parent)
+        roots.append(app_dir)
+    roots.append(macro_file.parent.parent)
+    roots.append(macro_file.parent)
 
     for raw in lines:
         line = raw.strip()
@@ -82,7 +117,7 @@ def infer_window_size(macro_file: Path) -> tuple[int, int] | None:
         ref = line[len("check "):].strip()
 
         ref_path = Path(ref)
-        for root in (macro_file.parent.parent, macro_file.parent):
+        for root in roots:
             size = _png_dimensions(root / ref_path)
             if size:
                 return size
@@ -332,23 +367,51 @@ def resolve_video_output() -> str | None:
 def main() -> int:
     args = parse_args()
 
-    macro_file = Path(args.macro_file).resolve()
-    if not macro_file.is_file():
-        print(f"Macro file not found: {macro_file}", file=sys.stderr)
-        return 1
-
+    target = Path(args.macro_file).resolve()
     display = args.display
     if not display:
         print("--display must not be empty", file=sys.stderr)
         return 1
 
-    speed    = parse_speed()
-    app_meta = load_app_metadata(macro_file)
-    app_dir  = macro_file.parent   # e.g. applications/firefox/
+    speed = parse_speed()
 
-    window_size = infer_window_size(macro_file)
+    if args.run_to is not None:
+        if not target.is_dir():
+            print(f"--run-to requires a directory: {target}", file=sys.stderr)
+            return 1
+        macro_files = collect_block_files(target, args.run_to)
+        if not macro_files:
+            print(
+                f"No numbered block files found in {target} (run-to {args.run_to})",
+                file=sys.stderr,
+            )
+            return 1
+        # The first block carries the app metadata; later blocks reuse it.
+        app_meta = load_app_metadata(macro_files[0])
+        # Treat the parent of the blocks directory as the app dir so that
+        # check refs like 'atril/atril-check-005.png' resolve the same way
+        # they do for a top-level recording in the app dir.
+        app_dir = target.parent
+        window_size = None
+        for block in macro_files:
+            window_size = infer_window_size(block, app_dir)
+            if window_size:
+                break
+    else:
+        if not target.is_file():
+            print(f"Macro file not found: {target}", file=sys.stderr)
+            return 1
+        macro_files = [target]
+        app_meta = load_app_metadata(target)
+        app_dir = target.parent   # e.g. applications/firefox/
+        window_size = infer_window_size(target)
 
-    print(f"Replaying : {macro_file}", file=sys.stderr)
+    if len(macro_files) == 1:
+        print(f"Replaying : {macro_files[0]}", file=sys.stderr)
+    else:
+        print(f"Replaying : {len(macro_files)} blocks from {target}", file=sys.stderr)
+        for block in macro_files:
+            print(f"            {block.name}", file=sys.stderr)
     print(f"Display   : {display}  speed={speed}", file=sys.stderr)
     print(
         f"App class : {app_meta.get('windowclass', '')}  title: {app_meta.get('windowtitle', '')}",
@@ -371,13 +434,14 @@ def main() -> int:
     video_output = resolve_video_output()
     recorder = start_recording(display, video_output) if video_output else None
 
-    # 4. Parse the recording and replay each event in-process.
+    # 4. Parse each recording and replay its events in-process.
     #    iter_replay_lines() sleeps between events to honour the recorded timing.
     try:
-        for line in iter_replay_lines(macro_file, speed):
-            action = parse_xmacro_event(line)
-            if action is not None:
-                dispatch(action, display, app_meta, app_dir)
+        for macro_file in macro_files:
+            for line in iter_replay_lines(macro_file, speed):
+                action = parse_xmacro_event(line)
+                if action is not None:
+                    dispatch(action, display, app_meta, app_dir)
     finally:
         if recorder:
             stop_recording(recorder)

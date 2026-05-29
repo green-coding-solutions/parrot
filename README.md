@@ -166,6 +166,28 @@ flow:
 
 Point the Green Metrics Tool at the repository and it will set up the container, run the replay, and collect energy and performance metrics automatically.
 
+## Comparing Recordings Across Applications (`tools/check_blocks.py`)
+
+When the same script is recorded against several applications (e.g. multiple PDF viewers running the same checklist), each `.parrot` file should contain the same ordered set of *blocks*. A block is the sequence of actions ending in a `log <message>` line followed by a `check <ref>.png` line — the log message is the block's identity.
+
+`tools/check_blocks.py` cross-checks those files, prints a per-block wait-time table, and can split or time-normalize them.
+
+```bash
+# Verify structure and print the wait-time table
+./tools/check_blocks.py applications/pdf_viewers/
+
+# Write each block as its own self-contained .parrot under <app>/blocks/
+./tools/check_blocks.py applications/pdf_viewers/ --split
+
+# Write <name>-normalized.parrot next to each file, padding every block to
+# the longest duration that block has across all files
+./tools/check_blocks.py applications/pdf_viewers/ --normalize-time
+```
+
+The script recursively finds every `*.parrot` under the given folder, ignoring `-normalized.parrot` outputs and anything inside a `blocks/` directory. If the files disagree on block names or order, mismatches are listed on stderr and the script exits non-zero.
+
+Time normalization inserts a single extra `wait <padding>` line immediately before each block's `log` line, so the action timing within a block is preserved while the total runtime of each block matches across files — useful for fair side-by-side benchmarking.
+
 ## Deterministic Window Layout
 
 To keep click coordinates and screenshots stable across runs, configure fixed window geometry in the compose environment:

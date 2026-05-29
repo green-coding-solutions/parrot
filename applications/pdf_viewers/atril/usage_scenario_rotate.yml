@@ -1,0 +1,32 @@
+name: Parrot atril
+author: Didi <didi@green-coding.io>
+description: Drives atril using Parrot
+
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    # volumes:
+    #   - .:/save_dir
+    #   - /tmp/parrot-debug:/debug   # remove when not debugging
+    environment:
+      # DEBUG: 1
+      # PARROT_DEBUG_DIR: /debug
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: apt update
+      - command: apt-get install -y --no-install-recommends atril=1.26.2-3build2
+      - command: bash /usr/local/bin/entrypoint.sh
+      - command: ln -s /tmp/repo/applications/pdf_viewers/20yearsofKDE.pdf /tmp/pdf.pdf # The path rending in the open dialog changes depending on the files so this makes is more fail safe
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py --run-to 5 /tmp/repo/applications/pdf_viewers/atril/blocks/
+        read-notes-stdout: true

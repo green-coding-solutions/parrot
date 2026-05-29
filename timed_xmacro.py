@@ -335,31 +335,70 @@ def iter_replay_lines(input_path: Path, speed: float):
     Yield event lines from a .🦜 recording, sleeping between them.
 
     'wait X.X' lines set the delay before the next event; they are not yielded.
-    Comment, blank, and metadata lines are all skipped.
+    'label NAME' marks a jump target. 'loop NAME N' jumps back to the named
+    label so the body between them runs N times in total. Comment, blank, and
+    metadata lines are all skipped.
     """
-    pending_wait = 0.0
+    lines: list[str] = []
     with input_path.open("r", encoding="utf-8") as f:
         for raw in f:
             line = raw.strip()
             if not line or line.startswith("#"):
                 continue
-            parts = line.split(None, 1)
-            verb  = parts[0].lower()
+            lines.append(line)
 
-            if verb == "wait":
-                try:
-                    pending_wait = float(parts[1]) if len(parts) > 1 else 0.0
-                except ValueError:
-                    pending_wait = 0.0
+    labels: dict[str, int] = {}
+    for idx, line in enumerate(lines):
+        parts = line.split(None, 1)
+        if parts[0].lower() == "label" and len(parts) > 1:
+            labels[parts[1].strip()] = idx
+
+    loop_remaining: dict[int, int] = {}
+    pending_wait = 0.0
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        parts = line.split(None, 1)
+        verb = parts[0].lower()
+
+        if verb == "wait":
+            try:
+                pending_wait = float(parts[1]) if len(parts) > 1 else 0.0
+            except ValueError:
+                pending_wait = 0.0
+            i += 1
+            continue
+
+        if verb == "label":
+            i += 1
+            continue
+
+        if verb == "loop":
+            loop_args = parts[1].split() if len(parts) > 1 else []
+            target = loop_args[0] if loop_args else None
+            try:
+                total = int(loop_args[1]) if len(loop_args) > 1 else 0
+            except ValueError:
+                total = 0
+            if i not in loop_remaining:
+                loop_remaining[i] = max(total - 1, 0)
+            if loop_remaining[i] > 0 and target in labels:
+                loop_remaining[i] -= 1
+                pending_wait = 0.0
+                i = labels[target] + 1
                 continue
+            i += 1
+            continue
 
-            if verb not in EVENT_VERBS:
-                continue  # metadata line
+        if verb not in EVENT_VERBS:
+            i += 1
+            continue
 
-            if pending_wait > 0:
-                time.sleep(pending_wait / speed)
-            pending_wait = 0.0
-            yield line
+        if pending_wait > 0:
+            time.sleep(pending_wait / speed)
+        pending_wait = 0.0
+        yield line
+        i += 1
 
 
 def parse_xmacro_event(line: str) -> tuple | None:

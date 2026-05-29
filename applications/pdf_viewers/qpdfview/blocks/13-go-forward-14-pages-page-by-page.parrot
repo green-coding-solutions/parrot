@@ -1,0 +1,91 @@
+# Parrot recording v2
+
+startcommand = qpdfview
+windowtitle = Qpdfview
+windowclass = qpdfview
+
+wait 3.123354
+mousemove 1081 618
+wait 0.000022
+keydown Next
+wait 0.120892
+keyup Next
+wait 0.303780
+keydown Next
+wait 0.097505
+keyup Next
+wait 0.159005
+keydown Next
+wait 0.105062
+keyup Next
+wait 0.207435
+keydown Next
+wait 0.071365
+keyup Next
+wait 0.270987
+keydown Next
+wait 0.096201
+keyup Next
+wait 0.272424
+keydown Next
+wait 0.087114
+keyup Next
+wait 0.327539
+keydown Next
+wait 0.072573
+keyup Next
+wait 0.265308
+keydown Next
+wait 0.087558
+keyup Next
+wait 0.223251
+keydown Next
+wait 0.071920
+keyup Next
+wait 0.240314
+keydown Next
+wait 0.083143
+keyup Next
+wait 0.197004
+keydown Next
+wait 0.081600
+keyup Next
+wait 0.245737
+keydown Next
+wait 0.080295
+keyup Next
+wait 0.234849
+keydown Next
+wait 0.076976
+keyup Next
+wait 0.240612
+keydown Next
+wait 0.073560
+keyup Next
+wait 0.246830
+keydown Next
+wait 0.070740
+keyup Next
+wait 0.240691
+keydown Next
+wait 0.074253
+keyup Next
+wait 0.231087
+keydown Next
+wait 0.069782
+keyup Next
+wait 0.232818
+keydown Next
+wait 0.080557
+keyup Next
+wait 0.249884
+keydown Next
+wait 0.076979
+keyup Next
+wait 0.251121
+keydown Next
+wait 0.076808
+keyup Next
+wait 1.759783
+log * Go forward 14 pages, page by page
+check qpdfview/qpdfview-check-013.png
