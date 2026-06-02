@@ -278,4 +278,16 @@ services:
    ./record-macro.py --script applications/pdf_viewers/script.md --startcommand okular --windowtitle Okular --windowclass okular  applications/pdf_viewers/okular/okular.parrot
    ```
 
+
+## Credit / Funding
+
+This work is funded by the Deutsche Bundesstiftung Umwelt (DBU) under the number [DBU Project 39703/01](https://www.dbu.de/projektdatenbank/39703-01/)
+
+Project details are to be found on the [project page](https://greencoding.f2.htw-berlin.de/projekte/caso-entwicklung-von-technologien-zur-co2-und-energieeinsparung-bei-der-softwareentwicklung/)
+
+![DBU Logo](https://www.dbu.de/app/uploads/jpg-DBU-Logosponsored-by-RGB.jpg)
+
+We are super grateful for this funding and are blessed to have been granted the opportunity to create this data repository for the greater
+software community!
+
    make sure to adapt the commands. Now the application should be loaded in the VNC and have the focus. Now everytime you select Scroll Lock the script should advance.
