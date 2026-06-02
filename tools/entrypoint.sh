@@ -13,6 +13,22 @@ export LANG="${LANG:-C.UTF-8}"
 mkdir -p "$XDG_RUNTIME_DIR"
 chmod 700 "$XDG_RUNTIME_DIR"
 
+# When USE_HOST_DISPLAY=1 the container draws into the host's already-running
+# X server instead of a virtual framebuffer. Mount the host's X socket
+# (/tmp/.X11-unix:/tmp/.X11-unix), pass DISPLAY from the host (e.g. :0), and
+# grant access on the host with `xhost +local:`. We must NOT start our own
+# Xvfb, window manager, or VNC here — the host already owns all three.
+if [[ "${USE_HOST_DISPLAY:-0}" == "1" ]]; then
+  echo "[entrypoint] using host X server on ${DISPLAY}"
+  if ! xset -display "$DISPLAY" q >/dev/null 2>&1; then
+    echo "[entrypoint] cannot reach host display ${DISPLAY}" >&2
+    echo "[entrypoint] mount /tmp/.X11-unix into the container and run 'xhost +local:' on the host" >&2
+    exit 1
+  fi
+  echo "[entrypoint] host display ${DISPLAY} reachable; skipping Xvfb/WM/VNC"
+  exit 0
+fi
+
 display_num="${DISPLAY#:}"
 display_num="${display_num%%.*}"
 if [[ "$display_num" =~ ^[0-9]+$ ]]; then

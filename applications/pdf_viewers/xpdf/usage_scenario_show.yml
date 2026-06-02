@@ -9,11 +9,13 @@ services:
     # ports:
     #   - "6080:6080" # noVNC (open in browser)
     #   - "5900:5900" # raw VNC
-    # volumes:
+    volumes:
     #   - .:/save_dir
     #   - /tmp/parrot-debug:/debug   # remove when not debugging
+      - /tmp/.X11-unix:/tmp/.X11-unix   # share the host's X server (USE_HOST_DISPLAY)
     environment:
       # DEBUG: 1
+      USE_HOST_DISPLAY: 1
       RESOLUTION: 1440x900
       WINDOW_X: -1
       WINDOW_Y: 0
