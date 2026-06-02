@@ -277,6 +277,7 @@ services:
    ```bash
    ./record-macro.py --script applications/pdf_viewers/script.md --startcommand okular --windowtitle Okular --windowclass okular  applications/pdf_viewers/okular/okular.parrot
    ```
+   make sure to adapt the commands. Now the application should be loaded in the VNC and have the focus. Now everytime you select Scroll Lock the script should advance.
 
 
 ## Credit / Funding
@@ -289,5 +290,3 @@ Project details are to be found on the [project page](https://greencoding.f2.htw
 
 We are super grateful for this funding and are blessed to have been granted the opportunity to create this data repository for the greater
 software community!
-
-   make sure to adapt the commands. Now the application should be loaded in the VNC and have the focus. Now everytime you select Scroll Lock the script should advance.
