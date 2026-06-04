@@ -12,6 +12,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     gnupg=2.4.4-2ubuntu17.4 \
     imagemagick=8:6.9.12.98+dfsg1-5.2build2 \
     novnc=1:1.3.0-2 \
+    python3-xlib=0.33-2 \
     wget=1.21.4-1ubuntu4.1 \
     websockify=0.10.0+dfsg1-5build2 \
     x11vnc=0.9.16-10 \

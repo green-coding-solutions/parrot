@@ -7,7 +7,7 @@ IMAGE ?= ribalba/xwindow-server
 PLATFORM ?= linux/amd64
 
 # Both platforms for the multi-arch manifest pushed to the registry.
-PLATFORMS ?= linux/amd64,linux/arm64
+PLATFORMS ?= linux/amd64
 
 # Build one arch and load it into local Docker so you can run it.
 build:
@@ -18,9 +18,3 @@ build:
 # straight to the registry via --push.
 push:
 	docker buildx build --platform $(PLATFORMS) -t $(IMAGE) --push .
-
-# Build both arches locally under per-arch tags (no registry needed).
-# Each --load is a single platform, so they get distinct tags.
-build-all:
-	docker buildx build --platform linux/amd64 --load -t $(IMAGE):amd64 .
-	docker buildx build --platform linux/arm64 --load -t $(IMAGE):arm64 .

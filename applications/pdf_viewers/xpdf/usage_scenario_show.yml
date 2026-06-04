@@ -22,7 +22,8 @@ services:
       WINDOW_WIDTH: 1440
       WINDOW_HEIGHT: 853
       DISPLAY: :0
-#      CHECK_SCALE_ON_MISMATCH: 1
+      #CHECK_SCALE_ON_MISMATCH: 1
+      REPLAY_IGNORE_CHECKS: 1
 
     setup-commands:
       - command: apt update

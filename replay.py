@@ -43,7 +43,19 @@ def parse_args() -> argparse.Namespace:
              "file up to and including this number, ordered by the leading "
              "number in the filename",
     )
+    parser.add_argument(
+        "--no-checks",
+        action="store_true",
+        default=_env_flag("REPLAY_IGNORE_CHECKS"),
+        help="Skip Check (screenshot comparison) steps instead of asserting on "
+             "them. Equivalent to setting REPLAY_IGNORE_CHECKS=1.",
+    )
     return parser.parse_args()
+
+
+def _env_flag(name: str) -> bool:
+    """Return True if environment variable *name* is set to a truthy value."""
+    return os.environ.get(name, "").strip().lower() in ("1", "true", "yes")
 
 
 def collect_block_files(directory: Path, run_to: int) -> list[Path]:
@@ -265,7 +277,8 @@ def resolve_check_ref(ref: str, app_dir: Path) -> str:
     return ref  # let check-image.sh produce a clear error message
 
 
-def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Path) -> None:
+def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Path,
+             ignore_checks: bool = False) -> None:
     """Execute a single parsed replay action."""
     env  = {**os.environ, "DISPLAY": display}
     op   = action[0]
@@ -281,6 +294,9 @@ def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Pat
     elif op == "keyup":
         subprocess.run(["xdotool", "keyup",     action[1]], env=env, check=False)
     elif op == "check":
+        if ignore_checks:
+            print(f"[replay] skipping check: {action[1]}", file=sys.stderr)
+            return
         ref = resolve_check_ref(action[1], app_dir)
         check_env = {
             **env,
@@ -413,6 +429,8 @@ def main() -> int:
         for block in macro_files:
             print(f"            {block.name}", file=sys.stderr)
     print(f"Display   : {display}  speed={speed}", file=sys.stderr)
+    if args.no_checks:
+        print("Checks    : ignored (--no-checks)", file=sys.stderr)
     print(
         f"App class : {app_meta.get('windowclass', '')}  title: {app_meta.get('windowtitle', '')}",
         file=sys.stderr,
@@ -441,7 +459,7 @@ def main() -> int:
             for line in iter_replay_lines(macro_file, speed):
                 action = parse_xmacro_event(line)
                 if action is not None:
-                    dispatch(action, display, app_meta, app_dir)
+                    dispatch(action, display, app_meta, app_dir, args.no_checks)
     finally:
         if recorder:
             stop_recording(recorder)

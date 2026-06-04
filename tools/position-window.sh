@@ -89,31 +89,35 @@ xrandr --fb "$_fb" 2>/dev/null || true
 
 # Resize, then read the geometry back and retry. xdotool's windowsize sends a
 # ConfigureRequest the WM (or the app, via size hints) is free to ignore or
-# round, so the request "succeeding" tells us nothing — we must verify. Toolkit
-# apps like xpdf (Motif/Xt) advertise resize increments, so the second pass
-# uses --usehints, which sizes in those increments and often lands exactly when
-# a raw pixel request gets snapped to a different value.
+# round, so the request "succeeding" tells us nothing — we must verify.
+#
+# A plain windowsize does not hold for toolkit apps: xpdf (Motif/Xt) re-asserts
+# a preferred geometry through WM_NORMAL_HINTS after launch and on document
+# load, drifting the window to a size we never asked for. freeze-window-size.py
+# pins min == max == target so the WM clamps those later requests back to our
+# size, making the resize stick for the whole replay.
+FREEZE_SIZE_SCRIPT="${FREEZE_SIZE_SCRIPT:-/usr/local/bin/freeze-window-size.py}"
 target="${WINDOW_WIDTH}x${WINDOW_HEIGHT}"
 actual=""
 for attempt in 1 2 3 4; do
-  if (( attempt == 1 )); then
-    xdotool windowsize "$window_id" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" || true
-  else
-    xdotool windowsize --usehints "$window_id" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" || true
+  xdotool windowsize "$window_id" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" || true
+  if [[ -f "$FREEZE_SIZE_SCRIPT" ]]; then
+    python3 "$FREEZE_SIZE_SCRIPT" "$window_id" "$WINDOW_WIDTH" "$WINDOW_HEIGHT" \
+      || echo "[position-window] WARNING: could not freeze size hints (is python3-xlib installed?)" >&2
   fi
   xdotool windowmove "$window_id" "$WINDOW_X" "$WINDOW_Y" || true
   # Give the WM a moment to apply the request before reading it back.
   sleep 0.5
   actual="$(window_size "$window_id" || true)"
   if [[ "$actual" == "$target" ]]; then
-    echo "[position-window] window ${window_id} is ${actual}"
+    echo "[position-window] window ${window_id} is ${actual} (size pinned)"
     exit 0
   fi
   echo "[position-window] attempt ${attempt}: window is ${actual:-unknown}, wanted ${target} — retrying"
 done
 
 echo "[position-window] WARNING: could not size window ${window_id} to ${target}; it is ${actual:-unknown}." >&2
-echo "[position-window] WARNING: the window manager or the app likely overrode the request (e.g. resize increments or a maximised/constrained frame)." >&2
+echo "[position-window] WARNING: the window manager or the app overrode the request despite pinned size hints (resize increments, a maximised/constrained frame, or the app rewriting its own hints)." >&2
 echo "[position-window] WARNING: check-image will fail on a size mismatch unless the reference was captured at ${actual:-this size}, or CHECK_SCALE_ON_MISMATCH=1 is set." >&2
 # Don't fail the run here: replay.py treats positioning as best-effort
 # (check=False), and a loud warning plus the later size-mismatch error is more

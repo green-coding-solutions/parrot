@@ -67,6 +67,13 @@ REPLAY_SPEED=0.5 ./replay.py applications/firefox/firefox.parrot  # slower
 
 Replay finds the application window by class/title metadata embedded in the macro, focuses it, and plays back every action. Any `Check` line triggers a screenshot comparison against the saved reference image. A failed check exits non-zero.
 
+Skip the screenshot comparisons entirely with `--no-checks` (or `REPLAY_IGNORE_CHECKS=1`). `Check` lines are then logged and skipped instead of asserted, so replay never fails on a mismatched display. This is useful for benchmarking on hardware where the reference screenshots were not captured:
+
+```bash
+./replay.py --no-checks applications/firefox/firefox.parrot
+REPLAY_IGNORE_CHECKS=1 ./replay.py applications/firefox/firefox.parrot
+```
+
 ### Screen Recording
 
 Set `RECORD_VIDEO` to capture the full replay as an MP4 video:
@@ -224,6 +231,7 @@ services:
 | `REPLAY_INIT_CAPSLOCK` | `off` | Desired Caps Lock state before replay starts (`on`, `off`, or `keep`). |
 | `REPLAY_INIT_NUMLOCK` | `off` | Desired Num Lock state before replay starts (`on`, `off`, or `keep`). |
 | `REPLAY_INIT_SCROLLLOCK` | `keep` | Desired Scroll Lock state before replay starts (`on`, `off`, or `keep`). |
+| `REPLAY_IGNORE_CHECKS` | _(off)_ | Set to `1`/`true` to skip all `Check` screenshot comparisons (same as the `--no-checks` flag). Checks are logged and skipped instead of asserted. |
 
 ### Screenshot checks (`check-image.sh`)
 
