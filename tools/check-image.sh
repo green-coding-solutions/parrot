@@ -21,8 +21,10 @@ export DISPLAY="${DISPLAY:-:99}"
 CHECK_MAX_RMSE="${CHECK_MAX_RMSE:-0.2}"
 CHECK_IGNORE_RECT="${CHECK_IGNORE_RECT:-}"
 CHECK_SCALE_ON_MISMATCH="${CHECK_SCALE_ON_MISMATCH:-0}"
-APP_WINDOW_CLASS="${APP_WINDOW_CLASS:-gnome-calculator}"
-APP_WINDOW_TITLE="${APP_WINDOW_TITLE:-Calculator}"
+# See position-window.sh: "-" not ":-", so a recording that deliberately stores an
+# empty windowclass keeps it and matches on title alone.
+APP_WINDOW_CLASS="${APP_WINDOW_CLASS-gnome-calculator}"
+APP_WINDOW_TITLE="${APP_WINDOW_TITLE-Calculator}"
 
 window_area() {
   local window_id="$1"

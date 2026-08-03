@@ -1,0 +1,761 @@
+# Parrot recording v2
+
+startcommand = claws-mail
+windowtitle = Claws Mail
+windowclass = claws-mail
+
+wait 39.538177
+mousemove 700 878
+wait 0.006198
+log * Load app: wait for the main window to finish drawing, with the folder list and the empty message pane visible
+check clawsmail/clawsmail-check-001.png
+wait 3.117409
+mousemove 85 234
+wait 0.000025
+mousedown 3
+wait 0.000007
+mouseup 3
+wait 4.216468
+mousemove 200 476
+wait 0.000022
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 49.095027
+mousemove 80 251
+wait 0.000018
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 10.213911
+mousemove 80 251
+wait 0.000022
+mousedown 1
+wait 0.000041
+mouseup 1
+wait 76.216922
+mousemove 450 132
+wait 0.000020
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 4.149824
+keydown Home
+wait 0.006555
+keyup Home
+wait 10.160617
+mousemove 700 878
+wait 0.006143
+log * Sync account: let the inbox finish downloading until the message count stops rising, entering the password `parrot` and ticking "remember" only if the client asks
+check clawsmail/clawsmail-check-002.png
+wait 2.063489
+keydown Home
+wait 0.006159
+keyup Home
+wait 5.127083
+mousemove 450 132
+wait 0.000021
+mousedown 1
+wait 0.000015
+mouseup 1
+wait 9.264091
+mousemove 700 878
+wait 0.006317
+log * Read newest: open message 1, `Re: Release checklist for Aurora 4.2` from Nadia Oyelaran, and wait for the body to render
+check clawsmail/clawsmail-check-003.png
+wait 2.056204
+keydown Control_L
+wait 0.006255
+keydown End
+wait 0.006134
+keyup Control_L
+wait 0.006106
+keyup End
+wait 9.177242
+mousemove 700 878
+wait 0.006398
+log * Scroll to bottom: scroll the message list down to the very last message without opening anything
+check clawsmail/clawsmail-check-004.png
+wait 2.059951
+keydown Home
+wait 0.006226
+keyup Home
+wait 5.110852
+mousemove 450 149
+wait 0.000024
+mousedown 1
+wait 0.000007
+mouseup 1
+wait 9.263726
+mousemove 700 878
+wait 0.006300
+log * Read second: scroll back to the top and open message 2, `Staging cluster credentials rotated` from Dmitri Sokolov
+check clawsmail/clawsmail-check-005.png
+wait 3.115131
+mousemove 450 234
+wait 0.000016
+mousedown 1
+wait 0.000009
+mouseup 1
+wait 12.202562
+mousemove 1422 792
+wait 0.000033
+mousedown 1
+wait 0.000007
+mouseup 1
+wait 0.150629
+mousedown 1
+wait 0.000027
+mouseup 1
+wait 7.384853
+mousemove 330 209
+wait 0.000024
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 9.272129
+mousemove 700 878
+wait 0.006360
+log * Open PDF attachment: open message 7, `Quarterly infrastructure review - final PDF`, and open `infrastructure-review-2026-Q2.pdf` from the attachment bar, then go back to the mailbox. Clients that bundle a viewer show it in a tab; the rest hand the file to the desktop, which has no PDF handler, so nothing opens - both are the same user action and both are in scope
+check clawsmail/clawsmail-check-006.png
+wait 3.137557
+mousemove 900 660
+wait 0.000020
+mousedown 1
+wait 0.000011
+mouseup 1
+wait 2.159360
+keydown Shift_L
+wait 0.000026
+keydown w
+wait 0.017802
+keyup Shift_L
+wait 0.000025
+keyup w
+wait 0.018142
+keydown i
+wait 0.018187
+keyup i
+wait 0.018072
+keydown n
+wait 0.018156
+keyup n
+wait 0.018178
+keydown d
+wait 0.017971
+keyup d
+wait 0.017995
+keydown v
+wait 0.017990
+keyup v
+wait 0.017972
+keydown a
+wait 0.018074
+keyup a
+wait 0.017531
+keydown n
+wait 0.018198
+keyup n
+wait 0.018021
+keydown e
+wait 0.017610
+keyup e
+wait 2.068603
+keydown Return
+wait 0.006235
+keyup Return
+wait 29.185215
+mousemove 700 878
+wait 0.006363
+log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
+check clawsmail/clawsmail-check-007.png
+wait 3.114876
+mousemove 450 132
+wait 0.000023
+mousedown 1
+wait 0.000077
+mouseup 1
+wait 9.273159
+mousemove 700 878
+wait 0.006196
+log * Open result: open the first search result and wait for the body to render
+check clawsmail/clawsmail-check-008.png
+wait 3.118536
+mousemove 1405 660
+wait 0.000021
+mousedown 1
+wait 0.000015
+mouseup 1
+wait 11.224527
+mousemove 450 132
+wait 0.000021
+mousedown 1
+wait 0.000015
+mouseup 1
+wait 3.158594
+keydown Home
+wait 0.006061
+keyup Home
+wait 9.174113
+mousemove 700 878
+wait 0.006124
+log * Clear search: leave the search results and return to the inbox message list
+check clawsmail/clawsmail-check-009.png
+wait 3.122090
+mousemove 450 149
+wait 0.000018
+mousedown 1
+wait 0.000016
+mouseup 1
+wait 4.158764
+keydown Control_L
+wait 0.006368
+keydown o
+wait 0.006900
+keyup Control_L
+wait 0.005879
+keyup o
+wait 5.268464
+mousemove 655 556
+wait 0.000020
+mousedown 1
+wait 0.000007
+mouseup 1
+wait 3.330936
+mousemove 824 631
+wait 0.000019
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 13.262570
+mousemove 700 878
+wait 0.006302
+log * Move to Archive: select message 2 and move it into the archive folder
+check clawsmail/clawsmail-check-010.png
+wait 3.131601
+mousemove 450 183
+wait 0.000019
+mousedown 1
+wait 0.000079
+mouseup 1
+wait 4.154329
+keydown Control_L
+wait 0.006224
+keydown d
+wait 0.006277
+keyup Control_L
+wait 0.005987
+keyup d
+wait 13.182391
+mousemove 700 878
+wait 0.006118
+log * Delete message: select message 4 as the list now stands and delete it, so it lands in the trash
+check clawsmail/clawsmail-check-011.png
+wait 3.128950
+mousemove 450 200
+wait 0.000019
+mousedown 1
+wait 0.000117
+mouseup 1
+wait 4.157909
+keydown Shift_L
+wait 0.000025
+keydown 8
+wait 0.006004
+keyup Shift_L
+wait 0.000014
+keyup 8
+wait 9.191960
+mousemove 700 878
+wait 0.006373
+log * Flag message: select message 5 as the list now stands and flag or star it
+check clawsmail/clawsmail-check-012.png
+wait 3.114032
+mousemove 450 132
+wait 0.000020
+mousedown 1
+wait 0.000004
+mouseup 1
+wait 2.152957
+keydown Shift_L
+wait 1.118925
+mousemove 450 200
+wait 0.000019
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 0.151405
+keyup Shift_L
+wait 4.068323
+keydown Shift_L
+wait 0.000025
+keydown 1
+wait 0.006267
+keyup Shift_L
+wait 0.000024
+keyup 1
+wait 9.176196
+mousemove 700 878
+wait 0.006156
+log * Mark five unread: select the top five messages and mark them as unread
+check clawsmail/clawsmail-check-013.png
+wait 4.115952
+mousemove 95 370
+wait 0.000022
+mousedown 1
+wait 0.000007
+mouseup 1
+wait 46.206217
+mousemove 450 132
+wait 0.000021
+mousedown 1
+wait 0.000004
+mouseup 1
+wait 4.154726
+keydown Home
+wait 0.006131
+keyup Home
+wait 5.120506
+mousemove 450 132
+wait 0.000025
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 13.273366
+mousemove 700 878
+wait 0.006035
+log * Open Archive 2024: open the 2024 folder under the archive and read the newest message in it
+check clawsmail/clawsmail-check-014.png
+wait 4.115576
+mousemove 80 251
+wait 0.000016
+mousedown 1
+wait 0.000010
+mouseup 1
+wait 16.214158
+mousemove 450 132
+wait 0.000024
+mousedown 1
+wait 0.000008
+mouseup 1
+wait 4.153344
+keydown Home
+wait 0.006157
+keyup Home
+wait 5.111044
+mousemove 450 149
+wait 0.000021
+mousedown 1
+wait 0.000008
+mouseup 1
+wait 5.156363
+keydown Control_L
+wait 0.006202
+keydown r
+wait 0.006146
+keyup Control_L
+wait 0.006297
+keyup r
+wait 7.185749
+mousemove 700 600
+wait 0.000024
+mousedown 1
+wait 0.000008
+mouseup 1
+wait 2.157202
+keydown Control_L
+wait 0.006113
+keydown Home
+wait 0.006208
+keyup Control_L
+wait 0.006123
+keyup Home
+wait 2.062168
+keydown Shift_L
+wait 0.000029
+keydown t
+wait 0.017754
+keyup Shift_L
+wait 0.000020
+keyup t
+wait 0.017805
+keydown h
+wait 0.017629
+keyup h
+wait 0.018157
+keydown a
+wait 0.017852
+keyup a
+wait 0.017597
+keydown n
+wait 0.017966
+keyup n
+wait 0.017811
+keydown k
+wait 0.017507
+keyup k
+wait 0.018018
+keydown space
+wait 0.017622
+keyup space
+wait 0.017925
+keydown y
+wait 0.018096
+keyup y
+wait 0.017947
+keydown o
+wait 0.017801
+keyup o
+wait 0.017676
+keydown u
+wait 0.018058
+keyup u
+wait 0.017696
+keydown space
+wait 0.017870
+keyup space
+wait 0.018342
+keydown s
+wait 0.017585
+keyup s
+wait 0.018176
+keydown o
+wait 0.017847
+keyup o
+wait 0.017924
+keydown space
+wait 0.017726
+keyup space
+wait 0.017610
+keydown m
+wait 0.018177
+keyup m
+wait 0.018048
+keydown u
+wait 0.017912
+keyup u
+wait 0.017635
+keydown c
+wait 0.017770
+keyup c
+wait 0.017841
+keydown h
+wait 0.017916
+keyup h
+wait 2.073364
+keydown Return
+wait 0.006085
+keyup Return
+wait 1.068230
+keydown Return
+wait 0.006155
+keyup Return
+wait 3.115881
+mousemove 456 235
+wait 0.000023
+mousedown 1
+wait 0.000018
+mouseup 1
+wait 40.569728
+mousemove 700 878
+wait 0.006385
+log * Reply and send: go back to the inbox, reply to message 2 with the body text `Thank you so much` and send it, entering the password `parrot` again only if the outgoing server asks
+check clawsmail/clawsmail-check-015.png
+wait 2.064355
+keydown Control_L
+wait 0.006195
+keydown m
+wait 0.006181
+keyup Control_L
+wait 0.006361
+keyup m
+wait 6.122981
+keydown a
+wait 0.015528
+keyup a
+wait 0.015285
+keydown l
+wait 0.015402
+keyup l
+wait 0.015317
+keydown i
+wait 0.015635
+keyup i
+wait 0.015465
+keydown c
+wait 0.015566
+keyup c
+wait 0.015411
+keydown e
+wait 0.015384
+keyup e
+wait 0.015417
+keydown period
+wait 0.015191
+keyup period
+wait 0.015386
+keydown b
+wait 0.015627
+keyup b
+wait 0.015369
+keydown r
+wait 0.015251
+keyup r
+wait 0.015493
+keydown e
+wait 0.015222
+keyup e
+wait 0.015479
+keydown n
+wait 0.015219
+keyup n
+wait 0.015455
+keydown n
+wait 0.015541
+keyup n
+wait 0.015522
+keydown e
+wait 0.015653
+keyup e
+wait 0.015605
+keydown r
+wait 0.015683
+keyup r
+wait 0.015833
+keydown Shift_L
+wait 0.000022
+keydown 2
+wait 0.016022
+keyup Shift_L
+wait 0.000024
+keyup 2
+wait 0.015726
+keydown p
+wait 0.015561
+keyup p
+wait 0.015523
+keydown a
+wait 0.016002
+keyup a
+wait 0.015135
+keydown r
+wait 0.015750
+keyup r
+wait 0.015570
+keydown r
+wait 0.015549
+keyup r
+wait 0.015567
+keydown o
+wait 0.015699
+keyup o
+wait 0.015708
+keydown t
+wait 0.015272
+keyup t
+wait 0.015653
+keydown period
+wait 0.015493
+keyup period
+wait 0.015267
+keydown t
+wait 0.015584
+keyup t
+wait 0.015560
+keydown e
+wait 0.015766
+keyup e
+wait 0.015539
+keydown s
+wait 0.015323
+keyup s
+wait 0.015384
+keydown t
+wait 0.015725
+keyup t
+wait 4.124388
+mousemove 745 414
+wait 0.000022
+mousedown 1
+wait 0.000004
+mouseup 1
+wait 2.160170
+keydown Shift_L
+wait 0.000025
+keydown p
+wait 0.015332
+keyup Shift_L
+wait 0.000027
+keyup p
+wait 0.015610
+keydown a
+wait 0.015155
+keyup a
+wait 0.015448
+keydown r
+wait 0.015520
+keyup r
+wait 0.015429
+keydown r
+wait 0.015633
+keyup r
+wait 0.015463
+keydown o
+wait 0.015299
+keyup o
+wait 0.015303
+keydown t
+wait 0.015627
+keyup t
+wait 0.015467
+keydown space
+wait 0.015503
+keyup space
+wait 0.015361
+keydown b
+wait 0.015282
+keyup b
+wait 0.015317
+keydown e
+wait 0.015485
+keyup e
+wait 0.015604
+keydown n
+wait 0.015515
+keyup n
+wait 0.015556
+keydown c
+wait 0.015459
+keyup c
+wait 0.015296
+keydown h
+wait 0.015654
+keyup h
+wait 0.015542
+keydown m
+wait 0.015353
+keyup m
+wait 0.015366
+keydown a
+wait 0.015165
+keyup a
+wait 0.015463
+keydown r
+wait 0.015524
+keyup r
+wait 0.015403
+keydown k
+wait 0.015385
+keyup k
+wait 3.132959
+mousemove 700 600
+wait 0.000020
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 2.146972
+keydown Shift_L
+wait 0.000033
+keydown t
+wait 0.015463
+keyup Shift_L
+wait 0.000012
+keyup t
+wait 0.015350
+keydown h
+wait 0.015404
+keyup h
+wait 0.015570
+keydown a
+wait 0.015453
+keyup a
+wait 0.015432
+keydown n
+wait 0.015447
+keyup n
+wait 0.015497
+keydown k
+wait 0.015570
+keyup k
+wait 0.015735
+keydown space
+wait 0.015144
+keyup space
+wait 0.015602
+keydown y
+wait 0.015562
+keyup y
+wait 0.015415
+keydown o
+wait 0.015454
+keyup o
+wait 0.015571
+keydown u
+wait 0.015329
+keyup u
+wait 0.015568
+keydown space
+wait 0.015508
+keyup space
+wait 0.015540
+keydown s
+wait 0.015451
+keyup s
+wait 0.015566
+keydown o
+wait 0.015307
+keyup o
+wait 0.015457
+keydown space
+wait 0.015566
+keyup space
+wait 0.015596
+keydown m
+wait 0.015588
+keyup m
+wait 0.015548
+keydown u
+wait 0.015446
+keyup u
+wait 0.015466
+keydown c
+wait 0.015483
+keyup c
+wait 0.015263
+keydown h
+wait 0.015654
+keyup h
+wait 3.115417
+mousemove 456 235
+wait 0.000019
+mousedown 1
+wait 0.000006
+mouseup 1
+wait 40.540852
+mousemove 700 878
+wait 0.006148
+log * Compose and send: compose a new message to `alice.brenner@parrot.test` with the subject `Parrot benchmark` and the body text `Thank you so much`, then send it
+check clawsmail/clawsmail-check-016.png
+wait 3.124287
+mousemove 19 12
+wait 0.000020
+mousedown 1
+wait 0.000004
+mouseup 1
+wait 4.213664
+mousemove 110 165
+wait 0.000016
+mousedown 1
+wait 0.000157
+mouseup 1
+wait 5.349225
+mousemove 735 543
+wait 0.000027
+mousedown 1
+wait 0.000110
+mouseup 1
+wait 21.265561
+mousemove 700 878
+wait 0.006210
+log * Empty trash: empty the trash folder and confirm if asked
+check clawsmail/clawsmail-check-017.png

@@ -18,8 +18,16 @@ Everything runs inside Docker, so there are no security implications for the hos
 | LibreOffice Calc | `applications/calc/` |
 | VLC | `applications/vlc/` |
 | Okular (PDF viewer) | `applications/pdf_viewers/okular/` |
+| Thunderbird (email client) | `applications/emailclients/thunderbird/` |
 
 Each application directory contains the recorded `.parrot` macro file and a `usage_scenario.yml` for use with the Green Metrics Tool.
+
+Two directories hold whole comparisons rather than a single application, where the same script is recorded against every candidate:
+
+| Comparison | Path | What it provides |
+| ---------- | ---- | ---------------- |
+| PDF viewers | [`applications/pdf_viewers/`](applications/pdf_viewers/) | Six viewers over one local document |
+| Email clients | [`applications/emailclients/`](applications/emailclients/) | Eight clients over a local IMAP server holding a deterministic ~500 MB mailbox |
 
 ## Quick Start
 
@@ -37,6 +45,7 @@ Every application ships with a Docker Compose file (or uses the shared `ribalba/
 - Press `Pause` to stop recording.
 - Press `Scroll Lock` at any point to capture a reference screenshot (inserts a `Check` assertion into the macro).
 - Pass `--script path/to/script.md` to attach one note per checkpoint; trimmed blank lines and lines starting with `#` are ignored.
+- A script line may be written as `label: detailed instruction`. Recording shows the whole line, so whoever drives the application knows exactly what to do and every application is driven identically. Replay emits only the label as the note. See [Script labels](#script-labels).
 - When a script is provided, recording shows a live checklist and highlights the next pending item in green.
 
 Override the hotkeys if your browser intercepts them:
@@ -118,7 +127,7 @@ Recorded macros (`.parrot` files) contain:
 - Timed xmacro events — `MotionNotify`, `ButtonPress`, `KeyStrPress`, etc.
 - `#WAIT_SEC <seconds>` — timing gaps between events
 - `Check <path>.png` — screenshot assertion lines
-- `log <text>` — note lines emitted to stdout during replay as `<timestamp_microseconds> <text>`
+- `log <text>` — note lines emitted to stdout during replay as `<timestamp_microseconds> <label>`, where the label is the part of `<text>` before the first colon (see [Script labels](#script-labels))
 
 Example header:
 
@@ -127,6 +136,42 @@ Example header:
 #APP windowtitle=Firefox
 #APP windowclass=firefox
 ```
+
+## Script labels
+
+A checkpoint script line can carry both a short label and the full instruction,
+separated by the first colon:
+
+```text
+* Reply and send: reply to message 2 with the body text `Thank you so much` and send it
+```
+
+The two audiences want different things from that line, so each gets what it
+needs:
+
+| Where | What it uses | Why |
+| ----- | ------------ | --- |
+| Recording checklist | the whole line | Whoever drives the application has to know exactly what to do, or two recordings of the "same" step end up being different steps. |
+| The `.parrot` file | the whole line | A recording stays self-documenting; you can read what a block was meant to do a year later. |
+| Replay output and Green Metrics Tool notes | the label only | The note names a measurement phase. A full sentence per phase makes the report unreadable. |
+| `tools/check_blocks.py` table | the label only | Same reason — but block *identity* still compares the whole line, so two files disagreeing on the detail is still an error. |
+
+Only lines starting with `*` become checkpoints. Blank lines and lines starting
+with `#` are skipped — but **an HTML comment block is not**. `<!-- ... -->` in a
+script file is parsed as ordinary note text, so every line of it is consumed as a
+checkpoint note and the real steps shift out of alignment. The recording still has
+the right number of blocks, which is what makes it easy to miss: the block *names*
+are the comment prose. Keep explanations in a README rather than in the script.
+
+Scripts without colons keep working unchanged: the whole line becomes the label.
+Only the first colon splits, so an instruction may contain as many more as it
+likes. A line starting with a colon is left alone rather than producing an empty
+note.
+
+[`applications/emailclients/script.md`](applications/emailclients/script.md) uses
+this throughout — the same scenario has to be reproduced by hand against eight
+different email clients, which is exactly the case where a vague instruction
+turns into eight subtly different benchmarks.
 
 ## Screenshot Assertions
 
@@ -206,6 +251,18 @@ To keep click coordinates and screenshots stable across runs, configure fixed wi
 | `WINDOW_WIDTH` / `WINDOW_HEIGHT` | Window size |
 | `APP_WINDOW_CLASS` | xdotool window class matcher |
 | `APP_WINDOW_TITLE` | xdotool window title matcher |
+
+The class is tried first and the title only if it finds nothing, so an app whose
+windows all share one `WM_CLASS` needs the class left **empty** to be matched
+reliably — otherwise the lookup returns whichever window it happens to hit first.
+Recording with `--windowclass ''` stores an empty value and matching falls through
+to the title alone. Thunderbird needs this: its main window is `"Mail"`, its
+composer `"Msgcompose"` and its dialogs `"Thunderbird"`, so no single class
+identifies the window the coordinates were measured against.
+
+Empty is therefore meaningful and is preserved end to end — through the `.🦜`
+file, `position-window.sh` and `check-image.sh`. Only an *unset* matcher falls
+back to the `gnome-calculator` demo default.
 
 ## Environment Variables
 
