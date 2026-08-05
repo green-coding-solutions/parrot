@@ -18,3 +18,41 @@ build:
 # straight to the registry via --push.
 push:
 	docker buildx build --platform $(PLATFORMS) -t $(IMAGE) --push .
+
+# ---------------------------------------------------------------------------
+# Email-client benchmark mail server
+#
+# Carries the ~500 MB deterministic mailbox inside the image, so a benchmark run
+# starts two daemons instead of generating 13,481 messages. Bump MAIL_TAG
+# whenever the corpus changes - the tag is what the usage_scenario files pin.
+# ---------------------------------------------------------------------------
+MAIL_IMAGE ?= ribalba/parrot-mailserver
+MAIL_TAG ?= v1
+MAIL_CONTEXT := applications/emailclients
+MAIL_DOCKERFILE := $(MAIL_CONTEXT)/mailserver/Dockerfile
+
+# Build a smaller corpus for quick iteration:
+#   make mailserver MAIL_TARGET_MB=100
+MAIL_TARGET_MB ?= 500
+
+mailserver:
+	docker buildx build --platform $(PLATFORM) --load \
+		--build-arg PARROT_MAIL_TARGET_MB=$(MAIL_TARGET_MB) \
+		-t $(MAIL_IMAGE):$(MAIL_TAG) \
+		-f $(MAIL_DOCKERFILE) $(MAIL_CONTEXT)
+
+push-mailserver:
+	docker buildx build --platform $(PLATFORMS) \
+		--build-arg PARROT_MAIL_TARGET_MB=$(MAIL_TARGET_MB) \
+		-t $(MAIL_IMAGE):$(MAIL_TAG) --push \
+		-f $(MAIL_DOCKERFILE) $(MAIL_CONTEXT)
+
+# Start the image on its own and run the smoke test against it. Useful after a
+# rebuild, before pushing.
+check-mailserver:
+	docker rm -f parrot-mailserver-check >/dev/null 2>&1 || true
+	docker run -d --name parrot-mailserver-check $(MAIL_IMAGE):$(MAIL_TAG) >/dev/null
+	docker exec parrot-mailserver-check parrot-mailserver-start
+	docker rm -f parrot-mailserver-check >/dev/null
+
+.PHONY: build push mailserver push-mailserver check-mailserver

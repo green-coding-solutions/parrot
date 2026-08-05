@@ -22,6 +22,13 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 
+# helpers.py lives one level up in the repository, and next to this script inside
+# the container image, so both locations are on the path.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from helpers import note_label  # noqa: E402  (needs the path set up above)
+
 EVENT_VERBS = {
     "wait", "mousemove", "mousedown", "mouseup",
     "keydown", "keyup", "check", "log",
@@ -165,7 +172,11 @@ def print_wait_table(parsed: "OrderedDict[Path, tuple[list[str], list[dict]]]", 
                 cells.append(f"{blocks[i]['wait_total']:>{col_widths[j]}.3f}")
             else:
                 cells.append(f"{'-':>{col_widths[j]}}")
-        display_name = name if len(name) <= name_col else name[: name_col - 1] + "…"
+        # Show the label, not the whole instruction: a script line may carry a
+        # detailed instruction after a colon, which would make the table
+        # unreadable.  Block identity above still compares the full message.
+        short = note_label(name)
+        display_name = short if len(short) <= name_col else short[: name_col - 1] + "…"
         print(f"{display_name:<{name_col}}  " + "  ".join(cells))
 
     print("-" * rule_len)

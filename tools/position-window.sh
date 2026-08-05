@@ -6,8 +6,12 @@ WINDOW_X="${WINDOW_X:-20}"
 WINDOW_Y="${WINDOW_Y:-20}"
 WINDOW_WIDTH="${WINDOW_WIDTH:-1400}"
 WINDOW_HEIGHT="${WINDOW_HEIGHT:-857}"
-APP_WINDOW_CLASS="${APP_WINDOW_CLASS:-gnome-calculator}"
-APP_WINDOW_TITLE="${APP_WINDOW_TITLE:-Calculator}"
+# Only an *unset* variable gets the demo default. A recording that deliberately
+# stores an empty windowclass (Thunderbird, whose class differs per window type)
+# must match on title alone -- ":-" would substitute the default for that empty
+# value too and send us hunting for a calculator.
+APP_WINDOW_CLASS="${APP_WINDOW_CLASS-gnome-calculator}"
+APP_WINDOW_TITLE="${APP_WINDOW_TITLE-Calculator}"
 
 echo "[position-window] waiting for app window on ${DISPLAY} (class=${APP_WINDOW_CLASS} title=${APP_WINDOW_TITLE})"
 

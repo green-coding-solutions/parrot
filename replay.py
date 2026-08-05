@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from helpers import load_app_metadata
+from helpers import load_app_metadata, note_label
 from timed_xmacro import iter_replay_lines, parse_xmacro_event
 
 CHECK_IMAGE_SCRIPT   = "/usr/local/bin/check-image.sh"
@@ -307,7 +307,10 @@ def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Pat
         }
         subprocess.run([CHECK_IMAGE_SCRIPT, ref], env=check_env, check=True)
     elif op == "log":
-        sys.stdout.write(f"{time.time_ns() // 1000} {action[1]}\n")
+        # Only the label - the text before the first colon - becomes the note.
+        # The rest of the line is the instruction for whoever recorded the macro
+        # and stays in the .🦜 file without being emitted.
+        sys.stdout.write(f"{time.time_ns() // 1000} {note_label(action[1])}\n")
         sys.stdout.flush()
 
 

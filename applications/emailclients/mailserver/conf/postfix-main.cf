@@ -1,0 +1,87 @@
+# Parrot email-client benchmark - Postfix configuration.
+#
+# Only job: accept the messages the scenario sends from the client under test
+# and hand them to Dovecot LMTP, which files them into the same 500 MB Maildir.
+# Nothing ever leaves the Docker network - there is no relayhost and every
+# recipient domain is local.
+#
+# NEVER expose this configuration outside the benchmark network.
+
+compatibility_level = 3.8
+
+myhostname = mail.parrot.test
+mydomain = parrot.test
+myorigin = $mydomain
+mydestination = $myhostname, parrot.test, localhost.localdomain, localhost
+
+# Docker's default bridge ranges.  Submission from the client container is
+# accepted on the strength of SASL auth anyway; this just avoids surprises.
+mynetworks = 127.0.0.0/8 [::1]/128 172.16.0.0/12 10.0.0.0/8 192.168.0.0/16
+
+# Deliberately no relayhost: undeliverable mail must bounce locally rather than
+# escape to the internet.
+relayhost =
+default_transport = error:the parrot benchmark network has no outbound mail
+relay_transport = error:the parrot benchmark network has no outbound mail
+
+inet_interfaces = all
+inet_protocols = ipv4
+
+# Dovecot owns the mailbox, so it also performs delivery.  This keeps the
+# indexes consistent - a message written behind Dovecot's back would force a
+# full re-scan of a 500 MB maildir on the next connection.
+mailbox_transport = lmtp:unix:private/dovecot-lmtp
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+local_transport = lmtp:unix:private/dovecot-lmtp
+
+# Every persona in the corpus resolves to the one real mailbox, so mail the
+# scenario composes to e.g. alice.brenner@parrot.test comes straight back and
+# is visible in the inbox.
+virtual_alias_maps = hash:/etc/postfix/virtual
+
+# SASL against Dovecot, so clients can use the same credentials for IMAP and
+# submission.  Plaintext mechanisms over an unencrypted connection are allowed
+# for the same reason as in the Dovecot config.
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_sasl_security_options = noanonymous
+smtpd_sasl_local_domain = $mydomain
+broken_sasl_auth_clients = yes
+
+smtpd_tls_cert_file = /etc/dovecot/private/mail.parrot.test.fullchain.crt
+smtpd_tls_key_file = /etc/dovecot/private/mail.parrot.test.key
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = no
+smtpd_tls_protocols = >=TLSv1.2
+smtp_tls_security_level = none
+
+smtpd_recipient_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination
+
+smtpd_relay_restrictions =
+    permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination
+
+# The corpus contains a 12 MB attachment and the scenario forwards it, so the
+# default 10 MB limit is not enough.
+message_size_limit = 62914560
+mailbox_size_limit = 0
+
+# The benchmark runs unattended; a message stuck in the queue must fail loudly
+# and quickly rather than be retried for days.
+maximal_queue_lifetime = 1h
+bounce_queue_lifetime = 1h
+
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+smtpd_banner = $myhostname ESMTP Parrot benchmark mail server
+disable_vrfy_command = yes
+
+# No chroot: /var/spool/postfix is not populated with a copy of /etc in this
+# image, and chrooted smtpd would fail to resolve anything.
+queue_directory = /var/spool/postfix
