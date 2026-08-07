@@ -172,7 +172,7 @@ keyup Return
 wait 29.185215
 mousemove 700 878
 wait 0.006363
-wait 8.442219
+wait 8.428241
 log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
 check clawsmail/clawsmail-check-007.png
 wait 3.114876

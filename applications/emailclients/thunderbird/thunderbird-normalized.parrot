@@ -125,7 +125,7 @@ keydown Return
 wait 0.006391
 keyup Return
 wait 18.080040
-wait 15.375937
+wait 15.361959
 log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
 check thunderbird/thunderbird-check-007.png
 wait 2.118287

@@ -115,7 +115,7 @@ keydown Return
 wait 0.006157
 keyup Return
 wait 23.064038
-wait 15.631522
+wait 15.617544
 log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
 check bluemail/bluemail-check-007.png
 wait 2.117026

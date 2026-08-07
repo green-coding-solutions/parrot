@@ -129,7 +129,7 @@ keyup Return
 wait 29.173768
 mousemove 1290 700
 wait 0.006324
-wait 8.526593
+wait 8.512615
 log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
 check mailspring/mailspring-check-007.png
 wait 3.130504

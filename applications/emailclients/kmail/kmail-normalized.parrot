@@ -186,7 +186,7 @@ keyup e
 wait 24.191877
 mousemove 125 780
 wait 0.006130
-wait 15.528136
+wait 15.514158
 log * Search account: search the whole account for `Windvane` and wait for the result list to stop growing
 check kmail/kmail-check-007.png
 wait 3.115759
