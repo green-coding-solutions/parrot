@@ -1,0 +1,119 @@
+# AppArmor profile for the Parrot containers that run a Flatpak application.
+#
+# WHY THIS EXISTS
+#
+# Every `flatpak run` goes through bubblewrap, and bwrap's first act inside its
+# new namespace is
+#
+#     mount(NULL, "/", NULL, MS_SLAVE | MS_REC, NULL)
+#
+# Docker's built-in `docker-default` profile contains a blanket `deny mount,`,
+# so on any AppArmor host that call returns EPERM and the application never
+# starts. What reaches the log is
+#
+#     bwrap: Failed to make / slave: Permission denied
+#     error: ldconfig failed, exit status 256
+#
+# and nothing in it names AppArmor. On a host without AppArmor - Fedora, for
+# instance - the same scenario runs clean, which is why this only ever shows up
+# on the measurement node.
+#
+# WHY NOT `--security-opt apparmor=unconfined`
+#
+# It is the obvious fix and it does not work on Ubuntu 23.10 or newer. Measured
+# on Ubuntu 24.04.4 / AppArmor 4.0.1:
+#
+#   docker-default    userns + uid_map OK, mount DENIED
+#                       unshare: cannot change root filesystem propagation:
+#                       Permission denied
+#   unconfined        mount would be fine, userns DENIED
+#                       unshare: write failed /proc/self/uid_map:
+#                       Operation not permitted
+#
+# The second one is `kernel.apparmor_restrict_unprivileged_userns=1`, and it
+# restricts *unconfined* processes specifically: an unconfined process that
+# creates an unprivileged user namespace is transitioned into a stub profile
+# that has no CAP_SETUID, so writing the map fails. Being confined by a profile
+# that says `userns,` is what makes the namespace allowed - so the way out is a
+# profile, not the absence of one.
+#
+# WHAT THIS IS
+#
+# `docker-default` (moby contrib/apparmor/template.go) with three changes:
+#
+#   - `deny mount,`  ->  `mount,` + `pivot_root,`   the reason this file exists
+#   - `userns,`                                     required by AppArmor 4
+#   - the /proc and /sys denials are KEPT, and they are load-bearing here for a
+#     reason the scenarios did not have before: those scenarios pass
+#     `systempaths=unconfined`, which unmasks /proc/sysrq-trigger, i.e. the
+#     container can panic the host. That grant is what the usage_scenario
+#     comment calls "not a free one". `deny @{PROC}/sysrq-trigger rwklx` below
+#     takes it back. Running under this profile is therefore tighter than
+#     running under docker-default was, not looser, on that axis.
+#
+# `mount,` is narrower than it reads. Mounting still needs CAP_SYS_ADMIN in the
+# namespace doing it, and these containers keep Docker's default capability set,
+# which does not include it. What the rule permits is the mount bwrap makes
+# INSIDE the user namespace it just created, where it does hold CAP_SYS_ADMIN
+# over that namespace alone. AppArmor was the second lock, not the only one.
+#
+# INSTALL - on the measurement host, not in the image:
+#
+#     sudo install -m 0644 parrot-flatpak /etc/apparmor.d/parrot-flatpak
+#     sudo apparmor_parser -r -W /etc/apparmor.d/parrot-flatpak
+#     aa-status | grep parrot-flatpak
+#
+# See host-setup/install-apparmor-profile.sh, which does exactly that.
+
+#include <tunables/global>
+
+profile parrot-flatpak flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  network,
+  capability,
+  file,
+  umount,
+
+  # The reason this profile exists. See the header.
+  mount,
+  pivot_root,
+
+  # AppArmor 4 mediates unprivileged user namespace creation. Without this rule
+  # a confined process fails the same way an unconfined one does on a host with
+  # kernel.apparmor_restrict_unprivileged_userns=1.
+  #
+  # AppArmor 4 ONLY - on 3.x this line is a parse error rather than a no-op:
+  #   syntax error, unexpected TOK_END_OF_RULE, expecting TOK_MODE
+  # install-apparmor-profile.sh strips it when the parser is older, where there
+  # is no userns mediation to satisfy in the first place.
+  userns,
+
+  # Host (privileged) processes may send signals to container processes.
+  signal (receive) peer=unconfined,
+  # Container processes may send signals amongst themselves.
+  signal (send,receive) peer=parrot-flatpak,
+
+  deny @{PROC}/* w,   # deny write for all files directly in /proc (not in a subdir)
+  # deny write to files not in /proc/<number>/** or /proc/sys/**
+  deny @{PROC}/{[^1-9],[^1-9][^0-9],[^1-9s][^0-9y][^0-9s],[^1-9][^0-9][^0-9][^0-9]*}/** w,
+  deny @{PROC}/sys/[^k]** w,  # deny /proc/sys except /proc/sys/k* (effectively /proc/sys/kernel)
+  deny @{PROC}/sys/kernel/{?,??,[^s][^h][^m]**} w,  # deny everything except shm* in /proc/sys/kernel/
+
+  # Kept deliberately, and see the header: the scenarios that use this profile
+  # pass systempaths=unconfined, which unmasks both of these.
+  deny @{PROC}/sysrq-trigger rwklx,
+  deny @{PROC}/kcore rwklx,
+
+  deny /sys/[^f]*/** wklx,
+  deny /sys/f[^s]*/** wklx,
+  deny /sys/fs/[^c]*/** wklx,
+  deny /sys/fs/c[^g]*/** wklx,
+  deny /sys/fs/cg[^r]*/** wklx,
+  deny /sys/firmware/** rwklx,
+  deny /sys/devices/virtual/powercap/** rwklx,
+  deny /sys/kernel/security/** rwklx,
+
+  # suppress ptrace denials when using 'docker ps' or using 'ps' inside a container
+  ptrace (trace,read,tracedby,readby) peer=parrot-flatpak,
+}

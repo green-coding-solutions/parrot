@@ -1,0 +1,61 @@
+# TIME-NORMALIZED VARIANT - use this one to COMPARE APPS, not the one beside it.
+#
+# Identical to usage_scenario.yml in every respect except the recording it
+# replays. `tools/check_blocks.py --normalize-time` pads every block of every
+# recording in the group out to the longest that block takes in ANY of them, so
+# all six runs are 1269.515 s and every one of the eighteen blocks occupies the
+# same wall-clock in each. The padding is a single `wait` inserted immediately
+# before the block's checkpoint, so the timing of the actions inside a block is
+# untouched - only the settled idle at the end of the block grows.
+#
+# WHY THIS EXISTS
+#
+# 96-99 % of every recording in this group is deliberate `wait`, and the drivers
+# were paced per app to whatever that app needed to settle. Un-normalized totals
+# run from 445 s (LibreOffice) to 1173 s (Collabora) - a 2.6x spread that is
+# mostly the driver's safety margin rather than the application. Each scenario
+# is a single flow command, so GMT reports one phase covering the whole replay:
+# comparing those figures across apps largely ranks how patient each driver is.
+# Normalizing removes that, at the cost of every app now paying the slowest
+# app's idle in every block.
+#
+# Regenerate after ANY re-recording - the padding is computed across the whole
+# group, so one new recording changes all six:
+#
+#   ./tools/check_blocks.py applications/wordprocessors --normalize-time
+#
+name: Parrot AbiWord (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives AbiWord through a 98-page ODT using Parrot, with every block padded to the group-wide maximum
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/wordprocessors/abiword/install.sh
+      # Deterministic window geometry, and a fluxbox keys file with no keyboard
+      # bindings at all - the default one grabs Control+F1..F12 for workspace
+      # switching, which silently steals shortcuts from the application. Must
+      # run BEFORE entrypoint.sh: fluxbox reads its configuration once at
+      # startup and will not replace files that are already there.
+      #
+      # The res_name below is measured, not guessed. See MEASUREMENTS.md: a rule
+      # written against the res_class a settled window reports can match nothing
+      # at all, because fluxbox evaluates it at map time.
+      - command: bash /tmp/repo/applications/wordprocessors/common/pin-windows.sh abiword 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/wordprocessors/abiword/abiword-normalized.parrot
+        read-notes-stdout: true

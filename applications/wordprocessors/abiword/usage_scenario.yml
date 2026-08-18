@@ -1,0 +1,35 @@
+name: Parrot AbiWord
+author: Didi <didi@green-coding.io>
+description: Drives AbiWord through a 98-page ODT using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/wordprocessors/abiword/install.sh
+      # Deterministic window geometry, and a fluxbox keys file with no keyboard
+      # bindings at all - the default one grabs Control+F1..F12 for workspace
+      # switching, which silently steals shortcuts from the application. Must
+      # run BEFORE entrypoint.sh: fluxbox reads its configuration once at
+      # startup and will not replace files that are already there.
+      #
+      # The res_name below is measured, not guessed. See MEASUREMENTS.md: a rule
+      # written against the res_class a settled window reports can match nothing
+      # at all, because fluxbox evaluates it at map time.
+      - command: bash /tmp/repo/applications/wordprocessors/common/pin-windows.sh abiword 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/wordprocessors/abiword/abiword.parrot
+        read-notes-stdout: true

@@ -1,0 +1,40 @@
+name: Parrot Apache OpenOffice Writer
+author: Didi <didi@green-coding.io>
+description: Drives Apache OpenOffice Writer through a 98-page ODT using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/wordprocessors/openoffice/install.sh
+      # Deterministic window geometry, and a fluxbox keys file with no keyboard
+      # bindings at all - the default one grabs Control+F1..F12 for workspace
+      # switching, which silently steals shortcuts from the application. Must
+      # run BEFORE entrypoint.sh: fluxbox reads its configuration once at
+      # startup and will not replace files that are already there.
+      #
+      # The res_name below is measured, not guessed, and it is NOT the one the
+      # settled window reports. AOO maps its document window as
+      # VCLSalFrame.DocumentWindow and then reports plain VCLSalFrame to xprop
+      # afterwards; fluxbox evaluates the rule at map time, so the observable
+      # value is the one that matches nothing. See MEASUREMENTS.md.
+      #
+      # Dialogs share the res_name but are transient and are not resized, so the
+      # full-screen rule is safe for them: Find & Replace stays 390x252 centred.
+      - command: bash /tmp/repo/applications/wordprocessors/common/pin-windows.sh VCLSalFrame.DocumentWindow 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/wordprocessors/openoffice/openoffice.parrot
+        read-notes-stdout: true

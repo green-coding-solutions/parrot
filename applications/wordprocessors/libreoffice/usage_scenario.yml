@@ -1,0 +1,40 @@
+name: Parrot LibreOffice Writer
+author: Didi <didi@green-coding.io>
+description: Drives LibreOffice Writer through a 98-page ODT using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/wordprocessors/libreoffice/install.sh
+      # Deterministic window geometry.  Must run BEFORE entrypoint.sh: fluxbox
+      # reads ~/.fluxbox/apps once at startup and will not replace an existing
+      # file.
+      #
+      # The res_name and nothing else.  Adding the res_class the settled window
+      # reports (libreoffice-writer) makes the rule match NOTHING - fluxbox
+      # evaluates it at map time, before Writer has set its final class or
+      # title.  Measured; see the table in pin-windows.sh.
+      #
+      # Writer's dialogs share the res_name, so this rule matches them too, and
+      # that is safe here: they are transient, which makes fluxbox centre them on
+      # their parent whatever [Position] says, and they carry a program-specified
+      # maximum size, which clamps [Dimensions].  Find and Replace stays 574x403
+      # centred with this rule active.
+      - command: bash /tmp/repo/applications/wordprocessors/common/pin-windows.sh libreoffice 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/wordprocessors/libreoffice/libreoffice.parrot
+        read-notes-stdout: true

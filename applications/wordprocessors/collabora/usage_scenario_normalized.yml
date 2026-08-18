@@ -1,0 +1,156 @@
+# TIME-NORMALIZED VARIANT - use this one to COMPARE APPS, not the one beside it.
+#
+# Identical to usage_scenario.yml in every respect except the recording it
+# replays. `tools/check_blocks.py --normalize-time` pads every block of every
+# recording in the group out to the longest that block takes in ANY of them, so
+# all six runs are 1269.515 s and every one of the eighteen blocks occupies the
+# same wall-clock in each. The padding is a single `wait` inserted immediately
+# before the block's checkpoint, so the timing of the actions inside a block is
+# untouched - only the settled idle at the end of the block grows.
+#
+# WHY THIS EXISTS
+#
+# 96-99 % of every recording in this group is deliberate `wait`, and the drivers
+# were paced per app to whatever that app needed to settle. Un-normalized totals
+# run from 445 s (LibreOffice) to 1173 s (Collabora) - a 2.6x spread that is
+# mostly the driver's safety margin rather than the application. Each scenario
+# is a single flow command, so GMT reports one phase covering the whole replay:
+# comparing those figures across apps largely ranks how patient each driver is.
+# Normalizing removes that, at the cost of every app now paying the slowest
+# app's idle in every block.
+#
+# Regenerate after ANY re-recording - the padding is computed across the whole
+# group, so one new recording changes all six:
+#
+#   ./tools/check_blocks.py applications/wordprocessors --normalize-time
+#
+name: Parrot Collabora Office (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives Collabora Office through a 98-page ODT using Parrot, with every block padded to the group-wide maximum
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    # Required, and specific to the two Flatpak entrants: every `flatpak run`
+    # goes through bubblewrap. Neither of these grants a capability - the
+    # container keeps Docker's default set, CapEff 00000000a80425fb.
+    #
+    # THE SHORT VERSION: the application does not run as root. bwrap chooses
+    # between its privileged path (which needs CAP_SYS_ADMIN) and its
+    # unprivileged one (which unshares a USER namespace and so holds the
+    # capabilities inside it for free) by looking at the real uid - and a
+    # container is exactly the case where uid 0 does NOT imply SYS_ADMIN. So
+    # install-flatpak.sh runs the application as uid 1001, which puts bwrap on
+    # the path that needs nothing from the container.
+    #
+    # Measured one flag at a time in throwaway containers, because each failure
+    # looks like a different problem:
+    #
+    #   nothing, as root          bwrap: Creating new namespace failed:
+    #                               Operation not permitted
+    #   nothing, as uid 1001      bwrap: No permissions to create new namespace,
+    #                               likely because the kernel does not allow
+    #                               non-privileged user namespaces
+    #                               - and the message is wrong about the kernel.
+    #                               /proc/sys/user/max_user_namespaces reads
+    #                               126911. It is Docker's default seccomp
+    #                               profile refusing CLONE_NEWUSER, and it
+    #                               refuses it for root and non-root alike.
+    #   +seccomp=unconfined       `unshare -Ur` works now, and so does the D-Bus
+    #                               proxy's sandbox, but the application's own
+    #                               dies at
+    #                               bwrap: Can't mount proc on /newroot/proc:
+    #                                 Operation not permitted
+    #                               Docker bind-mounts over 13 paths inside
+    #                               /proc (kcore, keys, sysrq-trigger, ...),
+    #                               which makes procfs "not fully visible", and
+    #                               the kernel then refuses a fresh mount of it
+    #                               from inside a user namespace. --unshare-pid
+    #                               does NOT lift that: the check does not care
+    #                               which pid namespace you are in.
+    #   +systempaths=unconfined   works, with no capabilities at all
+    #
+    # This replaced `seccomp=unconfined` + `--cap-add SYS_ADMIN` + `--cap-add
+    # NET_ADMIN`, which was close to --privileged. What is left is a much
+    # smaller grant but not a free one: an unmasked /proc means the container
+    # can write /proc/sysrq-trigger, i.e. it can panic the HOST. It can no
+    # longer escape into it - that needed SYS_ADMIN, which is gone.
+    #
+    # AND ON AN APPARMOR HOST THAT IS STILL NOT ENOUGH. The rows above were
+    # measured on Fedora, which has no AppArmor; the measurement node runs
+    # Ubuntu 24.04.4, where Docker applies its `docker-default` profile and that
+    # profile contains a blanket `deny mount,`. bwrap's first act inside its new
+    # namespace is a mount, so the application never starts:
+    #
+    #   +apparmor=docker-default   bwrap: Failed to make / slave: Permission
+    #     (i.e. the default)         denied
+    #                               error: ldconfig failed, exit status 256
+    #                               Nothing in it names AppArmor.
+    #   +apparmor=unconfined      WORSE, not better. Ubuntu 23.10+ sets
+    #                               kernel.apparmor_restrict_unprivileged_userns
+    #                               =1, which restricts UNCONFINED processes
+    #                               specifically: one that creates an
+    #                               unprivileged user namespace is transitioned
+    #                               into a stub profile with no CAP_SETUID, and
+    #                               it now dies one step earlier, at
+    #                               unshare: write failed /proc/self/uid_map:
+    #                                 Operation not permitted
+    #   +apparmor=parrot-flatpak  works.
+    #
+    # So the way out is a profile, not the absence of one: docker-default plus
+    # `mount,` and the `userns,` rule AppArmor 4 needs, keeping every /proc and
+    # /sys denial. It is in host-setup/apparmor/parrot-flatpak, it is HOST state
+    # rather than image state, and host-setup/install-apparmor-profile.sh loads
+    # it and proves the mount before a run depends on it.
+    #
+    # On a host with no AppArmor the argument is accepted and does nothing, so
+    # this stays a single scenario for both.
+    #
+    # It is not a third grant on top of the two above - it is narrower than what
+    # docker-default already allowed on one axis. `mount,` still needs
+    # CAP_SYS_ADMIN in the namespace doing the mounting, and these containers
+    # keep Docker's default capability set; what it permits is the mount bwrap
+    # makes inside the user namespace it just created. Meanwhile the profile
+    # denies /proc/sysrq-trigger, which `systempaths=unconfined` had unmasked -
+    # so the "it can panic the HOST" sentence above no longer holds under it.
+    #
+    # GMT gates docker-run-args behind --allow-unsafe in CLI mode ONLY. The job
+    # runner passes the user's
+    # capabilities.measurement.orchestrators.docker.allowed_run_args, and any
+    # argument that fullmatches an entry there is accepted with no unsafe flag
+    # (lib/scenario_runner.py). The three strings below are what to allowlist
+    # for a production run; --allow-unsafe is only needed for local `runner.py`.
+    docker-run-args:
+      - --security-opt seccomp=unconfined
+      - --security-opt systempaths=unconfined
+      - --security-opt apparmor=parrot-flatpak
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/wordprocessors/collabora/install.sh
+      # Deterministic window geometry, and a fluxbox keys file with no keyboard
+      # bindings at all - the default one grabs Control+F1..F12 for workspace
+      # switching, which silently steals shortcuts from the application. Must
+      # run BEFORE entrypoint.sh: fluxbox reads its configuration once at
+      # startup and will not replace files that are already there.
+      #
+      # res_name is `coda-qt` - the Chromium-based Collabora Online UI running
+      # offline, not LibreOffice's `soffice`. WM_CLASS is "coda-qt",
+      # "Collabora Office". Read back after the fix:
+      #   [Collabora Office - Start] X=0 Y=0 WIDTH=1440 HEIGHT=900
+      - command: bash /tmp/repo/applications/wordprocessors/common/pin-windows.sh coda-qt 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/wordprocessors/collabora/collabora-normalized.parrot
+        read-notes-stdout: true
