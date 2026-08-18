@@ -1,0 +1,80 @@
+# RECORDED. schildichat.parrot was made against this file, and every block that
+# changes server state was verified with matrix-truth.py rather than by eye.
+#
+# NOTE FOR RUNNING THIS BY HAND: the docker-run-args below make GMT refuse to
+# start in CLI mode unless it is given --allow-unsafe. The failure looks like a
+# clean run that ends during BOOT with no flow output.
+name: Parrot SchildiChat Desktop (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives SchildiChat Desktop through a 23-block Matrix session using Parrot
+
+# SchildiChat is the control in this group: same Electron and same
+# matrix-js-sdk as Element, different UI layer. Every setting below that could
+# affect the comparison is therefore identical to element/usage_scenario.yml on
+# purpose - same resolution, same --shm-size, same setup order. If one of them
+# has to change, both change.
+networks:
+  parrot-matrix:
+
+services:
+  matrix-container:
+    image: ribalba/parrot-matrixserver:v1
+    networks:
+      parrot-matrix:
+        aliases:
+          - matrix.parrot.test
+    setup-commands:
+      - command: parrot-matrixserver-start
+      - command: parrot-bot-start
+
+  window-container:
+    image: ribalba/xwindow-server
+    depends_on:
+      - matrix-container
+    networks:
+      - parrot-matrix
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    # See element/usage_scenario.yml for why 64 MB of /dev/shm is not enough for
+    # Chromium and why --disable-dev-shm-usage is the wrong fix.
+    docker-run-args:
+      - --shm-size=1g
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh
+      - command: bash /tmp/repo/applications/chatclients/schildichat/install.sh
+      # NO SESSION SEEDING AND NO keyring.sh - both are dead ends for every
+      # client in this group. An access token is server state and GMT rebuilds
+      # the homeserver per run, so a captured profile comes back to a server
+      # that never issued it; and a keyring unlocked in a setup-command is on a
+      # different session bus from the application. The scenario signs in itself
+      # (script.md block 2), and a client that needs its keyring unlocked needs
+      # a launcher wrapper, not a setup-command. Measured on nheko - see
+      # ../nheko/MEASUREMENTS.md.
+      # res_name is `schildichat`, read back off the running window:
+      #   WM_CLASS(STRING) = "schildichat", "SchildiChat"
+      #
+      # NOT `schildichat-desktop`, which is the binary, the package and the PATH
+      # command - the same trap Element sets, and for the same reason: Electron
+      # names the window after the app id, not after the executable. A res_name
+      # that matches nothing pins nothing, silently, and every coordinate then
+      # drifts per run.
+      - command: bash /tmp/repo/applications/chatclients/common/pin-windows.sh schildichat 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      # Same recording as usage_scenario.yml, replayed from the time-normalized
+      # copy: tools/check_blocks.py --normalize-time pads every block to the
+      # longest that block takes across the group, so the blocks line up for
+      # side-by-side comparison.  The actions and their order are unchanged.
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/chatclients/schildichat/schildichat-normalized.parrot
+        read-notes-stdout: true

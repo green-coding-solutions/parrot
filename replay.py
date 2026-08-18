@@ -15,6 +15,7 @@ from timed_xmacro import iter_replay_lines, parse_xmacro_event
 
 CHECK_IMAGE_SCRIPT   = "/usr/local/bin/check-image.sh"
 POSITION_WINDOW_SCRIPT = "/usr/local/bin/position-window.sh"
+APP_LAUNCH_LOG       = "/tmp/xtest-app-launch.log"
 
 
 # ---------------------------------------------------------------------------
@@ -56,6 +57,37 @@ def parse_args() -> argparse.Namespace:
 def _env_flag(name: str) -> bool:
     """Return True if environment variable *name* is set to a truthy value."""
     return os.environ.get(name, "").strip().lower() in ("1", "true", "yes")
+
+
+def _window_timeout() -> float:
+    """
+    Seconds to wait for the app window to map after launching it.
+
+    90 s is roughly four times what the slowest client in the chat group takes
+    to paint on the machine its macro was recorded on, and it is a ceiling
+    rather than a delay: the poll returns the moment the window appears, so on a
+    machine that starts the app as fast as the recording machine this costs
+    nothing. Raise REPLAY_WINDOW_TIMEOUT for a slower measurement node.
+    """
+    raw = os.environ.get("REPLAY_WINDOW_TIMEOUT", "90")
+    try:
+        timeout = float(raw)
+    except ValueError:
+        raise SystemExit(f"Invalid REPLAY_WINDOW_TIMEOUT: {raw}")
+    if timeout < 0:
+        raise SystemExit("REPLAY_WINDOW_TIMEOUT must be >= 0")
+    return timeout
+
+
+def _tail(path: str, lines: int = 40) -> str:
+    """Return the last *lines* lines of a file, indented, for error output."""
+    try:
+        content = Path(path).read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as exc:
+        return f"    (unreadable: {exc})"
+    if not content:
+        return "    (empty - the start command wrote nothing)"
+    return "\n".join(f"    {line}" for line in content[-lines:])
 
 
 def collect_block_files(directory: Path, run_to: int) -> list[Path]:
@@ -179,12 +211,139 @@ def _find_window(display: str, window_class: str, window_title: str) -> str | No
     return None
 
 
+def _describe_visible_windows(display: str) -> str:
+    """
+    Return a one-line-per-window inventory of the display, for error output.
+
+    WM_CLASS is the point of this, not a nicety: a window that maps under a class
+    the recording does not name fails in exactly the same way as no window at all
+    - check-image.sh exits 2 either way - and only the class tells the two apart.
+
+    It is read with python-xlib rather than xdotool because the xdotool in this
+    image (3.20160805) has no `getwindowclassname`, and `xprop` is not installed
+    either; asking xdotool for it yields an empty column, which is the one thing
+    this function must not do. python3-xlib is in the image; if it is ever not,
+    fall back to names alone and say so rather than raising inside a failure path.
+    """
+    try:
+        from Xlib import display as xdisplay   # noqa: PLC0415 - failure path only
+    except ImportError:
+        return _describe_visible_windows_by_name(display)
+
+    try:
+        conn = xdisplay.Display(display)
+    except Exception as exc:                   # noqa: BLE001 - any failure is non-fatal here
+        return f"    (could not open {display}: {exc})"
+
+    lines: list[str] = []
+
+    def walk(window, depth: int) -> None:
+        # fluxbox reparents clients into frames, so the interesting windows are
+        # not the root's direct children. Three levels covers frame -> client.
+        if depth > 3:
+            return
+        try:
+            klass = window.get_wm_class()
+            name  = window.get_wm_name()
+            geom  = window.get_geometry()
+            children = window.query_tree().children
+        except Exception:                      # noqa: BLE001 - window may vanish mid-walk
+            return
+        if klass or name:
+            res_class = klass[1] if klass else ""
+            lines.append(
+                f"    {window.id}  class={res_class!r}  name={name or ''!r}  "
+                f"{geom.width}x{geom.height}+{geom.x}+{geom.y}"
+            )
+        for child in children:
+            walk(child, depth + 1)
+
+    try:
+        walk(conn.screen().root, 0)
+    finally:
+        conn.close()
+
+    return "\n".join(lines) if lines else "    (no windows with a class or a name)"
+
+
+def _describe_visible_windows_by_name(display: str) -> str:
+    """Names-only inventory, used when python-xlib is unavailable. See above."""
+    env = {**os.environ, "DISPLAY": display}
+    try:
+        search = subprocess.run(
+            ["xdotool", "search", "--onlyvisible", "--name", "."],
+            env=env, capture_output=True, text=True,
+        )
+    except OSError as exc:
+        # This runs only when the run has already failed. It must not replace the
+        # failure being reported with one of its own.
+        return f"    (could not list windows: {exc})"
+    lines = []
+    for window_id in search.stdout.split():
+        name = subprocess.run(
+            ["xdotool", "getwindowname", window_id],
+            env=env, capture_output=True, text=True,
+        ).stdout.strip()
+        lines.append(f"    {window_id}  name={name!r}  (no class - python-xlib unavailable)")
+    return "\n".join(lines) if lines else "    (no visible windows)"
+
+
+def report_missing_window(display: str, app_meta: dict[str, str], preamble: str = "") -> None:
+    """
+    Print everything that says WHY no window matched, to stderr.
+
+    Both places this is called from - the launch in focus_app and a Check that
+    exits 2 - report the same failure, and both happen inside a container that
+    the runner tears down before anyone can look at it. The launch log and the
+    window list only exist there, so the diagnosis has to travel out on stderr
+    or it does not travel at all.
+    """
+    if preamble:
+        print(preamble, file=sys.stderr)
+    print(
+        f"[replay] no window matching class={app_meta.get('windowclass', '')!r} "
+        f"title={app_meta.get('windowtitle', '')!r}\n"
+        f"[replay] visible windows on {display}:\n"
+        f"{_describe_visible_windows(display)}\n"
+        f"[replay] tail of {APP_LAUNCH_LOG}:\n"
+        f"{_tail(APP_LAUNCH_LOG)}",
+        file=sys.stderr,
+    )
+
+
+def wait_for_window(display: str, win_class: str, win_title: str, timeout: float) -> str | None:
+    """
+    Poll for the app window until it maps or *timeout* seconds elapse.
+
+    This is NOT mainly about buying the app more time. Before it existed the app
+    already got a generous budget before the first Check: a 1 s sleep, then
+    position-window.sh's own 30 s wait loop, then the recording's leading wait -
+    around 50 s for every client in the chat group, itself padding rather than a
+    measured startup. An app that has not mapped a window in ~85 s is not slow,
+    it has failed to start.
+
+    What this buys is WHERE and HOW the run fails. Without it a failed launch
+    surfaces a minute later as check-image.sh exiting 2 with "app window not
+    found" - a screenshot-shaped error for something that is not a screenshot
+    problem - and the launch output that says why dies with the container.
+    Raise REPLAY_WINDOW_TIMEOUT on a measurement node slow enough to need it.
+    """
+    deadline = time.monotonic() + timeout
+    while True:
+        win = _find_window(display, win_class, win_title)
+        if win:
+            return win
+        if time.monotonic() >= deadline:
+            return None
+        time.sleep(0.25)
+
+
 def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, int] | None) -> None:
     """
     Ensure the app is running, positioned, and in the foreground.
 
     1. Try to find an existing window by class / title.
-    2. If not found, launch the app via startcommand and wait briefly.
+    2. If not found, launch the app via startcommand and wait for it to map.
     3. Run position-window.sh to size and place it.
     4. Raise and focus the window.
     """
@@ -197,10 +356,30 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
 
     if win is None and start_cmd:
         print(f"[replay] window not found — launching: {start_cmd}", file=sys.stderr)
-        with open("/tmp/xtest-app-launch.log", "w") as log:
+        with open(APP_LAUNCH_LOG, "w") as log:
             subprocess.Popen(["bash", "-lc", start_cmd], env=env, stdout=log, stderr=log)
-        time.sleep(1)
-        win = _find_window(display, win_class, win_title)
+
+        timeout = _window_timeout()
+        started = time.monotonic()
+        win = wait_for_window(display, win_class, win_title, timeout)
+        waited = time.monotonic() - started
+
+        if win is None:
+            # Every later action - the position, the clicks, the Checks - targets
+            # a window that is not there, so the run is already lost. Fail here,
+            # with the launch output, instead of 50 s later inside check-image.sh
+            # where the only symptom is "app window not found".
+            report_missing_window(
+                display, app_meta,
+                preamble=f"[replay] FATAL: the app did not map a window in {timeout:.0f}s",
+            )
+            raise SystemExit(1)
+
+        # Worth printing on every run: it is the recorded leading wait's margin.
+        # Anything close to the timeout means this machine is slower at starting
+        # the app than the one the macro was recorded on, and the macro's own
+        # leading wait no longer covers the startup - see wait_for_window.
+        print(f"[replay] window mapped after {waited:.1f}s", file=sys.stderr)
 
     pos_env = {
         **env,
@@ -305,7 +484,17 @@ def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Pat
             "CHECK_MAX_RMSE":    os.environ.get("CHECK_MAX_RMSE",    ""),
             "CHECK_IGNORE_RECT": os.environ.get("CHECK_IGNORE_RECT", ""),
         }
-        subprocess.run([CHECK_IMAGE_SCRIPT, ref], env=check_env, check=True)
+        try:
+            subprocess.run([CHECK_IMAGE_SCRIPT, ref], env=check_env, check=True)
+        except subprocess.CalledProcessError as exc:
+            # Exit 2 from check-image.sh means "no window matched", which is not a
+            # screenshot problem: the app never mapped a window, or mapped one under
+            # a class/title the recording does not name. The reason is in the launch
+            # log and in the window list, neither of which survives the container - so
+            # print both here, where they reach the runner's stderr.
+            if exc.returncode == 2:
+                report_missing_window(display, app_meta)
+            raise
     elif op == "log":
         # Only the label - the text before the first colon - becomes the note.
         # The rest of the line is the instruction for whoever recorded the macro

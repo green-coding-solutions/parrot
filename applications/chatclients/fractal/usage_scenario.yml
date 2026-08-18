@@ -1,0 +1,168 @@
+# RECORDED AND VERIFIED. fractal.parrot replays 23/23 with a worst RMSE of 0.095
+# against a 0.2 threshold, and the replay's server-side effects were checked with
+# matrix-truth.py - including `targets`, which resolves what the reply, reaction
+# and edit actually landed on - rather than by eye.
+#
+# NOTE FOR RUNNING THIS BY HAND: the docker-run-args below make GMT refuse to
+# start in CLI mode unless it is given --allow-unsafe. The failure looks like a
+# clean run that ends during BOOT with no flow output. See ../nheko/MEASUREMENTS.md
+# for the rest of the run flags.
+#
+# THREE BLOCKS ARE NOT LIKE-FOR-LIKE with the other clients, each by an explicit
+# decision, and all three have to be stated in the results:
+#   blocks 8/10  media previews are seeded ON; the shipped default hides them in
+#                public rooms, and Field Photos is public
+#   block 17     the image is PASTED, so no file chooser is measured here
+#   block 3      account recovery cannot be dismissed, so Fractal does
+#                cross-signing and key-backup work no other client does
+name: Parrot Fractal
+author: Didi <didi@green-coding.io>
+description: Drives Fractal through a 23-block Matrix session using Parrot
+
+networks:
+  parrot-matrix:
+
+services:
+  matrix-container:
+    image: ribalba/parrot-matrixserver:v1
+    networks:
+      parrot-matrix:
+        aliases:
+          - matrix.parrot.test
+    setup-commands:
+      - command: parrot-matrixserver-start
+      - command: parrot-bot-start
+      # FRACTAL ONLY, and the one deviation from the other four clients.
+      #
+      # Fractal implements MSC4278 media previews and ships defaulting to "Show
+      # only in private rooms". `Field Photos` is PUBLIC, so on the default
+      # Fractal renders 400 "Click to show preview" placeholders while the other
+      # four decode 400 thumbnails - and script.md blocks 8 and 10 are exactly
+      # "wait for the thumbnails to finish decoding". Left alone those two
+      # blocks would compare image decoding against scrolling past grey boxes.
+      #
+      # The setting is ACCOUNT DATA ON THE HOMESERVER, not a local preference,
+      # and GMT rebuilds the homeserver per run - so it has to be re-applied
+      # every run or it is not applied at all. This writes it live against the
+      # server that is running now; it does not touch the image or the corpus.
+      #
+      # THE RESULTS MUST SAY SO: this is not Fractal as shipped. See
+      # ../fractal/MEASUREMENTS.md, block 8.
+      - command: bash /tmp/repo/applications/chatclients/common/seed-media-previews.sh on
+
+  window-container:
+    image: ribalba/xwindow-server
+    depends_on:
+      - matrix-container
+    networks:
+      - parrot-matrix
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    # Required, and specific to the three Flatpak entrants: every `flatpak run`
+    # goes through bubblewrap. Neither of these grants a capability - the
+    # container keeps Docker's default set.
+    #
+    # THE SHORT VERSION: the application does not run as root. bwrap chooses
+    # between its privileged path (which needs CAP_SYS_ADMIN) and its
+    # unprivileged one by looking at the real uid - and a container is exactly
+    # the case where uid 0 does NOT imply SYS_ADMIN. So install-flatpak.sh runs
+    # the application as uid 1001, which puts bwrap on the path that needs
+    # nothing from the container.
+    #
+    # The full matrix of what fails without each flag is in
+    # applications/wordprocessors/calligra/usage_scenario.yml - it was measured
+    # one flag at a time there and applies unchanged here.
+    #
+    # What is left is not a free grant: an unmasked /proc means the container
+    # can write /proc/sysrq-trigger, i.e. it can panic the HOST. It can no
+    # longer escape into it - that needed SYS_ADMIN, which is gone.
+    #
+    # GMT gates docker-run-args behind --allow-unsafe in CLI mode ONLY. For a
+    # production run, allowlist both strings under
+    # capabilities.measurement.orchestrators.docker.allowed_run_args.
+    docker-run-args:
+      - --security-opt seccomp=unconfined
+      - --security-opt systempaths=unconfined
+      # THERE IS DELIBERATELY NO `--device /dev/fuse` AND NO
+      # `--cap-add SYS_ADMIN` HERE. Both were tried, and the reasoning is worth
+      # keeping because the obvious fix for block 17 is to add them.
+      #
+      # Fractal is GTK4 in a Flatpak, so its file chooser is always the XDG
+      # portal - GTK forces it for sandboxed apps and GTK_USE_PORTAL=0 does not
+      # turn it off. After the pick, xdg-desktop-portal registers the file with
+      # org.freedesktop.portal.Documents so the sandbox can read it, and that
+      # document store is a FUSE filesystem. Without it the whole call fails and
+      # block 17 SILENTLY SENDS NOTHING - the chooser closes, the timeline is
+      # unchanged, and no error reaches the screen.
+      #
+      # Measured, in this order:
+      #   no /dev/fuse          "fusermount3: fuse device not found"
+      #   + --device /dev/fuse  "fusermount3: mount failed: Operation not permitted"
+      #   + --cap-add SYS_ADMIN  portal on /run/user/1001/doc type fuse.portal  <- works
+      #
+      # `--filesystem=host` on the Flatpak does NOT avoid it: xdg-desktop-portal
+      # 1.18.4 registers documents unconditionally for sandboxed apps.
+      #
+      # So making the file chooser work costs CAP_SYS_ADMIN, which this group
+      # removed on purpose (commit cbe1099) and which is what the note above
+      # means by "It can no longer escape into it". Block 17 therefore pastes
+      # the image from the clipboard instead - a real upload of the same file,
+      # measured, with the container keeping Docker's default capability set.
+      # The trade is written up in MEASUREMENTS.md block 17.
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh
+      - command: bash /tmp/repo/applications/chatclients/fractal/install.sh
+      # NO SESSION SEEDING AND NO keyring.sh - both are dead ends for every
+      # client in this group. An access token is server state and GMT rebuilds
+      # the homeserver per run, so a captured profile comes back to a server
+      # that never issued it; and a keyring unlocked in a setup-command is on a
+      # different session bus from the application. The scenario signs in itself
+      # (script.md block 2), and a client that needs its keyring unlocked needs
+      # a launcher wrapper, not a setup-command. Measured on nheko - see
+      # ../nheko/MEASUREMENTS.md.
+      #
+      # The suspicion recorded here earlier was right, and nheko confirmed the
+      # mechanism: Fractal reaches the Secret Service through the XDG portal and
+      # flatpak-session runs the app under its own `dbus-run-session`, so the
+      # unlock has to happen inside that wrapper or not at all.
+      # res_name is `fractal`, read back off the running window:
+      #   WM_CLASS(STRING) = "fractal", "fractal"
+      #
+      # Both halves are the same here and neither is the Flatpak ref -
+      # `org.gnome.Fractal` would match nothing, and matching nothing is silent:
+      # fluxbox applies no rule, the window maps at whatever size the app asks
+      # for, and every coordinate in the recording is wrong. Measured without
+      # this argument, the main window came up 766x639 at (337, 130) instead of
+      # 1440x900 at (0, 0).
+      #
+      # Only the MAIN window is pinned. Fractal's Room Details / invite window
+      # (640x780) and its menus and tooltips share the class and must stay
+      # unpinned, which is why no res-class or role argument is passed.
+      - command: bash /tmp/repo/applications/chatclients/common/pin-windows.sh fractal 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+      # MUST BE LAST - after entrypoint.sh, not before it. This needs the X
+      # server that entrypoint.sh starts; run earlier it fails with "Can't open
+      # display :99" and leaves an empty clipboard, which block 17 cannot tell
+      # apart from a working one.
+      #
+      # Block 17 pastes rather than using the file chooser, because Fractal's
+      # chooser is the XDG portal and the portal's document store needs a FUSE
+      # mount, i.e. CAP_SYS_ADMIN - see the docker-run-args note above. The
+      # xclip it starts stays running for the whole session: X11 has no
+      # clipboard daemon, so when the owning client exits the clipboard is
+      # simply empty.
+      - command: bash /tmp/repo/applications/chatclients/common/seed-clipboard.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/chatclients/fractal/fractal.parrot
+        read-notes-stdout: true

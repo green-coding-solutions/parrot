@@ -55,4 +55,58 @@ check-mailserver:
 	docker exec parrot-mailserver-check parrot-mailserver-start
 	docker rm -f parrot-mailserver-check >/dev/null
 
-.PHONY: build push mailserver push-mailserver check-mailserver
+# ---------------------------------------------------------------------------
+# Chat-client benchmark Matrix homeserver
+#
+# Carries the seeded corpus inside the image, so a benchmark run starts two
+# daemons instead of registering 500 accounts and writing tens of thousands of
+# events. Bump MATRIX_TAG whenever the corpus changes - the tag is what the
+# usage_scenario files pin, and a reseed changes every room ID.
+# ---------------------------------------------------------------------------
+MATRIX_IMAGE ?= ribalba/parrot-matrixserver
+MATRIX_TAG ?= v1
+MATRIX_CONTEXT := applications/chatclients
+MATRIX_DOCKERFILE := $(MATRIX_CONTEXT)/matrixserver/Dockerfile
+
+# Build a smaller corpus for quick iteration:
+#   make matrixserver MATRIX_HISTORY=2000
+# See the note on PARROT_MATRIX_HISTORY in applications/chatclients/account.env
+# for why this is 8000 and not 40000: deep history does not make the initial
+# sync expensive, and every extra 1000 events costs about 2.5 minutes of build.
+MATRIX_HISTORY ?= 8000
+MATRIX_PHOTOS ?= 400
+MATRIX_MEMBERS ?= 500
+
+# Bootstrap only. The version pins in matrixserver/build.sh were written
+# without network access; this builds without them and prints what it resolved,
+# ready to be pasted back. Never benchmark from an unpinned build.
+MATRIX_UNPINNED ?= 0
+
+matrixserver:
+	docker buildx build --platform $(PLATFORM) --load \
+		--build-arg PARROT_MATRIX_HISTORY=$(MATRIX_HISTORY) \
+		--build-arg PARROT_MATRIX_PHOTOS=$(MATRIX_PHOTOS) \
+		--build-arg PARROT_MATRIX_MEMBERS=$(MATRIX_MEMBERS) \
+		--build-arg PARROT_ALLOW_UNPINNED=$(MATRIX_UNPINNED) \
+		-t $(MATRIX_IMAGE):$(MATRIX_TAG) \
+		-f $(MATRIX_DOCKERFILE) $(MATRIX_CONTEXT)
+
+push-matrixserver:
+	docker buildx build --platform $(PLATFORMS) \
+		--build-arg PARROT_MATRIX_HISTORY=$(MATRIX_HISTORY) \
+		--build-arg PARROT_MATRIX_PHOTOS=$(MATRIX_PHOTOS) \
+		--build-arg PARROT_MATRIX_MEMBERS=$(MATRIX_MEMBERS) \
+		-t $(MATRIX_IMAGE):$(MATRIX_TAG) --push \
+		-f $(MATRIX_DOCKERFILE) $(MATRIX_CONTEXT)
+
+# Start the image on its own, serve the corpus and run the smoke test against
+# it. Useful after a rebuild, before pushing.
+check-matrixserver:
+	docker rm -f parrot-matrixserver-check >/dev/null 2>&1 || true
+	docker run -d --name parrot-matrixserver-check $(MATRIX_IMAGE):$(MATRIX_TAG) >/dev/null
+	docker exec parrot-matrixserver-check parrot-matrixserver-start
+	docker exec parrot-matrixserver-check parrot-bot-start
+	docker rm -f parrot-matrixserver-check >/dev/null
+
+.PHONY: build push mailserver push-mailserver check-mailserver \
+	matrixserver push-matrixserver check-matrixserver

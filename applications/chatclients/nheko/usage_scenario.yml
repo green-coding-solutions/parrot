@@ -1,0 +1,78 @@
+# Recorded 2026-08-08 against ribalba/parrot-matrixserver:v1: 23 checkpoints,
+# every mutating block verified against the homeserver rather than the
+# screenshot. Landmarks and the reasoning behind the driver are in
+# MEASUREMENTS.md.
+name: Parrot nheko
+author: Didi <didi@green-coding.io>
+description: Drives nheko through a 23-block Matrix session using Parrot
+
+networks:
+  parrot-matrix:
+
+services:
+  matrix-container:
+    image: ribalba/parrot-matrixserver:v1
+    networks:
+      parrot-matrix:
+        aliases:
+          - matrix.parrot.test
+    setup-commands:
+      - command: parrot-matrixserver-start
+      - command: parrot-bot-start
+
+  window-container:
+    image: ribalba/xwindow-server
+    depends_on:
+      - matrix-container
+    networks:
+      - parrot-matrix
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    # No docker-run-args. nheko is the only client in this group that needs
+    # none: it is an apt-installed Qt binary, so there is no Chromium wanting
+    # shared memory and no bubblewrap wanting a user namespace. That is worth
+    # stating rather than leaving as an absence - it means nheko's figure is the
+    # one with nothing granted to the container at all.
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh
+      - command: bash /tmp/repo/applications/chatclients/nheko/install.sh
+      # NO SESSION SEEDING. The scenario signs in itself - script.md block 2 -
+      # so the account starts from the sign-in screen like a new install.
+      #
+      # That is not a fallback, it is the fix. An access token is server state:
+      # logging in writes a row to the homeserver's database, and that write
+      # lives in the running container, not in the image. GMT rebuilds both
+      # containers for every run, so any token seeded ahead of time comes back
+      # to a homeserver that has never heard of it:
+      #   nheko: dropping to the login page: Failed to setup encryption keys.
+      #          Server response: Invalid access token passed. 401.
+      # Measured, not predicted. Signing in inside the run is the only way the
+      # credential and the server agree, and it gives all six clients the same
+      # block 1 instead of five different seeding mechanisms.
+      #
+      # There is no keyring.sh step either. Unlocking the keyring from a
+      # setup-command demonstrably does not reach the application - that shell
+      # has its own session bus and nheko launches on a different one. nheko
+      # writes its token to the secret service after signing in, so the unlock
+      # still has to happen, and it happens inside the launcher; see install.sh.
+      # res_name is `nheko`, read back off the running window:
+      #   WM_CLASS(STRING) = "nheko", "nheko"
+      # Both halves are the same string, so this also works as xdotool's
+      # --class. Without it nheko opens at 1066x600 wherever fluxbox puts it -
+      # measured, not assumed.
+      - command: bash /tmp/repo/applications/chatclients/common/pin-windows.sh nheko 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/chatclients/nheko/nheko.parrot
+        read-notes-stdout: true

@@ -1,0 +1,161 @@
+# Synapse configuration for the Parrot chat-client benchmark.
+#
+# Hand-written rather than produced by `synapse --generate-config`, because the
+# generated file carries random secrets and a random signing key: the image
+# would differ on every build, and so would anything derived from it.  Every
+# secret below is fixed and public.  That is safe here and nowhere else - this
+# server is reachable only from a private Docker network, holds nothing real,
+# and is thrown away at the end of the run.
+#
+# Several settings exist to keep the measurement about the client rather than
+# about the weather.  Those are marked DETERMINISM and should not be relaxed
+# without re-recording the whole group.
+
+server_name: "parrot.test"
+pid_file: /var/run/matrix-synapse.pid
+public_baseurl: "http://matrix.parrot.test:8008/"
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: false
+    bind_addresses: ['0.0.0.0']
+    resources:
+      - names: [client, federation]
+        compress: false
+
+# PostgreSQL, not SQLite, and this matters for the benchmark rather than for
+# taste.  The scenario's second block is "Initial sync", which is the single
+# biggest differentiator between these clients - and on SQLite an initial sync
+# of a room with tens of thousands of events and 500 members is slow enough
+# that the server becomes the bottleneck.  Every client would then wait on
+# Synapse instead of on itself, and the block would measure the server.
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: synapse
+    dbname: synapse
+    host: 127.0.0.1
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/etc/matrix-synapse/log.config"
+media_store_path: /var/lib/matrix-synapse/media
+signing_key_path: "/etc/matrix-synapse/parrot.test.signing.key"
+
+# No federation partner exists on this network, and reaching for a key server
+# would mean reaching for the internet mid-measurement.
+trusted_key_servers: []
+suppress_key_server_warning: true
+report_stats: false
+
+# Accounts are created by the seeder through the application service, so the
+# public registration path stays shut.  The shared secret below is what
+# register_new_matrix_user uses, which works regardless of this setting.
+enable_registration: false
+registration_shared_secret: "parrot-benchmark-registration-secret"
+macaroon_secret_key: "parrot-benchmark-macaroon-secret"
+form_secret: "parrot-benchmark-form-secret"
+
+app_service_config_files:
+  - /etc/matrix-synapse/parrot-appservice.yaml
+
+# DETERMINISM.  URL previews would have the server fetch every link a seeded
+# message contains.  There is no internet on this network, so each one is a DNS
+# failure and a timeout, at a moment decided by whichever client happened to
+# scroll that message into view.
+url_preview_enabled: false
+
+# DETERMINISM.  Presence is the loudest non-deterministic thing a homeserver
+# does: with 500 members in the busy room, every client would receive a stream
+# of presence EDUs whose timing depends on nothing in the scenario.  It is a
+# real cost in the wild, and it is deliberately excluded here because it cannot
+# be made to arrive at the same point in two different runs.
+presence:
+  enabled: false
+
+# DETERMINISM.  The corpus is unencrypted, so the comparison is not about which
+# client implements key sharing how.  This setting only governs what Synapse
+# advises for newly created rooms - clients still decide for themselves, which
+# is why the scenario's "Create room" block specifies a PUBLIC room: every
+# client leaves encryption off for those.
+encryption_enabled_by_default_for_room_type: "off"
+
+# Rate limiting is effectively off.  The seeder writes tens of thousands of
+# events, and the scenario sends several messages in quick succession; at the
+# default limits both would start collecting 429s, and a client that retries
+# politely would look slower than one that hammers.  The application service is
+# separately exempt via `rate_limited: false` in its registration file.
+rc_message:
+  per_second: 1000
+  burst_count: 10000
+rc_registration:
+  per_second: 1000
+  burst_count: 10000
+rc_login:
+  address:
+    per_second: 1000
+    burst_count: 10000
+  account:
+    per_second: 1000
+    burst_count: 10000
+  failed_attempts:
+    per_second: 1000
+    burst_count: 10000
+rc_joins:
+  local:
+    per_second: 1000
+    burst_count: 10000
+  remote:
+    per_second: 1000
+    burst_count: 10000
+rc_invites:
+  per_room:
+    per_second: 1000
+    burst_count: 10000
+  per_user:
+    per_second: 1000
+    burst_count: 10000
+
+# The scenario uploads parrot.png, which is a little under 1 MB.  The default
+# limit would allow it; this is raised so that a larger anchor image later does
+# not silently start failing the upload block.
+max_upload_size: 50M
+
+# AUTHENTICATED MEDIA OFF - without this, one client in the group cannot render
+# a single image.
+#
+# Synapse defaults this to true since 1.120. When it is on, media uploaded
+# while it is on is flagged authenticated in the database and the legacy
+# unauthenticated endpoint /_matrix/media/v3/download 404s it. Measured:
+#
+#   nheko: Failed to download parrot.test/hVyeUPGzJQ...: (http: 404,
+#          matrix: M_NOT_FOUND:'Not found')
+#
+# The bytes were on disk the whole time - 2000 files in the media store, and
+# the same id served 609437 bytes over /_matrix/client/v1/media/download with a
+# token. nheko 0.11.3 only speaks the legacy endpoint, so `Field Photos`
+# rendered a grid of broken-image placeholders and three blocks of the scenario
+# measured nothing at all.
+#
+# Turning it off is strictly more compatible, not a downgrade: the authenticated
+# endpoint keeps working (the server still advertises v1.11), and the legacy one
+# starts working again. Leaving it on would mean the group's slowest and its
+# leanest client are doing different amounts of work in the photo blocks, which
+# is the one thing this benchmark exists to avoid.
+#
+# The flag is not retroactive - it is recorded per media row at upload time -
+# so it only takes effect because seed_corpus.py runs during the image build,
+# after this file is in place.
+enable_authenticated_media: false
+
+# Retention and background jobs off: a purge or a state compression running
+# mid-measurement would be server CPU that lands in the run for one client and
+# not another.
+retention:
+  enabled: false
+
+# The admin API is what smoke_test.py checks the corpus through.
+enable_media_repo: true

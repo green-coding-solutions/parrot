@@ -1,0 +1,120 @@
+# RECORDED AND VERIFIED. fluffychat.parrot replays 23/23 with a worst RMSE of
+# 0.018 against a 0.2 threshold, and the replay's server-side effects were
+# checked with matrix-truth.py - including `targets`, which resolves what the
+# reply, reaction and edit actually landed on - rather than by eye.
+#
+# NOTE FOR RUNNING THIS BY HAND: the docker-run-args below make GMT refuse to
+# start in CLI mode unless it is given --allow-unsafe. The failure looks like a
+# clean run that ends during BOOT with no flow output. See ../nheko/MEASUREMENTS.md
+# for the rest of the run flags.
+#
+# THREE BLOCKS ARE NOT LIKE-FOR-LIKE with the other clients, and all three have
+# to be stated in the results:
+#   block 3   the crypto prompt cannot be dismissed - "Skip" skips only the
+#             passphrase - so FluffyChat does cross-signing work that nheko,
+#             Element and SchildiChat do not. Fractal is in the same position.
+#   block 15  the quick-reaction row is used, so NO emoji picker is rendered:
+#             👍 is below the fold of the "Custom reaction" grid and that grid
+#             does not scroll with the wheel.
+#   block 17  the image is PASTED, so no file chooser is measured - the XDG
+#             portal's document store needs a FUSE mount, i.e. CAP_SYS_ADMIN.
+#
+# AND blocks 7 and 9 produce checkpoints byte-identical to their predecessors,
+# because closing an in-window overlay restores the view to the pixel. The
+# overlays do open - verified by hand - but those two blocks are covered by the
+# energy measurement and NOT by their screenshots. See MEASUREMENTS.md.
+name: Parrot FluffyChat
+author: Didi <didi@green-coding.io>
+description: Drives FluffyChat through a 23-block Matrix session using Parrot
+
+networks:
+  parrot-matrix:
+
+services:
+  matrix-container:
+    image: ribalba/parrot-matrixserver:v1
+    networks:
+      parrot-matrix:
+        aliases:
+          - matrix.parrot.test
+    setup-commands:
+      - command: parrot-matrixserver-start
+      - command: parrot-bot-start
+
+  window-container:
+    image: ribalba/xwindow-server
+    depends_on:
+      - matrix-container
+    networks:
+      - parrot-matrix
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    # See fractal/usage_scenario.yml for the full explanation - both flags are
+    # for bubblewrap and neither grants a capability. FluffyChat uses the same
+    # org.gnome.Platform//50 runtime as Fractal, pinned to the same commit, so
+    # the runtime is a constant between those two and a gap between them is the
+    # application and its toolkit.
+    docker-run-args:
+      - --security-opt seccomp=unconfined
+      - --security-opt systempaths=unconfined
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh
+      - command: bash /tmp/repo/applications/chatclients/fluffychat/install.sh
+      # NO SESSION SEEDING AND NO keyring.sh - both are dead ends for every
+      # client in this group. An access token is server state and GMT rebuilds
+      # the homeserver per run, so a captured profile comes back to a server
+      # that never issued it; and a keyring unlocked in a setup-command is on a
+      # different session bus from the application. The scenario signs in itself
+      # (script.md block 2), and a client that needs its keyring unlocked needs
+      # a launcher wrapper, not a setup-command. Measured on nheko - see
+      # ../nheko/MEASUREMENTS.md.
+      #
+      # FluffyChat may well need no secret service at all - it keeps its session
+      # in a Hive/SQLite store under the Flutter data directory. That would make
+      # it the only client here with nothing to unlock, which is worth knowing
+      # but no longer changes the setup: it signs in through the UI regardless.
+      # res_name is `fluffychat`, read back off the running window:
+      #   WM_CLASS(STRING) = "fluffychat", "Fluffychat"
+      #
+      # The two halves DIFFER IN CASE here, unlike Fractal where both
+      # are identical. pin-windows.sh matches on res_name, the first field, so it
+      # gets the lowercase one; `Fluffychat` would match nothing, and matching
+      # nothing is silent - measured without the argument, the window came up
+      # 864x720 at (288, 121) instead of 1440x900 at the origin, with no error.
+      - command: bash /tmp/repo/applications/chatclients/common/pin-windows.sh fluffychat 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+      # MUST BE LAST - after entrypoint.sh, because it needs the X server that
+      # entrypoint starts. Run earlier it fails with "Can't open display :99"
+      # and leaves an empty clipboard, which block 17 cannot tell apart from a
+      # working one.
+      #
+      # Block 17 pastes rather than using the file chooser, for exactly the same
+      # reason as Fractal and confirmed the same way on this client: FluffyChat
+      # is a Flatpak, so its chooser is the XDG portal - it opens a window
+      # titled `flutter picker` with WM_CLASS xdg-desktop-portal-gtk - and the
+      # portal hands files over through the FUSE-backed document portal:
+      #
+      #   fusermount3: fuse device not found, try 'modprobe fuse' first
+      #   error: fuse init failed: Can't mount path /run/user/1001/doc
+      #   xdg-desktop-portal: Failed to register file:///tmp/parrot.png ... NoReply
+      #
+      # and no event reaches the room. Making it work costs CAP_SYS_ADMIN, which
+      # this group dropped on purpose in cbe1099. See ../fractal/MEASUREMENTS.md
+      # block 17 for the full measurement, and MEASUREMENTS.md here for what
+      # FluffyChat does differently: it still sends a real m.image with
+      # mimetype image/png, but with an EMPTY body rather than a filename.
+      - command: bash /tmp/repo/applications/chatclients/common/seed-clipboard.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/chatclients/fluffychat/fluffychat.parrot
+        read-notes-stdout: true

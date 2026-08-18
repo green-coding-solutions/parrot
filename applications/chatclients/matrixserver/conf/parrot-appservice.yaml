@@ -1,0 +1,53 @@
+# Application service registration for the corpus seeder.
+#
+# WHY THE SEEDER IS AN APPLICATION SERVICE
+#
+# Three things the benchmark needs are only available to an application
+# service, and all three are load-bearing:
+#
+#   1. TIMESTAMP MASSAGING (`?ts=`).  Ordinary users cannot choose when their
+#      messages were sent, so a corpus seeded through the normal API is stamped
+#      with the build date.  Every client renders recent messages as relative
+#      labels - "today", "yesterday", "2 minutes ago" - so the reference
+#      screenshots would start rotting the day after the image was built.  The
+#      email group solved the same problem by freezing its corpus in the past;
+#      `?ts=` is how that is done on Matrix.
+#
+#   2. IMPERSONATION (`?user_id=`).  The busy room has 500 members and a cast
+#      of named senders.  Without impersonation each one needs a real account,
+#      a real login and a real access token, which is 500 password hashes at
+#      build time and 500 tokens to keep straight.
+#
+#   3. NO RATE LIMITING (`rate_limited: false` below).  Seeding writes tens of
+#      thousands of events as fast as the database will take them.
+#
+# The tokens are fixed and public.  Same reasoning as the secrets in
+# homeserver.yaml: this server is private to a Docker network, holds nothing
+# real, and lives for the length of one benchmark.
+
+id: parrot-seeder
+
+# No URL: Synapse pushes events to an application service that publishes one,
+# and this service only ever writes.  Leaving it null means Synapse never tries
+# to deliver anything and never retries a delivery that cannot succeed.
+url: null
+
+as_token: "parrot-benchmark-appservice-as-token"
+hs_token: "parrot-benchmark-appservice-hs-token"
+
+sender_localpart: parrotseeder
+
+namespaces:
+  # Non-exclusive on purpose.  An exclusive namespace of `@.*` would stop
+  # Synapse from creating the account under test by any other route, including
+  # register_new_matrix_user - and @parrot: has to be a real account with a real
+  # password, because the clients log into it.
+  users:
+    - exclusive: false
+      regex: "@.*"
+  aliases:
+    - exclusive: false
+      regex: "#.*"
+  rooms: []
+
+rate_limited: false
