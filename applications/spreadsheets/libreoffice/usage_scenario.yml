@@ -1,0 +1,39 @@
+name: Parrot LibreOffice Calc
+author: Didi <didi@green-coding.io>
+description: Drives LibreOffice Calc through a 20,000-row ODS using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/spreadsheets/libreoffice/install.sh
+      # Deterministic window geometry.  Must run BEFORE entrypoint.sh: fluxbox
+      # reads ~/.fluxbox/apps once at startup and will not replace an existing
+      # file.
+      #
+      # The res_name and nothing else.  Adding the res_class the settled window
+      # reports (libreoffice-calc) makes the rule match NOTHING - fluxbox
+      # evaluates it at map time, before Calc has set its final class or title.
+      # Measured for Writer; see the table in pin-windows.sh.
+      #
+      # Calc's dialogs share the res_name, so this rule matches them too, and
+      # that is safe here: they are transient, which makes fluxbox centre them on
+      # their parent whatever [Position] says, and they carry a program-specified
+      # maximum size, which clamps [Dimensions].
+      - command: bash /tmp/repo/applications/spreadsheets/common/pin-windows.sh libreoffice 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/spreadsheets/libreoffice/libreoffice.parrot
+        read-notes-stdout: true

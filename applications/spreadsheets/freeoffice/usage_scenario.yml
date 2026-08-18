@@ -1,0 +1,43 @@
+name: Parrot SoftMaker FreeOffice PlanMaker
+author: Didi <didi@green-coding.io>
+description: Drives SoftMaker FreeOffice PlanMaker through a 20,000-row ODS using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/spreadsheets/freeoffice/install.sh
+      # Deterministic window geometry, and a fluxbox keys file with no keyboard
+      # bindings at all - the default one grabs Control+F1..F12 for workspace
+      # switching, which silently steals shortcuts from the application. Must
+      # run BEFORE entrypoint.sh: fluxbox reads its configuration once at
+      # startup and will not replace files that are already there.
+      #
+      # res_name is `tm`, NOT `textmaker24free`. The binary, the package and the
+      # .desktop file are all called textmaker24free and the window is not:
+      # WM_CLASS is "tm", "tm". Measured the expensive way - with
+      # (name=textmaker24free) the window came back 1080x675 at 180,144 and
+      # fluxbox said nothing at all. Read back after the fix:
+      #   [Untitled 1 - PlanMaker] X=0 Y=0 WIDTH=1440 HEIGHT=900
+      # UNVERIFIED. TextMaker's res_name was measured as `tm`, so PlanMaker's is
+      # very probably `pm` - but "very probably" is exactly the kind of guess an
+      # unmatched fluxbox rule swallows without a word, leaving the window
+      # unpinned and every reference screenshot at the wrong size. Launch it,
+      # read WM_CLASS, confirm the geometry comes back 1440x900 at 0,0.
+      - command: bash /tmp/repo/applications/spreadsheets/common/pin-windows.sh pm 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/spreadsheets/freeoffice/freeoffice.parrot
+        read-notes-stdout: true

@@ -1,0 +1,33 @@
+name: Parrot Gnumeric
+author: Didi <didi@green-coding.io>
+description: Drives Gnumeric through a 20,000-row ODS using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/spreadsheets/gnumeric/install.sh
+      # Deterministic window geometry. Must run BEFORE entrypoint.sh: fluxbox
+      # reads ~/.fluxbox/apps once at startup and will not replace an existing
+      # file.
+      #
+      # UNVERIFIED until the window is read back. fluxbox matches res_name at MAP
+      # time and an unmatched rule is completely silent - no error, just an
+      # unpinned window and reference screenshots at the wrong size.
+      - command: bash /tmp/repo/applications/spreadsheets/common/pin-windows.sh gnumeric 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/spreadsheets/gnumeric/gnumeric.parrot
+        read-notes-stdout: true
