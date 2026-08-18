@@ -1,0 +1,35 @@
+name: Parrot kitty
+author: Didi <didi@green-coding.io>
+description: Drives kitty through an eighteen-block terminal session using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/kitty/install.sh
+      # WM_CLASS(STRING) = "kitty", "kitty".
+      #
+      # kitty is the one entrant whose DEFAULTS cannot be recorded: its cursor
+      # blinks, so an idle window is not byte-identical to itself 1.5 s later
+      # and every checkpoint after the first fails on replay. install.sh sets
+      # cursor_blink_interval 0. Re-run the two-screenshot test after any
+      # upgrade.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh kitty 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/kitty/kitty.parrot
+        read-notes-stdout: true

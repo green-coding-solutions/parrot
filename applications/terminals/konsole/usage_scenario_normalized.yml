@@ -1,0 +1,30 @@
+name: Parrot Konsole
+author: Didi <didi@green-coding.io>
+description: Drives konsole through the same sixteen-block session, time-normalized so every block lasts as long as the slowest entrant's
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/konsole/install.sh
+      # WM_CLASS(STRING) = "konsole", "konsole" - both fields identical, the
+      # easy case. Measured anyway.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh konsole 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/konsole/konsole-normalized.parrot
+        read-notes-stdout: true

@@ -1,0 +1,31 @@
+name: Parrot st (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives st through the same sixteen-block session, time-normalized so every block lasts as long as the slowest entrant's
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/st/install.sh
+      # WM_CLASS(STRING) = "st-256color", "st-256color" - st names itself
+      # after its TERM, which is neither the binary name (st) nor the package
+      # name (stterm). Measured; guessing 'st' here matches nothing.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh st-256color 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/st/st-normalized.parrot
+        read-notes-stdout: true

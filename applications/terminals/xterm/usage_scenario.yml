@@ -1,0 +1,37 @@
+name: Parrot xterm
+author: Didi <didi@green-coding.io>
+description: Drives xterm through an eighteen-block terminal session using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/xterm/install.sh
+      # res_name is `xterm`, res_class is `XTerm` - measured, not assumed:
+      #
+      #   WM_CLASS(STRING) = "xterm", "XTerm"
+      #
+      # fluxbox matches res_name and xdotool matches res_class, and here they
+      # differ only in case, which xdotool's match is insensitive to. That is a
+      # coincidence of this app rather than a rule: Apache OpenOffice in the
+      # spreadsheet group needed two completely different strings, and Collabora
+      # needed `coda-qt` for the pin and `collabora` for xdotool.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh xterm 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/xterm/xterm.parrot
+        read-notes-stdout: true

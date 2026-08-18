@@ -1,0 +1,28 @@
+name: Parrot mlterm (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives mlterm through the same sixteen-block session, time-normalized so every block lasts as long as the slowest entrant's
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    environment:
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/mlterm/install.sh
+      # WM_CLASS(STRING) = "xterm", "mlterm" - MEASURED, and the trap of this
+      # group: the res_name is literally `xterm`, so that is what fluxbox has to
+      # be given. Pinning `mlterm` matches nothing and leaves the window at its
+      # own size, which would make every reference screenshot the wrong size.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh xterm 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/mlterm/mlterm-normalized.parrot
+        read-notes-stdout: true

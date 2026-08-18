@@ -1,0 +1,26 @@
+name: Parrot pterm
+author: Didi <didi@green-coding.io>
+description: Drives pterm through a sixteen-block terminal session using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    environment:
+      RESOLUTION: 1440x900
+      LANG: en_US.UTF-8
+      LC_ALL: en_US.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/terminals/pterm/install.sh
+      # WM_CLASS(STRING) = "pterm", "Pterm" - the two fields differ only in case,
+      # which xdotool ignores and fluxbox does not, so the pin uses lowercase.
+      - command: bash /tmp/repo/applications/terminals/common/pin-windows.sh pterm 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/terminals/pterm/pterm.parrot
+        read-notes-stdout: true
