@@ -1,0 +1,30 @@
+name: Parrot Vim
+author: Didi <didi@green-coding.io>
+description: Drives Vim in a full-screen xterm through an eighteen-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/vim/install.sh
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      # xterm's res_name is "xterm" and its res_class "XTerm".  The capital T is
+      # not a typo and matters: fluxbox matches case-sensitively.
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh xterm 1440 900 XTerm
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/vim/vim.parrot
+        read-notes-stdout: true

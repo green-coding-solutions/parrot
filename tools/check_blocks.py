@@ -187,7 +187,30 @@ def print_wait_table(parsed: "OrderedDict[Path, tuple[list[str], list[dict]]]", 
     print(f"{'Total':<{name_col}}  " + "  ".join(total_cells))
 
 
+# A filename component may be at most 255 bytes on ext4, xfs and every other
+# filesystem this is likely to meet.  Leave room for the "NN-" prefix and the
+# ".parrot" suffix.
+_SLUG_MAX = 200
+
+
 def _slugify(name: str) -> str:
+    """Build a filename component from a block name.
+
+    Uses only the label - the part before the first colon - because a block name
+    is a whole script line, and a script line is an instruction written for a
+    human driving the application.  The code-editor scenario's longest is 300
+    characters, which produced
+
+        OSError: [Errno 36] File name too long
+
+    from --split, after it had already written the seventeen shorter blocks.  A
+    partial blocks/ directory that looks complete is worse than a clean failure,
+    so the length is also capped rather than merely being unlikely to matter.
+    """
+    label, sep, _detail = name.partition(":")
+    if sep and label.strip():
+        name = label
+
     out: list[str] = []
     for ch in name:
         if ch.isalnum():
@@ -199,7 +222,7 @@ def _slugify(name: str) -> str:
     slug = "".join(out).strip("-_")
     while "--" in slug:
         slug = slug.replace("--", "-")
-    return slug or "block"
+    return (slug[:_SLUG_MAX].rstrip("-_") or "block")
 
 
 def split_blocks(path: Path, header: list[str], blocks: list[dict]) -> Path:

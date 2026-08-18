@@ -1,0 +1,41 @@
+name: Parrot JupyterLab (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives JupyterLab through an eighteen-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/jupyterlab/install.sh
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      # Firefox's browser window is ("Navigator", "firefox") with role
+      # "browser" - NOT ("firefox", "Firefox"), which is a 10x10 helper it also
+      # maps.  Naming the role as well keeps the rule off anything else Gecko
+      # opens.
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh Navigator 1440 900 firefox browser
+      # The Jupyter server, backgrounded and left running for the session.  It
+      # must start BEFORE go-offline.sh only in the sense that it must be up
+      # before the macro's first block; it needs no network of its own, since
+      # everything it serves is on 127.0.0.1.
+      - command: bash /usr/local/bin/jupyter-server-start
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      # Same recording as usage_scenario.yml, replayed from the time-normalized
+      # copy: tools/check_blocks.py --normalize-time pads every block to the
+      # longest that block takes across the group, so the blocks line up for
+      # side-by-side comparison.  The actions and their order are unchanged.
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/jupyterlab/jupyterlab-normalized.parrot
+        read-notes-stdout: true

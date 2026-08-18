@@ -1,0 +1,40 @@
+name: Parrot Sublime Text
+author: Didi <didi@green-coding.io>
+description: Drives Sublime Text through an eighteen-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/sublime/install.sh
+      # The project the scenario edits, restored to its seeded state.  Setup runs
+      # before every replay, which is what this step is for: the last blocks of
+      # the scenario write to these files, so a second run would otherwise start
+      # from a tree that already had the edits in it.
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      # Deterministic window geometry.  Must run BEFORE entrypoint.sh: fluxbox
+      # reads ~/.fluxbox/apps once at startup and will not replace an existing
+      # file.  Runs at replay time too, because setup-commands always do - which
+      # is the point, since window management is not captured in the macro.
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh sublime_text 1440 900 Sublime_text
+      # Everything is installed by now, so take the network away - see
+      # common/go-offline.sh.  Applied to every editor in the group so that
+      # "nothing is downloaded at measurement time" is a property of the harness
+      # rather than of each editor's settings file.
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/sublime/sublime.parrot
+        read-notes-stdout: true

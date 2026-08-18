@@ -1,0 +1,58 @@
+name: Parrot VS Code (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives Visual Studio Code through a twelve-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/vscode/install.sh
+      # The project the scenario edits, restored to its seeded state.  Setup runs
+      # before every replay, which is what this step is for: the last three steps
+      # of the scenario write to this file, so a second run would otherwise open
+      # a file that already had the edit in it.
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      # Deterministic window geometry.  Must run BEFORE entrypoint.sh: fluxbox
+      # reads ~/.fluxbox/apps once at startup and will not replace an existing
+      # file.  Runs at replay time too, because setup-commands always do - which
+      # is the point, since window management is not captured in the macro.
+      #
+      # The role is not optional here.  Both of VS Code's window kinds report
+      # res_name "code", so a rule without it also matches every dialog - and a
+      # dialog matched by the main-window rule is moved to 0,0 and stacked
+      # underneath the editor, where it is invisible, unclickable and looks
+      # exactly like a hang.  Only the editor window carries
+      # WM_WINDOW_ROLE "browser-window".
+      #
+      # The res_class is deliberately lowercase "code".  The editor window
+      # reports WM_CLASS "code", "code" while its dialogs report "code", "Code",
+      # so the capitalised spelling - which is what the desktop file and every
+      # other reference to VS Code uses - selects the dialogs and misses the
+      # editor.  Read both off a running instance before trusting either.
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh code 1440 900 code browser-window
+      # Everything is installed by now, so take the network away - see
+      # common/go-offline.sh.  VS Code is already configured not to phone home,
+      # so this changes nothing visible here; it is applied to every editor in
+      # the group so that "nothing is downloaded at measurement time" is a
+      # property of the harness rather than of each editor's settings file.
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      # Same recording as usage_scenario.yml, replayed from the time-normalized
+      # copy: tools/check_blocks.py --normalize-time pads every block to the
+      # longest that block takes across the group, so the blocks line up for
+      # side-by-side comparison.  The actions and their order are unchanged.
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/vscode/vscode-normalized.parrot
+        read-notes-stdout: true

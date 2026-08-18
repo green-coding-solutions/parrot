@@ -1,0 +1,39 @@
+name: Parrot PyCharm (time-normalized)
+author: Didi <didi@green-coding.io>
+description: Drives PyCharm through an eighteen-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/pycharm/install.sh
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh jetbrains-pycharm 1440 900
+      # Everything is installed by now, so take the network away.  IDEA queries
+      # the JetBrains marketplace the first time it opens a .py file and draws a
+      # "Plugins supporting *.py files found" banner across the top of the
+      # editor when the query succeeds - one row tall, so every line below it
+      # moves down 32 px.  It appears only on a machine that can reach the
+      # marketplace, which makes a recording made on a connected machine fail on
+      # a disconnected one.
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      # Same recording as usage_scenario.yml, replayed from the time-normalized
+      # copy: tools/check_blocks.py --normalize-time pads every block to the
+      # longest that block takes across the group, so the blocks line up for
+      # side-by-side comparison.  The actions and their order are unchanged.
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/pycharm/pycharm-normalized.parrot
+        read-notes-stdout: true

@@ -22,12 +22,13 @@ Everything runs inside Docker, so there are no security implications for the hos
 
 Each application directory contains the recorded `.parrot` macro file and a `usage_scenario.yml` for use with the Green Metrics Tool.
 
-Two directories hold whole comparisons rather than a single application, where the same script is recorded against every candidate:
+Three directories hold whole comparisons rather than a single application, where the same script is recorded against every candidate:
 
 | Comparison | Path | What it provides |
 | ---------- | ---- | ---------------- |
 | PDF viewers | [`applications/pdf_viewers/`](applications/pdf_viewers/) | Six viewers over one local document |
 | Email clients | [`applications/emailclients/`](applications/emailclients/) | Eight clients over a local IMAP server holding a deterministic ~500 MB mailbox |
+| Code editors | [`applications/codeeditors/`](applications/codeeditors/) | Eleven editors over one Python project, including a generated 10 MB source file |
 
 ## Quick Start
 

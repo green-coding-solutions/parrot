@@ -1,0 +1,35 @@
+name: Parrot Eclipse IDE
+author: Didi <didi@green-coding.io>
+description: Drives the Eclipse IDE through an eighteen-step editing scenario using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/codeeditors/eclipse/install.sh
+      - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
+      # Eclipse is the one editor in this group whose main window cannot be
+      # picked out by WM_CLASS.  The workbench, the "Select a directory as
+      # workspace" launcher dialog, two 200x200 helpers and a window SWT calls
+      # "PartRenderingEngine's limbo" all report ("Eclipse", "Eclipse") with
+      # _NET_WM_WINDOW_TYPE_NORMAL and no WM_WINDOW_ROLE.  Only the title tells
+      # them apart, hence the trailing pattern; the dash is "no role", because
+      # GMT's shlex.split(posix=False) cannot carry an empty argument.
+      - command: bash /tmp/repo/applications/codeeditors/common/pin-windows.sh Eclipse 1440 900 Eclipse - eclipse-workspace.*
+      - command: bash /tmp/repo/applications/codeeditors/common/go-offline.sh
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/codeeditors/eclipse/eclipse.parrot
+        read-notes-stdout: true
