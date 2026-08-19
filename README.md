@@ -265,6 +265,37 @@ Empty is therefore meaningful and is preserved end to end — through the `.🦜
 file, `position-window.sh` and `check-image.sh`. Only an *unset* matcher falls
 back to the `gnome-calculator` demo default.
 
+### Apps whose window appears only after the macro clicks
+
+After launching the app, `replay.py` waits for its window to map before it plays
+the first event, and fails with the launch log if it never does. For most apps
+the window it waits for is the window the macro drives. The JetBrains IDEs are
+the exception: they run on their own defaults here, so a fresh install shows the
+user agreement, the data-sharing consent and the trust prompt first, and the
+window titled after the project does not exist until the macro has clicked
+through all three. Waiting for it deadlocks — the click that creates it is behind
+the wait — and the run dies with
+
+```text
+[replay] FATAL: the app did not map a window in 90s
+```
+
+Such a recording names a second matcher, used for that wait and nothing else:
+
+```text
+windowtitle = project
+windowclass =
+startupwindowtitle =
+startupwindowclass = jetbrains-idea
+```
+
+Positioning and every `Check` keep using `windowtitle`/`windowclass`, so it is
+safe to name a class here that also matches the app's dialogs and helper
+windows. While only the startup window is up, `position-window.sh` is skipped —
+a recording that needs this gets its geometry from `pin-windows.sh` before the
+window manager starts. Record it with `--startupwindowclass` /
+`--startupwindowtitle`; omit both for every other app.
+
 ## Environment Variables
 
 All variables can be set on the command line or, when running inside the Green Metrics Tool, in the `environment:` section of a service in your `usage_scenario.yml`:

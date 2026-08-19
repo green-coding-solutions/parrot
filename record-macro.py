@@ -46,6 +46,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--startcommand", default="",   help="Command to launch the app")
     parser.add_argument("--windowtitle",  default="",   help="Window title for app detection")
     parser.add_argument("--windowclass",  default="",   help="WM_CLASS for app detection")
+    # Only for an app whose driven window does not exist until the macro has
+    # clicked through a startup dialog - the JetBrains IDEs. See STARTUP_FIELDS
+    # in helpers.py. Default None, not "": an omitted option must stay out of the
+    # recording, while an explicit empty one is a deliberate "match on the other
+    # half alone" and is written.
+    parser.add_argument("--startupwindowtitle", default=None,
+                        help="Title of a window proving the app started, if not --windowtitle")
+    parser.add_argument("--startupwindowclass", default=None,
+                        help="WM_CLASS of a window proving the app started, if not --windowclass")
     parser.add_argument(
         "--script",
         type=Path,
@@ -233,6 +242,10 @@ def main() -> int:
         "--container",        args.container,
         "--container-repo",   args.container_repo,
     ]
+    for option, value in (("--app-startupwindowtitle", args.startupwindowtitle),
+                          ("--app-startupwindowclass", args.startupwindowclass)):
+        if value is not None:
+            timed_cmd.extend([option, value])
     if args.script:
         timed_cmd.extend(["--script", str(args.script)])
     if args.save_dir:

@@ -496,6 +496,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p_rec.add_argument("--app-startcommand", default="")
     p_rec.add_argument("--app-windowtitle",  default="")
     p_rec.add_argument("--app-windowclass",  default="")
+    # None, not "": see the note on --startupwindowclass in record-macro.py.
+    p_rec.add_argument("--app-startupwindowtitle", default=None)
+    p_rec.add_argument("--app-startupwindowclass", default=None)
     p_rec.add_argument("--display",          default=None)
     p_rec.add_argument("--save-dir",         default=None)
     p_rec.add_argument("--container",        default="window-container")
@@ -523,7 +526,11 @@ def main() -> int:
             args.script,
             {"startcommand": args.app_startcommand,
              "windowtitle":  args.app_windowtitle,
-             "windowclass":  args.app_windowclass},
+             "windowclass":  args.app_windowclass,
+             **({"startupwindowtitle": args.app_startupwindowtitle}
+                if args.app_startupwindowtitle is not None else {}),
+             **({"startupwindowclass": args.app_startupwindowclass}
+                if args.app_startupwindowclass is not None else {})},
             display=args.display,
             save_dir=args.save_dir,
             container=args.container,

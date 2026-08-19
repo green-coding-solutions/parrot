@@ -9,6 +9,22 @@ PARROT_HEADER = "# Parrot recording v2"
 
 APP_FIELDS = ("startcommand", "windowtitle", "windowclass")
 
+# A SECOND window matcher, used only to answer "did the app start at all".
+#
+# Most recordings do not need it: the window the macro drives is the first one
+# the app maps, so waiting for that window and waiting for the app are the same
+# wait.  The JetBrains IDEs are the exception.  They run on their own defaults
+# here, so a fresh install puts up the user agreement, the data-sharing consent
+# and the trust prompt first, and the window the macro drives - titled after the
+# project - does not exist until the macro has clicked through all three.
+# Waiting for it deadlocks: the click that would create it is behind the wait.
+#
+# These fields name a window that proves the process is up and drawing, and
+# nothing else.  Positioning and every Check keep using windowtitle/windowclass,
+# which is what makes it safe to name a class here that also matches the app's
+# dialogs and helper windows.
+STARTUP_FIELDS = ("startupwindowtitle", "startupwindowclass")
+
 DEFAULT_APP_META = {
     "startcommand": "",
     "windowtitle":  "Calculator",
@@ -33,6 +49,12 @@ def normalize_app_meta(meta: dict[str, str] | None) -> dict[str, str]:
     merged = dict(DEFAULT_APP_META)
     if meta:
         for key in APP_FIELDS:
+            if key in meta and meta[key] is not None:
+                merged[key] = str(meta[key]).strip()
+        # No default for the startup matcher: absent means "the startup window
+        # and the driven window are the same window", which is the normal case.
+        # An empty value is kept, the same way an empty windowclass is.
+        for key in STARTUP_FIELDS:
             if key in meta and meta[key] is not None:
                 merged[key] = str(meta[key]).strip()
     return merged
@@ -66,7 +88,7 @@ def load_app_metadata(input_path: Path) -> dict[str, str]:
                 parts = line.split(None, 1)
                 key, value = parts[0], (parts[1] if len(parts) > 1 else "")
             key = key.strip().lower()
-            if key in APP_FIELDS:
+            if key in APP_FIELDS or key in STARTUP_FIELDS:
                 raw[key] = value.strip()
     return normalize_app_meta(raw)
 
@@ -81,6 +103,13 @@ def format_metadata_lines(meta: dict[str, str]) -> list[str]:
     lines: list[str] = []
     for key in APP_FIELDS:
         lines.append(f"{key} = {meta.get(key, '')}")
+    # The startup matcher is the exception to "every field is written": it has no
+    # default to be filled in from, and writing it empty into every recording
+    # would suggest a knob where there is none.  A recording that carries one -
+    # the JetBrains IDEs - keeps it through a rewrite.
+    for key in STARTUP_FIELDS:
+        if key in meta:
+            lines.append(f"{key} = {meta[key]}")
     return lines
 
 

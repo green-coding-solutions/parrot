@@ -10,7 +10,7 @@ import sys
 import time
 from pathlib import Path
 
-from helpers import load_app_metadata, note_label
+from helpers import STARTUP_FIELDS, load_app_metadata, note_label
 from timed_xmacro import iter_replay_lines, parse_xmacro_event
 
 CHECK_IMAGE_SCRIPT   = "/usr/local/bin/check-image.sh"
@@ -338,6 +338,19 @@ def wait_for_window(display: str, win_class: str, win_title: str, timeout: float
         time.sleep(0.25)
 
 
+def _startup_matcher(app_meta: dict[str, str]) -> tuple[str, str]:
+    """Return the (class, title) to wait on after launching the app.
+
+    The recording's own matcher unless it carries a startup matcher, in which
+    case that one is used WHOLE - both halves, including an empty one. Falling
+    back per field would quietly re-introduce the title the startup matcher
+    exists to avoid waiting for.
+    """
+    if not any(key in app_meta for key in STARTUP_FIELDS):
+        return app_meta.get("windowclass", ""), app_meta.get("windowtitle", "")
+    return app_meta.get("startupwindowclass", ""), app_meta.get("startupwindowtitle", "")
+
+
 def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, int] | None) -> None:
     """
     Ensure the app is running, positioned, and in the foreground.
@@ -346,11 +359,18 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
     2. If not found, launch the app via startcommand and wait for it to map.
     3. Run position-window.sh to size and place it.
     4. Raise and focus the window.
+
+    A recording carrying a startup matcher (see STARTUP_FIELDS in helpers.py)
+    waits on THAT window in step 2, and skips step 3 when the window the macro
+    drives does not exist yet - there is nothing to position, and a recording
+    that needs a startup matcher gets its geometry from pin-windows.sh before
+    the window manager starts, not from position-window.sh afterwards.
     """
     env = {**os.environ, "DISPLAY": display}
     win_class  = app_meta.get("windowclass", "")
     win_title  = app_meta.get("windowtitle", "")
     start_cmd  = app_meta.get("startcommand", "")
+    startup_class, startup_title = _startup_matcher(app_meta)
 
     win = _find_window(display, win_class, win_title)
 
@@ -361,7 +381,7 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
 
         timeout = _window_timeout()
         started = time.monotonic()
-        win = wait_for_window(display, win_class, win_title, timeout)
+        win = wait_for_window(display, startup_class, startup_title, timeout)
         waited = time.monotonic() - started
 
         if win is None:
@@ -380,6 +400,19 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
         # the app than the one the macro was recorded on, and the macro's own
         # leading wait no longer covers the startup - see wait_for_window.
         print(f"[replay] window mapped after {waited:.1f}s", file=sys.stderr)
+
+    if _find_window(display, win_class, win_title) is None:
+        # Only the startup window is up - the macro's own window comes later, out
+        # of the dialogs the recording clicks through. Positioning now would
+        # spend position-window.sh's 30 s wait looking for a window that cannot
+        # appear until the replay has started, and delay the first event by that
+        # much.
+        print(
+            f"[replay] app is up but class={win_class!r} title={win_title!r} has not mapped yet; "
+            f"skipping position-window (geometry comes from the window manager)",
+            file=sys.stderr,
+        )
+        return
 
     pos_env = {
         **env,

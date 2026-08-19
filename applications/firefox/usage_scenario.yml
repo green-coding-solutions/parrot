@@ -9,11 +9,20 @@ services:
     # ports:
     #   - "6080:6080" # noVNC (open in browser)
     #   - "5900:5900" # raw VNC
-    volumes:
-      - /tmp/parrot-debug:/debug   # remove when not debugging
+    # volumes:
+    #   - /tmp/parrot-debug:/debug   # debugging only - see below
     environment:
       DEBUG: 0
-      PARROT_DEBUG_DIR: /debug
+      # PARROT_DEBUG_DIR: /debug
+      #
+      # The debug mount stays commented out.  A cluster run refuses it outright:
+      #
+      #   Service 'window-container': We only allow readonly (ro) as parameter
+      #   in volume mounts in safe mode. Volume: /tmp/parrot-debug:/debug
+      #
+      # and it fails in _setup_services, before anything is measured.  Uncomment
+      # both lines only for a local `--allow-unsafe` run, where check-image.sh
+      # copies its failure artifacts out to the host.
 
     setup-commands:
       - command: bash /tmp/repo/applications/firefox/install.sh

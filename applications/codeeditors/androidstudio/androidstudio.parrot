@@ -3,6 +3,8 @@
 startcommand = androidstudio /root/project
 windowtitle = project
 windowclass = 
+startupwindowtitle = 
+startupwindowclass = jetbrains-studio
 
 wait 28.354770
 mousemove 288 287

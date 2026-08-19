@@ -302,6 +302,23 @@ passing replay. Keep explanations in `README.md`.
 "match on title alone", needed when an app gives dialogs the same `WM_CLASS` as its
 main window.
 
+**An app that shows a dialog before its real window needs `startupwindowclass`.**
+`replay.py` waits for the recording's window before playing the first event, so an
+app whose window only appears after the macro has clicked a startup dialog away —
+the JetBrains IDEs and their user agreement — deadlocks on that wait and dies with
+"the app did not map a window in 90s". The startup matcher names a window that only
+proves the process is up; positioning and Checks keep the recording's own matcher.
+See the README section "Apps whose window appears only after the macro clicks".
+
+**Never rewrite `WM_NORMAL_HINTS` wholesale.** `freeze-window-size.py` reads the
+window's hints back and changes only the size fields. Writing a fresh structure
+drops `win_gravity`, and with it the difference between "put the client here" and
+"put the frame here": every Qt window silently moved 1,23 down under fluxbox, hung
+off the bottom of the screen, and `import -window` returned 1439x877 where the
+reference was 1440x900. Apps that get their geometry from `pin-windows.sh` are
+immune — an undecorated window has no offset to lose — which is why only the
+`pdf_viewers` group broke.
+
 **Check the image is current before you trust anything.** `ribalba/xwindow-server`
 silently reverted to an 8-week-old build mid-project, losing features the
 recordings depended on:

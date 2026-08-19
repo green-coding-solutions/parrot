@@ -1,8 +1,8 @@
-install -d -m 0755 /etc/apt/keyrings \
-&& wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O /etc/apt/keyrings/packages.mozilla.org.asc \
-&& echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" \
-    > /etc/apt/sources.list.d/mozilla.list \
-&& printf "Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n" \
-    > /etc/apt/preferences.d/mozilla \
-&& apt-get update \
-&& apt-get install -y --no-install-recommends firefox=151.0~build2
+#!/usr/bin/env bash
+# The pdf_viewers group measures the same browser the firefox group does, so it
+# installs it with the same script rather than a copy of it.  usage_scenario.yml
+# in this directory has always called ../../firefox/install.sh directly; this
+# file was a duplicate of the old apt one-liner and rotted with it.
+set -euo pipefail
+
+exec bash "$(dirname "$(readlink -f "$0")")/../../firefox/install.sh" "$@"

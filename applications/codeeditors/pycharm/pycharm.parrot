@@ -3,6 +3,8 @@
 startcommand = pycharm /root/project
 windowtitle = project
 windowclass = 
+startupwindowtitle = 
+startupwindowclass = jetbrains-pycharm
 
 wait 53.653199
 mousemove 42 831

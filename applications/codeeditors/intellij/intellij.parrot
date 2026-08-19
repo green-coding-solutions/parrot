@@ -3,6 +3,8 @@
 startcommand = intellij /root/project
 windowtitle = project
 windowclass = 
+startupwindowtitle = 
+startupwindowclass = jetbrains-idea
 
 wait 53.689056
 mousemove 42 831

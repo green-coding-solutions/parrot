@@ -23,11 +23,20 @@ echo "=== starting the recorder ==="
 # "Content window" helper share WM_CLASS "jetbrains-idea", the helper is
 # 1442x927 - larger than the frame - and every window lookup in this project
 # takes the largest match.
+#
+# --startupwindowclass names a window that only proves the IDE is up.  replay.py
+# waits for it after launching, and for nothing else: the window titled after
+# the project does not exist until the macro below has clicked through the user
+# agreement, the data-sharing consent and the trust prompt, so waiting for THAT
+# window would wait for a click that is behind the wait.  Positioning and every
+# Check keep using the title above.
 ./record-macro.py \
     --script applications/codeeditors/script.md \
     --startcommand 'intellij /root/project' \
     --windowtitle 'project' \
     --windowclass '' \
+    --startupwindowtitle '' \
+    --startupwindowclass 'jetbrains-idea' \
     "applications/codeeditors/${EDITOR_NAME}/${EDITOR_NAME}.parrot" &
 RECORDER=$!
 
