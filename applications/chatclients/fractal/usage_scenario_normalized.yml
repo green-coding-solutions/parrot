@@ -83,11 +83,30 @@ services:
     # longer escape into it - that needed SYS_ADMIN, which is gone.
     #
     # GMT gates docker-run-args behind --allow-unsafe in CLI mode ONLY. For a
-    # production run, allowlist both strings under
+    # production run, allowlist all three strings under
     # capabilities.measurement.orchestrators.docker.allowed_run_args.
     docker-run-args:
       - --security-opt seccomp=unconfined
       - --security-opt systempaths=unconfined
+      # THE THIRD ONE IS WHAT MAKES THE FLATPAK CLIENTS START ON THE MEASUREMENT
+      # NODE, and it was missing here while the wordprocessors and spreadsheets
+      # Flatpaks already carried it. The node runs Ubuntu 24.04, where Docker
+      # applies its `docker-default` profile and that profile contains a blanket
+      # `deny mount,` - and bwrap's first act inside its new namespace is a
+      # mount. The run dies in three lines that never name AppArmor:
+      #
+      #   bwrap: Failed to make / slave: Permission denied
+      #   error: ldconfig failed, exit status 256
+      #   [replay] FATAL: the app did not map a window in 90s
+      #
+      # `apparmor=unconfined` is worse rather than better - see the flag-by-flag
+      # matrix in applications/wordprocessors/calligra/usage_scenario.yml, which
+      # was measured one flag at a time and applies unchanged here. The profile
+      # is HOST state, not image state: host-setup/apparmor/parrot-flatpak,
+      # loaded by host-setup/install-apparmor-profile.sh. On a host with no
+      # AppArmor - Fedora - the argument is accepted and does nothing, so this
+      # stays a single scenario for both.
+      - --security-opt apparmor=parrot-flatpak
       # THERE IS DELIBERATELY NO `--device /dev/fuse` AND NO
       # `--cap-add SYS_ADMIN` HERE. Both were tried, and the reasoning is worth
       # keeping because the obvious fix for block 17 is to add them.

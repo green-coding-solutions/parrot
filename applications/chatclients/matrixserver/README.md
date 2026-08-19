@@ -101,6 +101,25 @@ is written around those two numbers - 24 messages five seconds apart is the
 "two minutes" it claims to measure - so changing them means rewording the block
 and re-pacing the recording.
 
+## Shipping a change to either of them
+
+They run from inside `ribalba/parrot-matrixserver`, not from the mounted
+repository, so committing a fix does not deploy it — the published image kept an
+older `parrot-bot.py` for exactly this reason, one whose startup `/sync` was not
+retried, and a run died in BOOT on the HTTP 500 a warming-up Synapse returns on
+the first attempt.
+
+```bash
+make patch-matrixserver          # layer the current scripts onto the published image
+make check-matrixserver          # start it, seed nothing, watch the bot come up
+make push-patched-matrixserver   # publish over the same tag
+```
+
+That path keeps the corpus, which is the whole point: `make matrixserver`
+reseeds, and a reseed changes every room and event ID the recordings are tied
+to. Use it only when a build-time input changed — `account.env`, `conf/`,
+`build.sh`, `setup.sh`, `seed_corpus.py` — and bump `MATRIX_TAG` when you do.
+
 ## Checking it without a homeserver
 
 `parrot-bot.py` talks plain HTTP JSON and takes `--homeserver`, so it can be

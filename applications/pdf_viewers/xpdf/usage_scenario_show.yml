@@ -1,3 +1,18 @@
+# LOCAL ONLY - DO NOT SCHEDULE THIS FILE FOR A MEASUREMENT.
+#
+# USE_HOST_DISPLAY below points the container at the X server of the machine you
+# are sitting in front of, so you can watch the replay happen. A measurement node
+# has no such display, and the run dies in BOOT with
+#
+#   [entrypoint] cannot reach host display :0
+#   [entrypoint] mount /tmp/.X11-unix into the container and run 'xhost +local:'
+#
+# which is what it did there. The measured scenario is usage_scenario.yml next to
+# this one; this file exists to be run by hand:
+#
+#   xhost +local:
+#   ... --filename applications/pdf_viewers/xpdf/usage_scenario_show.yml
+#
 name: Parrot xpdf
 author: Didi <didi@green-coding.io>
 description: Drives xpdf using Parrot

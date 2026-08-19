@@ -1,3 +1,16 @@
+# NOT RECORDED - DO NOT SCHEDULE THIS FILE FOR A MEASUREMENT.
+#
+# There is no freeoffice.parrot next to this file, so a run gets through
+# setup and then dies in the flow with
+#
+#   Macro file not found: /tmp/repo/applications/spreadsheets/freeoffice/freeoffice.parrot
+#
+# which is what it did on the measurement node. Everything below is complete and
+# correct; only the recording is missing, and it is missing on purpose:
+# PlanMaker cannot write OpenDocument, so block 17 - save in place, keeping
+# the ODS format - cannot be driven.
+# See MEASUREMENTS.md for the whole story.
+#
 name: Parrot SoftMaker FreeOffice PlanMaker
 author: Didi <didi@green-coding.io>
 description: Drives SoftMaker FreeOffice PlanMaker through a 20,000-row ODS using Parrot

@@ -43,15 +43,40 @@ ENV PARROT_MATRIX_HISTORY=${PARROT_MATRIX_HISTORY} \
 ARG PARROT_ALLOW_UNPINNED=0
 ENV PARROT_ALLOW_UNPINNED=${PARROT_ALLOW_UNPINNED}
 
+# WHAT IS COPIED BEFORE THE SEEDING LAYER, AND WHAT IS COPIED AFTER IT.
+#
+# These four are inputs to build.sh, so editing one of them SHOULD produce a
+# different corpus and SHOULD invalidate the layer below.
+#
 # account.env sits one level up from the scripts, which read it as
 # ../account.env - so the layout inside the image has to mirror the repository.
 COPY account.env /opt/parrot/account.env
-COPY matrixserver /opt/parrot/matrixserver
+COPY matrixserver/conf /opt/parrot/matrixserver/conf
+COPY matrixserver/build.sh matrixserver/setup.sh matrixserver/seed_corpus.py \
+     /opt/parrot/matrixserver/
 
 RUN chmod +x /opt/parrot/matrixserver/*.sh /opt/parrot/matrixserver/*.py
 
 # Packages, the database, the accounts, the configuration and the corpus.
 RUN bash /opt/parrot/matrixserver/build.sh
+
+# The runtime scripts come AFTER the corpus, and that ordering is the point.
+# `COPY matrixserver /opt/parrot/matrixserver` used to sit above build.sh, so a
+# one-line fix in parrot-bot.py invalidated the seeding layer and republishing
+# it meant reseeding - which changes every room and event ID and invalidates the
+# recordings, per the header. The consequence was that the published image kept
+# an older parrot-bot.py than the repository: its startup /sync was not wrapped
+# in with_retries(), so a Synapse that answered HTTP 500 while still warming up
+# killed the run in BOOT.
+#
+# With the copy here, a fix to one of these four rebuilds two cheap layers ON
+# TOP of the existing corpus - provided the build cache still holds it. When it
+# does not, `make patch-matrixserver` gets the same result from the published
+# image itself, which is the reliable way to ship a runtime-script fix.
+COPY matrixserver/start.sh matrixserver/start-bot.sh matrixserver/parrot-bot.py \
+     matrixserver/smoke_test.py /opt/parrot/matrixserver/
+
+RUN chmod +x /opt/parrot/matrixserver/*.sh /opt/parrot/matrixserver/*.py
 
 # Convenience entry points on PATH, so a usage_scenario setup-command does not
 # need to know where the repository was mounted.

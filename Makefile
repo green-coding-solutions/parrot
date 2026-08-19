@@ -108,5 +108,27 @@ check-matrixserver:
 	docker exec parrot-matrixserver-check parrot-bot-start
 	docker rm -f parrot-matrixserver-check >/dev/null
 
+# Ship a fix to parrot-bot.py, start.sh, start-bot.sh or smoke_test.py by
+# layering it onto the PUBLISHED image, so the corpus - and with it every room
+# ID the recordings depend on - comes through untouched. A plain rebuild only
+# preserves the corpus while the build cache still holds the seeding layer.
+# See matrixserver/Dockerfile.runtime-patch, and check-matrixserver after.
+MATRIX_PATCH_DOCKERFILE := $(MATRIX_CONTEXT)/matrixserver/Dockerfile.runtime-patch
+
+patch-matrixserver:
+	docker buildx build --platform $(PLATFORM) --load \
+		--build-arg MATRIX_IMAGE=$(MATRIX_IMAGE) \
+		--build-arg MATRIX_TAG=$(MATRIX_TAG) \
+		-t $(MATRIX_IMAGE):$(MATRIX_TAG) \
+		-f $(MATRIX_PATCH_DOCKERFILE) $(MATRIX_CONTEXT)
+
+push-patched-matrixserver:
+	docker buildx build --platform $(PLATFORMS) \
+		--build-arg MATRIX_IMAGE=$(MATRIX_IMAGE) \
+		--build-arg MATRIX_TAG=$(MATRIX_TAG) \
+		-t $(MATRIX_IMAGE):$(MATRIX_TAG) --push \
+		-f $(MATRIX_PATCH_DOCKERFILE) $(MATRIX_CONTEXT)
+
 .PHONY: build push mailserver push-mailserver check-mailserver \
-	matrixserver push-matrixserver check-matrixserver
+	matrixserver push-matrixserver check-matrixserver \
+	patch-matrixserver push-patched-matrixserver

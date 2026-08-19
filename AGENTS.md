@@ -330,6 +330,23 @@ docker run --rm ribalba/xwindow-server python3 -c \
 # expect: * A
 ```
 
+**The homeserver's scripts live in the image too, and a fix there is not shipped
+by committing it.** `parrot-bot.py`, `start.sh`, `start-bot.sh` and
+`smoke_test.py` run from `/opt/parrot/matrixserver/` inside
+`ribalba/parrot-matrixserver`, so the repository can be right while the published
+image is a version behind — which is exactly what happened: the image's
+`parrot-bot.py` had no `with_retries()` around its startup `/sync`, and a Synapse
+that answers HTTP 500 while warming up (it reliably does, on the first attempt)
+killed the run in BOOT. Ship such a fix with
+
+```bash
+make patch-matrixserver && make check-matrixserver   # then push-patched-matrixserver
+```
+
+which layers the scripts onto the published image. **Do not reach for
+`make matrixserver`** unless a build-time input changed: it reseeds, every room
+and event ID changes, and no chat recording survives that.
+
 **`tools/check_blocks.py <dir>` must report that every `.parrot` defines the same
 blocks in the same order.** That is what makes the energy figures comparable.
 

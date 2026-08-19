@@ -54,14 +54,18 @@ services:
       # DEBUG: 1
       RESOLUTION: 1440x900
 
-    # See fractal/usage_scenario.yml for the full explanation - both flags are
-    # for bubblewrap and neither grants a capability. FluffyChat uses the same
-    # org.gnome.Platform//50 runtime as Fractal, pinned to the same commit, so
-    # the runtime is a constant between those two and a gap between them is the
-    # application and its toolkit.
+    # See fractal/usage_scenario.yml for the full explanation - all three flags
+    # are for bubblewrap and none of them grants a capability. FluffyChat uses
+    # the same org.gnome.Platform//50 runtime as Fractal, pinned to the same
+    # commit, so the runtime is a constant between those two and a gap between
+    # them is the application and its toolkit.
     docker-run-args:
       - --security-opt seccomp=unconfined
       - --security-opt systempaths=unconfined
+      # The third one is the AppArmor profile the measurement node needs before
+      # bubblewrap may mount anything; without it the client never maps a window
+      # there. See fractal/usage_scenario.yml.
+      - --security-opt apparmor=parrot-flatpak
 
     setup-commands:
       - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh

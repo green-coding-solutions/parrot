@@ -1,3 +1,16 @@
+# NOT RECORDED - DO NOT SCHEDULE THIS FILE FOR A MEASUREMENT.
+#
+# There is no collabora.parrot next to this file, so a run gets through
+# setup and then dies in the flow with
+#
+#   Macro file not found: /tmp/repo/applications/spreadsheets/collabora/collabora.parrot
+#
+# which is what it did on the measurement node. Everything below is complete and
+# correct; only the recording is missing, and it is missing on purpose:
+# Collabora Office opens no modal dialog in this container, and three of
+# the eighteen blocks need one.
+# See MEASUREMENTS.md for the whole story.
+#
 # MEASURED. All eighteen blocks were driven end to end in a clean container and
 # every check-result.sh assertion passed. See MEASUREMENTS.md.
 name: Parrot Collabora Office

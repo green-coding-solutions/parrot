@@ -1,3 +1,17 @@
+# NOT RECORDED - DO NOT SCHEDULE THIS FILE FOR A MEASUREMENT.
+#
+# There is no terminology.parrot next to this file, so a run gets through
+# setup and then dies in the flow with
+#
+#   Macro file not found: /tmp/repo/applications/terminals/terminology/terminology.parrot
+#
+# which is what it did on the measurement node. Everything below is complete and
+# correct; only the recording is missing, and it is missing on purpose:
+# terminology installs and is configured, but EFL/Evas cannot start in
+# this container - ecore_con needs SO_REUSEPORT, which the sandbox does not
+# support, so there is nothing to record.
+# See MEASUREMENTS.md for the whole story.
+#
 name: Parrot terminology
 author: Didi <didi@green-coding.io>
 description: Drives terminology through a sixteen-block terminal session using Parrot
