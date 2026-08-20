@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install Element Desktop from element.io's own APT repository.
+# Install Element Desktop 1.12.25 from element.io's package pool.
 #
 # Not from Ubuntu: there is no element-desktop package in the 24.04 archive at
 # all. Not from Flathub either, unlike three of the other clients in this group
@@ -7,21 +7,36 @@
 # a user on Ubuntu installs it, and the Flatpak would put an extra runtime in
 # the figure that a .deb user never pays for.
 #
-# The version below was read from the repository's own Packages index on
-# 2026-08-08. element.io publishes only the current release there, so this pin
-# will stop resolving when they publish the next one - that is the intended
-# behaviour: a failed install is a prompt to re-record deliberately, not a
-# silent upgrade under a recording that no longer matches.
+# NOT `apt-get install element-desktop=1.12.25` against their APT repository,
+# which is what this file did first. That index carries only the current release,
+# so the pin rotted the day 1.12.26 shipped:
+#
+#   E: Version '1.12.25' for 'element-desktop' was not found
+#
+# and the run died in setup. The original comment called that the intended
+# behaviour - "a prompt to re-record deliberately". It is not much of a prompt
+# when it arrives as a failed scheduled job days later, and re-recording is the
+# expensive option, not the safe one: the check images in this directory are of
+# 1.12.25. The pool under the index keeps the .deb after the index drops it, so
+# the recorded version stays installable and the recording stays valid.
+#
+# Re-recording remains a deliberate act: PARROT_ALLOW_UNPINNED=1 adds the APT
+# repository and takes whatever is current, which is the version to record
+# against before bumping ELEMENT_VERSION here.
+#
+# INTEGRITY. There is no published checksum for a version the index has dropped
+# - the Packages file that carried it is gone - so what is verified is the
+# version the downloaded package declares about itself, over HTTPS from the
+# vendor. Weaker than the SHA256 pins elsewhere in this repo, and the reason the
+# script prints the hash it fetched: fill ELEMENT_SHA256 in from a run you trust
+# and every later run is checked against it.
 set -euo pipefail
 
 ELEMENT_VERSION='1.12.25'
+ELEMENT_SHA256=''   # see INTEGRITY above; empty means "print it, do not enforce"
+ELEMENT_URL="https://packages.element.io/debian/pool/main/e/element-desktop/element-desktop_${ELEMENT_VERSION}_amd64.deb"
 
 log() { printf '[install-element] %s\n' "$*"; }
-
-pin() {
-    if [[ "${PARROT_ALLOW_UNPINNED:-0}" == "1" ]]; then printf '%s' "$1"
-    else printf '%s=%s' "$1" "$2"; fi
-}
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
@@ -34,16 +49,42 @@ apt-get install -y -qq --no-install-recommends \
 # picker is a grid of boxes. The reference screenshot would then record which
 # box was clicked rather than which emoji.
 
-log "adding the element.io repository"
-curl -fsSL https://packages.element.io/debian/element-io-archive-keyring.gpg \
-    -o /usr/share/keyrings/element-io-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main" \
-    > /etc/apt/sources.list.d/element-io.list
-apt-get update -qq
+if [[ "${PARROT_ALLOW_UNPINNED:-0}" == "1" ]]; then
+    # The re-recording path. Never benchmark from it: whatever is current today
+    # is not what the check images in this directory were captured against.
+    log "PARROT_ALLOW_UNPINNED=1 - adding the element.io repository"
+    curl -fsSL https://packages.element.io/debian/element-io-archive-keyring.gpg \
+        -o /usr/share/keyrings/element-io-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main" \
+        > /etc/apt/sources.list.d/element-io.list
+    apt-get update -qq
+    apt-get install -y -qq --no-install-recommends element-desktop >/dev/null
+    log "UNPINNED install: $(dpkg-query -W -f='${Version}' element-desktop)"
+else
+    log "downloading Element Desktop ${ELEMENT_VERSION}"
+    curl -fsSL "$ELEMENT_URL" -o /tmp/element-desktop.deb
 
-log "installing Element Desktop ${ELEMENT_VERSION}"
-apt-get install -y -qq --no-install-recommends \
-    "$(pin element-desktop "$ELEMENT_VERSION")" >/dev/null
+    got_sha="$(sha256sum /tmp/element-desktop.deb | cut -d' ' -f1)"
+    log "sha256 ${got_sha}"
+    if [[ -n "$ELEMENT_SHA256" && "$got_sha" != "$ELEMENT_SHA256" ]]; then
+        echo "[install-element] FAILED: expected sha256 ${ELEMENT_SHA256}" >&2
+        exit 1
+    fi
+
+    # The pool is addressed by filename, so a wrong file would have to be served
+    # under the right name - but the package still has to say what it is.
+    got_version="$(dpkg-deb -f /tmp/element-desktop.deb Version)"
+    if [[ "$got_version" != "$ELEMENT_VERSION" ]]; then
+        echo "[install-element] FAILED: ${ELEMENT_URL} declares ${got_version}, not ${ELEMENT_VERSION}" >&2
+        exit 1
+    fi
+
+    # apt rather than dpkg: the .deb's dependencies come from the Ubuntu archive
+    # and dpkg would leave them unresolved.
+    log "installing Element Desktop ${ELEMENT_VERSION}"
+    apt-get install -y -qq --no-install-recommends /tmp/element-desktop.deb >/dev/null
+    rm -f /tmp/element-desktop.deb
+fi
 
 # RUNNING AS ROOT DOES NOT WORK, EVEN WITH --no-sandbox
 #
