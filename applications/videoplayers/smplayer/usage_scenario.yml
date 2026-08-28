@@ -1,0 +1,28 @@
+name: Parrot smplayer
+author: Didi <didi@green-coding.io>
+description: Drives smplayer through a twenty-two-block video-player session using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/videoplayers/smplayer/install.sh
+      - command: bash /tmp/repo/applications/videoplayers/common/pin-windows.sh smplayer 1440 900
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/videoplayers/smplayer/smplayer.parrot
+        read-notes-stdout: true

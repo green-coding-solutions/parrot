@@ -1,0 +1,34 @@
+name: Parrot vlc
+author: Didi <didi@green-coding.io>
+description: Drives vlc through a twenty-two-block video-player session using Parrot
+
+services:
+  window-container:
+    image: ribalba/xwindow-server
+    # ports:
+    #   - "6080:6080" # noVNC (open in browser)
+    #   - "5900:5900" # raw VNC
+    environment:
+      # DEBUG: 1
+      RESOLUTION: 1440x900
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+
+    setup-commands:
+      - command: bash /tmp/repo/applications/videoplayers/vlc/install.sh
+      # VLC gives its main window WM_WINDOW_ROLE "vlc-main" and its dialogs their
+      # own roles, and the role argument is what keeps the full-screen pin rule
+      # off them. Without it the rule matches on WM_CLASS alone - which VLC
+      # shares between the main window and every dialog - and fluxbox moves a
+      # modal to 0,0 underneath the main window, where it is invisible,
+      # unclickable, and looks exactly like the player having hung.
+      - command: bash /tmp/repo/applications/videoplayers/common/pin-windows.sh vlc 1440 900 vlc vlc-main
+      - command: bash /usr/local/bin/entrypoint.sh
+
+flow:
+  - name: Run Benchmark
+    container: window-container
+    commands:
+      - type: console
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/videoplayers/vlc/vlc.parrot
+        read-notes-stdout: true
