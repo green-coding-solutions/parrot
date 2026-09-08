@@ -30,6 +30,17 @@ Three directories hold whole comparisons rather than a single application, where
 | Email clients | [`applications/emailclients/`](applications/emailclients/) | Eight clients over a local IMAP server holding a deterministic ~500 MB mailbox |
 | Code editors | [`applications/codeeditors/`](applications/codeeditors/) | Eleven editors over one Python project, including a generated 10 MB source file |
 
+One directory holds a comparison of **websites** rather than of applications, and
+it sits at the repository root because of that:
+
+| Comparison | Path | What it provides |
+| ---------- | ---- | ---------------- |
+| Websites | [`websites/`](websites/) | Any page, passed in as a GMT variable, loaded in a real Firefox and a real Chrome behind a warm caching proxy |
+
+Its macros are written by hand rather than recorded, and it carries no reference
+screenshots: the page under test is a variable, so there is nothing to compare
+pixels against. See [`websites/README.md`](websites/README.md).
+
 ## Quick Start
 
 ### 1. Start the Window Container

@@ -129,6 +129,44 @@ push-patched-matrixserver:
 		-t $(MATRIX_IMAGE):$(MATRIX_TAG) --push \
 		-f $(MATRIX_PATCH_DOCKERFILE) $(MATRIX_CONTEXT)
 
+# ---------------------------------------------------------------------------
+# Website benchmark browser container
+#
+# Parrot's window container plus a pinned Firefox and a pinned Chrome for the
+# websites/ group. It EXTENDS $(IMAGE), so a change to replay.py, helpers.py or
+# tools/ needs `make build push` first and `make browsers push-browsers` after -
+# otherwise a website run keeps measuring with the browsers image's older copy.
+#
+# The browsers themselves are pinned by checksum in websites/install-*.sh, which
+# is the pin that decides what a measurement measured. Bump BROWSERS_TAG
+# whenever either version changes; the tag is what the usage_scenario files pin.
+# ---------------------------------------------------------------------------
+BROWSERS_IMAGE ?= ribalba/parrot-browsers
+BROWSERS_TAG ?= v1
+BROWSERS_CONTEXT := websites
+BROWSERS_DOCKERFILE := $(BROWSERS_CONTEXT)/Dockerfile
+
+browsers:
+	docker buildx build --platform $(PLATFORM) --load \
+		-t $(BROWSERS_IMAGE):$(BROWSERS_TAG) \
+		-f $(BROWSERS_DOCKERFILE) $(BROWSERS_CONTEXT)
+
+push-browsers:
+	docker buildx build --platform $(PLATFORMS) \
+		-t $(BROWSERS_IMAGE):$(BROWSERS_TAG) --push \
+		-f $(BROWSERS_DOCKERFILE) $(BROWSERS_CONTEXT)
+
+# Prove both browsers actually run in the built image before pushing it. A
+# missing shared library shows up here as a non-zero exit, rather than as a
+# window that never maps 90 s into a measured run.
+check-browsers:
+	docker rm -f parrot-browsers-check >/dev/null 2>&1 || true
+	docker run -d --name parrot-browsers-check $(BROWSERS_IMAGE):$(BROWSERS_TAG) >/dev/null
+	docker exec parrot-browsers-check firefox --version
+	docker exec parrot-browsers-check google-chrome --version
+	docker rm -f parrot-browsers-check >/dev/null
+
 .PHONY: build push mailserver push-mailserver check-mailserver \
 	matrixserver push-matrixserver check-matrixserver \
-	patch-matrixserver push-patched-matrixserver
+	patch-matrixserver push-patched-matrixserver \
+	browsers push-browsers check-browsers
