@@ -23,7 +23,7 @@ services:
 
     setup-commands:
       - command: apt update
-      - command: bash /tmp/repo/applications/firefox/install.sh
+      - command: bash /tmp/repo/applications/pdf_viewers/firefox/install.sh
       - command: bash /usr/local/bin/entrypoint.sh
       - command: ln -s /tmp/repo/applications/pdf_viewers/20yearsofKDE.pdf /tmp/pdf.pdf # The path rending in the open dialog changes depending on the files so this makes is more fail safe
 

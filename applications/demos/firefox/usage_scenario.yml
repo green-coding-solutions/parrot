@@ -25,7 +25,7 @@ services:
       # copies its failure artifacts out to the host.
 
     setup-commands:
-      - command: bash /tmp/repo/applications/firefox/install.sh
+      - command: bash /tmp/repo/applications/demos/firefox/install.sh
       - command: bash /usr/local/bin/entrypoint.sh
 
 flow:
@@ -33,4 +33,4 @@ flow:
     container: window-container
     commands:
       - type: console
-        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/firefox/firefox.🦜
+        command: python3 /usr/local/bin/replay.py /tmp/repo/applications/demos/firefox/firefox.🦜
