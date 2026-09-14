@@ -334,10 +334,10 @@ def iter_replay_lines(input_path: Path, speed: float):
     """
     Yield event lines from a .🦜 recording, sleeping between them.
 
-    'wait X.X' lines set the delay before the next event; they are not yielded.
-    'label NAME' marks a jump target. 'loop NAME N' jumps back to the named
-    label so the body between them runs N times in total. Comment, blank, and
-    metadata lines are all skipped.
+    'wait X.X' lines add to the delay before the next event, so consecutive
+    waits sum; they are not yielded. 'label NAME' marks a jump target.
+    'loop NAME N' jumps back to the named label so the body between them runs
+    N times in total. Comment, blank, and metadata lines are all skipped.
     """
     lines: list[str] = []
     with input_path.open("r", encoding="utf-8") as f:
@@ -362,10 +362,15 @@ def iter_replay_lines(input_path: Path, speed: float):
         verb = parts[0].lower()
 
         if verb == "wait":
+            # Add, never replace.  tools/check_blocks.py --normalize-time pads a
+            # block with its own `wait` line straight after the block's last
+            # recorded one, and replacing kept only the padding: a normalized
+            # Thunderbird replayed 721 s of a 1005 s recording.  A malformed
+            # value adds nothing, which is also how check_blocks.py counts it.
             try:
-                pending_wait = float(parts[1]) if len(parts) > 1 else 0.0
+                pending_wait += float(parts[1]) if len(parts) > 1 else 0.0
             except ValueError:
-                pending_wait = 0.0
+                pass
             i += 1
             continue
 
