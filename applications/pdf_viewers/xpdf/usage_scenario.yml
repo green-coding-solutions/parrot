@@ -19,8 +19,11 @@ services:
       WINDOW_Y: 0
       WINDOW_WIDTH: 1440
       WINDOW_HEIGHT: 853
-#      CHECK_SCALE_ON_MISMATCH: 1
-      REPLAY_IGNORE_CHECKS: 1
+      # xpdf's Motif shell re-grows itself to 1440x856 after position-window pins
+      # 1440x853, on the current image as on the cluster; the references are 853.
+      # Scaling the capture back to 853 keeps the checks running (worst RMSE
+      # 0.16, zoom 200 %, verified 2026-09-29) instead of failing at block 1.
+      CHECK_SCALE_ON_MISMATCH: 1
 
     setup-commands:
       - command: apt update
