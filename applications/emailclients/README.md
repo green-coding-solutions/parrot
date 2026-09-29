@@ -16,7 +16,7 @@ up, because that is what the first block of a recording has to deal with.
 | Client | Version | Source | Starts at |
 | ------ | ------- | ------ | --------- |
 | [Mozilla Thunderbird](thunderbird/) | 153.0.1 ESR | Mozilla tarball | mail view, connecting; asks for the password once |
-| [Betterbird](betterbird/) | 140.12.0esr-bb24 | New Life Linux PPA | mail view, connecting; asks for the password once |
+| [Betterbird](betterbird/) | 140.13.0esr-bb25 | Betterbird tarball | mail view, connecting; asks for the password once |
 | [Claws Mail](clawsmail/) | 4.2.0 | Ubuntu 24.04 | mail view with the account in the folder tree |
 | [GNOME Evolution](evolution/) | 3.52.3 | Ubuntu 24.04 | scanning folders; password pre-filled, confirm once |
 | [KMail (Kontact)](kmail/) | 23.08.5 | Ubuntu 24.04 | mailbox, account collapsed — the profile carries the account |

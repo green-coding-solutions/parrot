@@ -342,7 +342,7 @@ mouseup 1
 wait 31.485763
 mousemove 400 400
 wait 0.006096
-wait 2.364102
+wait 2.125978
 log * Open busy room: open `Aurora Release` from the room list and wait for the timeline to finish rendering at the live end
 check fractal/fractal-check-004.png
 wait 2.505069
@@ -728,7 +728,7 @@ mouseup 4
 wait 11.459240
 mousemove 400 400
 wait 0.006172
-wait 12.247151
+wait 9.241078
 log * Scroll back: scroll the timeline up through ten screens of history, letting each batch of older messages finish loading before scrolling again
 check fractal/fractal-check-005.png
 wait 2.488866
@@ -851,7 +851,7 @@ mouseup 1
 wait 29.487136
 mousemove 400 400
 wait 0.006098
-wait 3.981463
+wait 4.232802
 log * Open photo room: open `Field Photos` from the room list and wait for the thumbnails on the first screen to finish decoding
 check fractal/fractal-check-008.png
 wait 2.505254
@@ -869,7 +869,7 @@ mouseup 1
 wait 6.482645
 mousemove 400 400
 wait 0.006258
-wait 0.146463
+wait 0.154867
 log * View image full size: open the newest image in the room, `reservoir-at-first-light.jpg`, in the client's image viewer, wait for it to render at full size, then close the viewer and return to the timeline
 check fractal/fractal-check-009.png
 wait 2.503649
@@ -1065,7 +1065,7 @@ mouseup 4
 wait 12.476341
 mousemove 400 400
 wait 0.006141
-wait 5.347104
+wait 4.169288
 log * Scroll thumbnails: scroll that timeline up through five screens of images, letting the thumbnails on each screen finish decoding before scrolling again
 check fractal/fractal-check-010.png
 wait 2.503945
@@ -1117,7 +1117,7 @@ keyup e
 wait 6.399626
 mousemove 400 400
 wait 0.006147
-wait 0.984862
+wait 1.488345
 log * Filter room list: type `windvane` into the room-list filter and wait for the list to settle. Clients that fold this into one box that also searches messages show more than one section of results; both are the same user action and both are in scope
 check fractal/fractal-check-011.png
 wait 2.497805
@@ -1135,7 +1135,7 @@ mouseup 1
 wait 7.460609
 mousemove 400 400
 wait 0.006371
-wait 2.040998
+wait 2.383928
 log * Open filtered room: open `Windvane Deployment` from the filtered list, wait for the timeline to render, then clear the filter
 check fractal/fractal-check-012.png
 wait 2.492897
@@ -1341,7 +1341,7 @@ keyup Return
 wait 9.396418
 mousemove 400 400
 wait 0.006157
-wait 1.492456
+wait 1.605891
 log * Reply to message: reply to `Ship it when the smoke tests are green.` from Nadia Oyelaran, the newest message in the room, with the body text `Agreed, going out today`
 check fractal/fractal-check-014.png
 wait 2.563441
@@ -1630,7 +1630,7 @@ keyup Return
 wait 13.383753
 mousemove 400 400
 wait 0.006168
-wait 6.434446
+wait 6.341675
 log * Echo round trip: open `Parrot Echo` from the room list, send the message `ping`, and wait for the bot's `pong` to arrive and render in the timeline
 check fractal/fractal-check-018.png
 wait 2.496155
@@ -1768,7 +1768,7 @@ mouseup 1
 wait 19.492342
 mousemove 400 400
 wait 0.006205
-wait 8.438473
+wait 8.521088
 log * Join room: join the public room `#parrot-lobby:parrot.test` by its address and wait for its timeline to render
 check fractal/fractal-check-019.png
 wait 2.505808
@@ -2234,7 +2234,7 @@ mouseup 1
 wait 85.470704
 mousemove 400 400
 wait 0.006252
-wait 1.997345
+wait 2.039848
 log * Idle quiet: open `Parrot Firehose` from the room list and let it settle, then leave the pointer and keyboard alone and let the client sit untouched for 60 seconds with nothing arriving
 check fractal/fractal-check-022.png
 wait 2.493791

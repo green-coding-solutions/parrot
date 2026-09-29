@@ -22,7 +22,7 @@ TARGET_MB="${PARROT_MAIL_TARGET_MB:-500}"
 # Pinned against the ubuntu:24.04 (noble) archive, like the rest of this repo.
 PKG_DOVECOT='1:2.3.21+dfsg1-2ubuntu6.5'
 PKG_POSTFIX='3.8.6-1ubuntu0.1'
-PKG_OPENSSL='3.0.13-0ubuntu3.11'
+PKG_OPENSSL='3.0.13-0ubuntu3.15'
 
 log() { printf '[mailserver-build] %s\n' "$*"; }
 

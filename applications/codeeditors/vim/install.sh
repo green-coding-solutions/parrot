@@ -3,14 +3,20 @@
 #
 # Both versions are pinned to the exact package the 24.04 archive holds, so a
 # rebuild next year installs the same editor rather than whatever has landed in
-# the pocket since.  The base image is pinned by digest, so these keep resolving.
+# the pocket since.
+#
+# The pin does NOT keep resolving on its own.  xterm comes from the release
+# pocket, which never changes.  Vim comes from noble-updates, and Ubuntu keeps
+# only the newest version there: 7.18 vanished when 7.20 landed, and the install
+# failed with "Version ... was not found" (re-pinned 2026-09-29).  The base
+# image's digest pins the image, not the archive apt reads from.
 #
 # NOTHING IS CONFIGURED.  No .vimrc is written: Vim runs on its compiled-in
 # defaults plus Debian's /usr/share/vim/vim91/defaults.vim, which is what you
 # get when you install Vim and type `vim`.
 set -euo pipefail
 
-VIM_VERSION='2:9.1.0016-1ubuntu7.18'
+VIM_VERSION='2:9.1.0016-1ubuntu7.20'
 XTERM_VERSION='390-1ubuntu3'
 
 log() { printf '[install-vim] %s\n' "$*"; }

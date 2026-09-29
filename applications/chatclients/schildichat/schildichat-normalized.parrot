@@ -312,7 +312,7 @@ keyup Return
 wait 31.421018
 mousemove 900 300
 wait 0.006191
-wait 3.313493
+wait 3.075369
 log * Open busy room: open `Aurora Release` from the room list and wait for the timeline to finish rendering at the live end
 check schildichat/schildichat-check-004.png
 wait 3.121791
@@ -360,7 +360,7 @@ keyup Prior
 wait 11.752002
 mousemove 900 300
 wait 0.006545
-wait 27.514744
+wait 24.508671
 log * Scroll back: scroll the timeline up through ten screens of history, letting each batch of older messages finish loading before scrolling again
 check schildichat/schildichat-check-005.png
 wait 2.659709
@@ -470,7 +470,7 @@ keyup Return
 wait 29.471971
 mousemove 900 300
 wait 0.006201
-wait 4.935886
+wait 5.187225
 log * Open photo room: open `Field Photos` from the room list and wait for the thumbnails on the first screen to finish decoding
 check schildichat/schildichat-check-008.png
 wait 2.535228
@@ -488,6 +488,7 @@ mouseup 1
 wait 6.548438
 mousemove 900 300
 wait 0.006287
+wait 0.008404
 log * View image full size: open the newest image in the room, `reservoir-at-first-light.jpg`, in the client's image viewer, wait for it to render at full size, then close the viewer and return to the timeline
 check schildichat/schildichat-check-009.png
 wait 3.216865
@@ -515,7 +516,7 @@ keyup Prior
 wait 12.576063
 mousemove 900 300
 wait 0.006303
-wait 12.337774
+wait 11.159958
 log * Scroll thumbnails: scroll that timeline up through five screens of images, letting the thumbnails on each screen finish decoding before scrolling again
 check schildichat/schildichat-check-010.png
 wait 2.076985
@@ -561,7 +562,7 @@ keyup e
 wait 6.514099
 mousemove 900 300
 wait 0.006243
-wait 1.417614
+wait 1.921097
 log * Filter room list: type `windvane` into the room-list filter and wait for the list to settle. Clients that fold this into one box that also searches messages show more than one section of results; both are the same user action and both are in scope
 check schildichat/schildichat-check-011.png
 wait 2.072718
@@ -571,7 +572,7 @@ keyup Return
 wait 25.419331
 mousemove 900 300
 wait 0.006117
-wait 3.079800
+wait 3.422730
 log * Open filtered room: open `Windvane Deployment` from the filtered list, wait for the timeline to render, then clear the filter
 check schildichat/schildichat-check-012.png
 wait 2.574242
@@ -777,7 +778,7 @@ keyup Return
 wait 9.719073
 mousemove 900 300
 wait 0.006860
-wait 1.330933
+wait 1.444368
 log * Reply to message: reply to `Ship it when the smoke tests are green.` from Nadia Oyelaran, the newest message in the room, with the body text `Agreed, going out today`
 check schildichat/schildichat-check-014.png
 wait 2.667547
@@ -1119,7 +1120,7 @@ keyup Return
 wait 13.666323
 mousemove 900 300
 wait 0.006204
-wait 7.083220
+wait 6.990449
 log * Echo round trip: open `Parrot Echo` from the room list, send the message `ping`, and wait for the bot's `pong` to arrive and render in the timeline
 check schildichat/schildichat-check-018.png
 wait 2.076952
@@ -1245,7 +1246,7 @@ keyup Return
 wait 19.495462
 mousemove 900 300
 wait 0.006518
-wait 19.514680
+wait 19.597295
 log * Join room: join the public room `#parrot-lobby:parrot.test` by its address and wait for its timeline to render
 check schildichat/schildichat-check-019.png
 wait 2.540642
@@ -1695,7 +1696,7 @@ keyup Return
 wait 85.748732
 mousemove 900 300
 wait 0.006389
-wait 2.652799
+wait 2.695302
 log * Idle quiet: open `Parrot Firehose` from the room list and let it settle, then leave the pointer and keyboard alone and let the client sit untouched for 60 seconds with nothing arriving
 check schildichat/schildichat-check-022.png
 wait 2.557494

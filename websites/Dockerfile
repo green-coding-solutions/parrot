@@ -32,7 +32,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
-    curl=8.5.0-2ubuntu10.13 \
+    curl=8.5.0-2ubuntu10.15 \
     unzip=6.0-28ubuntu4.1 \
     xz-utils=5.6.1+really5.4.5-1ubuntu0.3 \
     libnss3-tools=2:3.98-1ubuntu0.2 \

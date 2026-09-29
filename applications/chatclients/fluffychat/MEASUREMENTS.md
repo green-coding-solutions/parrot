@@ -1,15 +1,20 @@
 # FluffyChat — measured landmarks
 
-FluffyChat 2.8.0 (Flathub, commit `104c4950b04a…`, runtime `org.gnome.Platform//50`)
-in the benchmark container at 1440x900.
+FluffyChat 2.9.5 (Flathub, commit `35790fc6…`, runtime `org.gnome.Platform//50`
+commit `b1935f7a…`) in the benchmark container at 1440x900.
 
-**RECORDED AND REPLAY-VERIFIED.** All 23 blocks measured, and `fluffychat.parrot`
-replays **23/23 PASS, 0 FAIL** against fresh containers with a worst RMSE of
-**0.0178** against a 0.2 threshold — the tightest of the group so far. Every
-mutating block was confirmed against the homeserver, including the target events
-of the reply, the reaction and the edit. Two consecutive-checkpoint pairs are
-identical and that was run down rather than waved through; see the section near
-the end.
+**RE-RECORDED 2026-09-29 ON 2.9.5.** The original recording was made on 2.8.0
+(commit `104c4950…`), which Flathub has since deleted, so it can no longer be
+installed. The 2.8.0 recording replayed 23/23 on 2.9.5 but its Leave block did
+nothing; see Block 21. That was the only landmark that had moved. The new
+recording replays **23/23 PASS, 0 FAIL** against fresh containers with a worst
+RMSE of **0.0178** against a 0.2 threshold, and every mutating block was
+confirmed against the homeserver again, including the target events of the
+reply, the reaction and the edit, and `Parrot Lobby  not a member`.
+
+The landmarks below were measured on 2.8.0 and still hold on 2.9.5 except where
+a block says otherwise. Two consecutive-checkpoint pairs are identical and that
+was run down rather than waved through; see the section near the end.
 
 Flutter paints every control itself onto a single
 surface, and that shows up here in a way it does not in the other five: there is
@@ -307,9 +312,15 @@ with no `m.room.encryption` event.
 
 ## Block 21 — Leave
 
-`⋮ (1404, 36)` → *Chat details / Mute chat / Search / Encryption / Emote
-Settings /* **Leave (1324, 288)** → confirmation *"Are you sure?"* →
-**Leave (815, 516)**.
+`⋮ (1404, 36)` → *Chat details / Search / Encryption /* **Leave (1324, 192)**
+→ confirmation *"Are you sure?"* → **Leave (815, 516)**.
+
+On 2.8.0 the menu had six entries (*Mute chat* and *Emote Settings* as well) and
+Leave sat at **(1324, 288)**. Replaying the 2.8.0 recording on 2.9.5, that click
+landed below the four-entry menu and closed it, and the confirm click hit the
+timeline. Every check still passed, this one at RMSE 0.079 (the worst of the
+run) against 0.2, and only `membership` showed `Parrot Lobby JOINED`. Measured
+on 2.9.5 and confirmed on the server: `Parrot Lobby  not a member`.
 
 ## Blocks 22-23 — the idle pair
 

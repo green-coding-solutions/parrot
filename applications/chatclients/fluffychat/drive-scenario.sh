@@ -321,9 +321,13 @@ CLICK 1180 244                               # Invite
 CP "Create room" 12
 
 # --- 21. Leave room ----------------------------------------------------------
+# 2.9 cut the room menu from six entries to four (Mute chat and Emote Settings
+# went), which moved Leave from y=288 to y=192. The old click landed below the
+# menu, closed it, and the confirm click hit the timeline: a silent no-op that
+# still passed its checkpoint at 0.079. Only the server showed the lobby joined.
 ROOM 'Parrot Lobby' 252 16
 CLICK 1404 36; sleep 4                       # room menu
-CLICK 1324 288; sleep 5                      # Leave
+CLICK 1324 192; sleep 5                      # Leave
 CLICK 815 516                                # confirm Leave
 CP "Leave room" 14
 

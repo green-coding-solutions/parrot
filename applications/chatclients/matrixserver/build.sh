@@ -30,7 +30,7 @@ HERE="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 # shellcheck source=../account.env
 source "${HERE}/../account.env"
 
-PKG_SYNAPSE='1.158.0+noble1'
+PKG_SYNAPSE='1.161.0+noble1'
 PKG_POSTGRES='16+257build1.1'
 PG_VERSION='16'
 

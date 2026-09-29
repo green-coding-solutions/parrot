@@ -141,7 +141,7 @@ sign in.
 | [SchildiChat Desktop](schildichat/) | Electron | 1.11.36-sc.3 | GitHub release `.deb` |
 | [nheko](nheko/) | Qt / C++ | 0.11.3+~0.9.2+~1.0.0+~0.3.0-1build4 | Ubuntu 24.04 |
 | [Fractal](fractal/) | GTK4 / Rust | Flathub `be6bc4ab` | Flathub, `org.gnome.Platform//50` |
-| [FluffyChat](fluffychat/) | Flutter | Flathub `104c4950` | Flathub, `org.gnome.Platform//50` |
+| [FluffyChat](fluffychat/) | Flutter | 2.9.5, Flathub `35790fc6` | Flathub, `org.gnome.Platform//50` |
 
 Four distinct runtimes across five clients, which is the point of the group. Two
 pairings hold something fixed on purpose:

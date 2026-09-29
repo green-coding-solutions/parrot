@@ -17,6 +17,18 @@
 # different application every few weeks and no recording would survive it. An
 # OSTree commit is immutable and is the Flatpak equivalent of a SHA-256.
 #
+# Immutable is not permanent. Flathub keeps only a short history behind each
+# branch head and prunes it as the branch moves, in two ways, both seen on
+# 2026-09-29 and both fatal to the `flatpak update --commit=` below:
+#
+#   the commit is gone          ->  error: Server returned status 404
+#   only its signature is gone  ->  GPG verification enabled, but no signatures
+#                                   found
+#
+# The head always installs; anything older can stop at any time. The fix is to
+# re-resolve (RESOLVE, or `flatpak remote-info`), paste the new commit in, and
+# replay-verify the recording against it before scheduling anything.
+#
 # RESOLVING A COMMIT
 #
 # Pass the literal string RESOLVE as the commit to install the current branch

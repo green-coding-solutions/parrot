@@ -387,7 +387,7 @@ keyup Return
 wait 27.247330
 mousemove 800 300
 wait 0.006380
-wait 9.519105
+wait 9.280981
 log * Open busy room: open `Aurora Release` from the room list and wait for the timeline to finish rendering at the live end
 check nheko/nheko-check-004.png
 wait 3.126058
@@ -435,7 +435,7 @@ keyup Prior
 wait 11.235090
 mousemove 800 300
 wait 0.006305
-wait 28.075962
+wait 25.069889
 log * Scroll back: scroll the timeline up through ten screens of history, letting each batch of older messages finish loading before scrolling again
 check nheko/nheko-check-005.png
 wait 2.525580
@@ -537,7 +537,7 @@ keyup Return
 wait 24.243145
 mousemove 800 300
 wait 0.006318
-wait 12.221800
+wait 12.473139
 log * Open photo room: open `Field Photos` from the room list and wait for the thumbnails on the first screen to finish decoding
 check nheko/nheko-check-008.png
 wait 2.514553
@@ -553,7 +553,7 @@ keyup Escape
 wait 6.233552
 mousemove 800 300
 wait 0.006358
-wait 4.794997
+wait 4.803401
 log * View image full size: open the newest image in the room, `reservoir-at-first-light.jpg`, in the client's image viewer, wait for it to render at full size, then close the viewer and return to the timeline
 check nheko/nheko-check-009.png
 wait 3.125098
@@ -581,7 +581,7 @@ keyup Prior
 wait 12.252764
 mousemove 800 300
 wait 0.006269
-wait 12.817450
+wait 11.639634
 log * Scroll thumbnails: scroll that timeline up through five screens of images, letting the thumbnails on each screen finish decoding before scrolling again
 check nheko/nheko-check-010.png
 wait 2.059457
@@ -627,7 +627,7 @@ keyup e
 wait 6.232473
 mousemove 800 300
 wait 0.006312
-wait 1.711856
+wait 2.215339
 log * Filter room list: type `windvane` into the room-list filter and wait for the list to settle. Clients that fold this into one box that also searches messages show more than one section of results; both are the same user action and both are in scope
 check nheko/nheko-check-011.png
 wait 2.064280
@@ -637,7 +637,7 @@ keyup Return
 wait 19.235031
 mousemove 800 300
 wait 0.006133
-wait 9.272604
+wait 9.615534
 log * Open filtered room: open `Windvane Deployment` from the filtered list, wait for the timeline to render, then clear the filter
 check nheko/nheko-check-012.png
 wait 2.522462
@@ -841,7 +841,7 @@ keyup Return
 wait 7.239329
 mousemove 800 300
 wait 0.006440
-wait 5.426076
+wait 5.539511
 log * Reply to message: reply to `Ship it when the smoke tests are green.` from Nadia Oyelaran, the newest message in the room, with the body text `Agreed, going out today`
 check nheko/nheko-check-014.png
 wait 2.509695
@@ -1205,7 +1205,7 @@ keyup Return
 wait 11.256212
 mousemove 800 300
 wait 0.006464
-wait 14.596573
+wait 14.503802
 log * Echo round trip: open `Parrot Echo` from the room list, send the message `ping`, and wait for the bot's `pong` to arrive and render in the timeline
 check nheko/nheko-check-018.png
 wait 2.519522
@@ -1347,7 +1347,7 @@ keyup Return
 wait 13.241345
 mousemove 800 300
 wait 0.006241
-wait 23.511907
+wait 23.594522
 log * Join room: join the public room `#parrot-lobby:parrot.test` by its address and wait for its timeline to render
 check nheko/nheko-check-019.png
 wait 2.524739
@@ -1749,7 +1749,7 @@ keyup Return
 wait 80.269988
 mousemove 800 300
 wait 0.006190
-wait 10.219637
+wait 10.262140
 log * Idle quiet: open `Parrot Firehose` from the room list and let it settle, then leave the pointer and keyboard alone and let the client sit untouched for 60 seconds with nothing arriving
 check nheko/nheko-check-022.png
 wait 2.522335

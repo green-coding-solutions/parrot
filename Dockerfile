@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     ffmpeg=7:6.1.1-3ubuntu5 \
     xmacro=0.3pre-20000911-8 \
     xdotool=1:3.20160805.1-5build1 \
-    xvfb=2:21.1.12-1ubuntu1.6
+    xvfb=2:21.1.12-1ubuntu1.8
 
 COPY tools/* /usr/local/bin/
 COPY replay.py helpers.py timed_xmacro.py /usr/local/bin/
