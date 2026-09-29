@@ -252,6 +252,17 @@ The script recursively finds every `*.parrot` under the given folder, ignoring `
 
 Time normalization inserts a single extra `wait <padding>` line immediately before each block's `log` line, so the action timing within a block is preserved while the total runtime of each block matches across files — useful for fair side-by-side benchmarking.
 
+### One GMT phase per block (`replay.py --block`)
+
+`replay.py <file>.parrot --block N` replays only block N of a recording, where block N is everything after checkpoint N-1 up to and including checkpoint N (the same boundary `check_blocks.py` uses). Block 1 starts the app exactly as a whole-file replay does. Every later block continues the app the earlier blocks left running and touches nothing first: no repositioning, no raise or focus, no lock-key reset, because a whole-file replay does none of that between blocks either. If the window is gone, the block fails instead of starting the app again. Replaying blocks 1 to N one after another yields the same events with the same waits as replaying the whole file.
+
+`tools/make_block_scenarios.py` uses this to write `usage_scenario_blocks_normalized.yml` next to every `usage_scenario_normalized.yml`: the same services, with one flow step per block, so every block is a GMT phase of its own. Each step is named after its block's label, so phase N carries the same name for every app in a group. Rerun the tool after re-recording or re-normalizing; `--check` exits non-zero when a copy is missing or out of date.
+
+```bash
+./tools/make_block_scenarios.py                 # write or refresh all of them
+./tools/make_block_scenarios.py --check         # write nothing, report stale copies
+```
+
 ## Deterministic Window Layout
 
 To keep click coordinates and screenshots stable across runs, configure fixed window geometry in the compose environment:

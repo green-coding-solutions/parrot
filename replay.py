@@ -11,7 +11,13 @@ import time
 from pathlib import Path
 
 from helpers import STARTUP_FIELDS, load_app_metadata, note_label
-from timed_xmacro import iter_replay_lines, parse_xmacro_event
+from timed_xmacro import (
+    iter_replay_lines,
+    parse_xmacro_event,
+    read_replay_lines,
+    select_block,
+    split_blocks,
+)
 
 CHECK_IMAGE_SCRIPT   = "/usr/local/bin/check-image.sh"
 POSITION_WINDOW_SCRIPT = "/usr/local/bin/position-window.sh"
@@ -43,6 +49,16 @@ def parse_args() -> argparse.Namespace:
         help="Treat macro_file as a directory and replay every numbered block "
              "file up to and including this number, ordered by the leading "
              "number in the filename",
+    )
+    parser.add_argument(
+        "--block",
+        type=int,
+        default=None,
+        help="Replay only this block (1-based) of macro_file, a block being "
+             "everything up to and including its check line. Block 1 starts "
+             "the app as a whole-file replay does; any later block continues "
+             "the app the earlier blocks left running, and fails if its window "
+             "is gone instead of starting it again",
     )
     parser.add_argument(
         "--no-checks",
@@ -436,6 +452,30 @@ def focus_app(app_meta: dict[str, str], display: str, window_size: tuple[int, in
         time.sleep(0.1)
 
 
+def attach_app(app_meta: dict[str, str], display: str, block: int) -> None:
+    """
+    Confirm the app an earlier block started is still up, and touch nothing.
+
+    A block after the first has to meet the state the block before it left:
+    the same window geometry, focus, pointer and lock keys, exactly as it would
+    inside a whole-file replay, which does none of focus_app's work between
+    blocks. focus_app would reposition, raise and refocus the window - a menu
+    or dialog open at the checkpoint would lose its focus - and
+    position-window.sh sleeps, all inside the measured phase.
+
+    Nor is the app launched when its window is missing. That means it died in
+    an earlier block, and starting it again would put an app start into a
+    phase that is not meant to have one, and one that could still pass its
+    Check.
+    """
+    if _find_window(display, app_meta.get("windowclass", ""), app_meta.get("windowtitle", "")) is None:
+        report_missing_window(
+            display, app_meta,
+            preamble=f"[replay] FATAL: block {block} continues the running app, but its window is gone",
+        )
+        raise SystemExit(1)
+
+
 # ---------------------------------------------------------------------------
 # Lock-key normalisation
 # ---------------------------------------------------------------------------
@@ -616,6 +656,12 @@ def main() -> int:
 
     speed = parse_speed()
 
+    if args.block is not None and args.run_to is not None:
+        print("--block and --run-to cannot be combined", file=sys.stderr)
+        return 1
+    # Any block after the first continues the app the earlier ones left running.
+    attaching = args.block is not None and args.block > 1
+
     if args.run_to is not None:
         if not target.is_dir():
             print(f"--run-to requires a directory: {target}", file=sys.stderr)
@@ -645,7 +691,17 @@ def main() -> int:
         macro_files = [target]
         app_meta = load_app_metadata(target)
         app_dir = target.parent   # e.g. applications/firefox/
-        window_size = infer_window_size(target)
+        # Only focus_app uses the size, and attaching skips focus_app.
+        window_size = None if attaching else infer_window_size(target)
+        if args.block is not None:
+            # Rejected here, before block 1 has started the app for nothing.
+            lines = read_replay_lines(target)
+            try:
+                select_block(lines, args.block)
+            except ValueError as exc:
+                print(f"{target}: {exc}", file=sys.stderr)
+                return 1
+            block_count = len(split_blocks(lines))
 
     if len(macro_files) == 1:
         print(f"Replaying : {macro_files[0]}", file=sys.stderr)
@@ -664,14 +720,21 @@ def main() -> int:
         print(f"Start cmd : {app_meta['startcommand']}", file=sys.stderr)
     if window_size:
         print(f"Win size  : {window_size[0]}x{window_size[1]} (from check image)", file=sys.stderr)
+    if args.block is not None:
+        mode = "continuing the running app" if attaching else "starting the app"
+        print(f"Block     : {args.block} of {block_count}, {mode}", file=sys.stderr)
 
-    # 1. Ensure the app is running and focused.
-    focus_app(app_meta, display, window_size)
+    if attaching:
+        # 1+2. Leave the app exactly as the block before left it; see attach_app.
+        attach_app(app_meta, display, args.block)
+    else:
+        # 1. Ensure the app is running and focused.
+        focus_app(app_meta, display, window_size)
 
-    # 2. Make lock-key state deterministic before replaying key events.
-    normalize_lock_key(display, "Caps Lock",   "Caps_Lock",   os.environ.get("REPLAY_INIT_CAPSLOCK",   "off"))
-    normalize_lock_key(display, "Num Lock",    "Num_Lock",    os.environ.get("REPLAY_INIT_NUMLOCK",    "off"))
-    normalize_lock_key(display, "Scroll Lock", "Scroll_Lock", os.environ.get("REPLAY_INIT_SCROLLLOCK", "keep"))
+        # 2. Make lock-key state deterministic before replaying key events.
+        normalize_lock_key(display, "Caps Lock",   "Caps_Lock",   os.environ.get("REPLAY_INIT_CAPSLOCK",   "off"))
+        normalize_lock_key(display, "Num Lock",    "Num_Lock",    os.environ.get("REPLAY_INIT_NUMLOCK",    "off"))
+        normalize_lock_key(display, "Scroll Lock", "Scroll_Lock", os.environ.get("REPLAY_INIT_SCROLLLOCK", "keep"))
 
     # 3. Optionally record the screen to a video file.
     video_output = resolve_video_output()
@@ -681,7 +744,7 @@ def main() -> int:
     #    iter_replay_lines() sleeps between events to honour the recorded timing.
     try:
         for macro_file in macro_files:
-            for line in iter_replay_lines(macro_file, speed):
+            for line in iter_replay_lines(macro_file, speed, args.block):
                 action = parse_xmacro_event(line)
                 if action is not None:
                     dispatch(action, display, app_meta, app_dir, args.no_checks)

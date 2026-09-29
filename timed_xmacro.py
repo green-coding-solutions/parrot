@@ -330,15 +330,8 @@ def cmd_record(
 # Replay
 # ---------------------------------------------------------------------------
 
-def iter_replay_lines(input_path: Path, speed: float):
-    """
-    Yield event lines from a .🦜 recording, sleeping between them.
-
-    'wait X.X' lines add to the delay before the next event, so consecutive
-    waits sum; they are not yielded. 'label NAME' marks a jump target.
-    'loop NAME N' jumps back to the named label so the body between them runs
-    N times in total. Comment, blank, and metadata lines are all skipped.
-    """
+def read_replay_lines(input_path: Path) -> list[str]:
+    """Return a .🦜 recording's lines, stripped, without blank and comment lines."""
     lines: list[str] = []
     with input_path.open("r", encoding="utf-8") as f:
         for raw in f:
@@ -346,6 +339,81 @@ def iter_replay_lines(input_path: Path, speed: float):
             if not line or line.startswith("#"):
                 continue
             lines.append(line)
+    return lines
+
+
+def _verb(line: str) -> str:
+    return line.split(None, 1)[0].lower()
+
+
+def split_blocks(lines: list[str]) -> list[list[str]]:
+    """
+    Split a recording's lines into blocks, each ending with its `check` line.
+
+    This is the boundary tools/check_blocks.py uses, so block N here is block N
+    in its wait table and in the normalized recording.  Block 1 also carries the
+    metadata and the startup wait; every later block starts with the wait that
+    followed the checkpoint before it.  Lines after the last `check` are one
+    more block only if they hold something replay yields: a tail of nothing but
+    `wait`s is not slept by a whole-file replay either, because a wait is only
+    ever slept before the event that follows it.
+    """
+    blocks: list[list[str]] = []
+    current: list[str] = []
+    for line in lines:
+        current.append(line)
+        if _verb(line) == "check":
+            blocks.append(current)
+            current = []
+    if any(_verb(line) in EVENT_VERBS - {"wait", "label", "loop"} for line in current):
+        blocks.append(current)
+    return blocks
+
+
+def select_block(lines: list[str], block: int) -> list[str]:
+    """
+    Return block *block* (1-based) of a recording's lines, see split_blocks.
+
+    Raises ValueError for a block the recording does not have, and for a block
+    whose `loop` jumps to a label in another block: replayed on its own, that
+    loop would silently run once instead of N times.
+    """
+    blocks = split_blocks(lines)
+    if not 1 <= block <= len(blocks):
+        raise ValueError(f"block {block} does not exist: the recording has {len(blocks)} blocks")
+    selected = blocks[block - 1]
+
+    def labels(of: list[str]) -> set[str]:
+        return {line.split(None, 1)[1].strip() for line in of
+                if _verb(line) == "label" and len(line.split(None, 1)) > 1}
+
+    everywhere, here = labels(lines), labels(selected)
+    for line in selected:
+        if _verb(line) != "loop":
+            continue
+        loop_args = line.split()[1:]
+        if loop_args and loop_args[0] in everywhere and loop_args[0] not in here:
+            raise ValueError(
+                f"block {block} loops back to label {loop_args[0]!r}, which is in another block"
+            )
+    return selected
+
+
+def iter_replay_lines(input_path: Path, speed: float, block: int | None = None):
+    """
+    Yield event lines from a .🦜 recording, sleeping between them.
+
+    'wait X.X' lines add to the delay before the next event, so consecutive
+    waits sum; they are not yielded. 'label NAME' marks a jump target.
+    'loop NAME N' jumps back to the named label so the body between them runs
+    N times in total. Comment, blank, and metadata lines are all skipped.
+
+    With *block*, only that block is replayed (see split_blocks).  It is cut
+    out before anything is slept, so the other blocks' waits cost nothing.
+    """
+    lines = read_replay_lines(input_path)
+    if block is not None:
+        lines = select_block(lines, block)
 
     labels: dict[str, int] = {}
     for idx, line in enumerate(lines):
