@@ -63,6 +63,10 @@ EOF
 cat > /etc/apt/apt.conf.d/99parrot-snapshot <<'EOF'
 // Snapshot Release files are past Valid-Until by design.
 Acquire::Check-Valid-Until "false";
+// snapshot.ubuntu.com answers 503 now and then (seen on machine 13,
+// 2026-10-12). apt retries transient failures, with growing delays, in every
+// later apt call of the install scripts too.
+Acquire::Retries "10";
 EOF
 
 # Prove it took, rather than trusting it: the lists must come from the snapshot.
@@ -74,8 +78,21 @@ EOF
 # network driver (machine 7) loses a few connects per thousand, so installs failed
 # with "Unable to connect to <host>:8889". Through the proxy's CONNECT tunnels the
 # same install needs 2 connections (measured 2026-10-12).
-rm -rf /var/lib/apt/lists/*
-apt-get update -qq --error-on=any
+#
+# A 503 from the snapshot service stopped one run in BOOT (machine 13,
+# 2026-10-12), so the update is tried up to six times, about 12 minutes in all.
+ok=0
+for wait_s in 30 60 120 240 300 0; do
+    rm -rf /var/lib/apt/lists/*
+    if apt-get update -qq --error-on=any; then ok=1; break; fi
+    (( wait_s > 0 )) || break
+    log "apt-get update failed, trying again in ${wait_s} s"
+    sleep "$wait_s"
+done
+if (( ok == 0 )); then
+    log "FAILED: the snapshot archive did not answer after six attempts" >&2
+    exit 1
+fi
 if ! ls /var/lib/apt/lists | grep -q '^snapshot.ubuntu.com_'; then
     log "FAILED: apt did not fetch its lists from snapshot.ubuntu.com" >&2
     exit 1
