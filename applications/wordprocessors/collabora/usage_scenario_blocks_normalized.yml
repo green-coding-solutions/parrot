@@ -140,6 +140,9 @@ services:
       - --security-opt apparmor=parrot-flatpak
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/wordprocessors/collabora/install.sh
       # Deterministic window geometry, and a fluxbox keys file with no keyboard
       # bindings at all - the default one grabs Control+F1..F12 for workspace

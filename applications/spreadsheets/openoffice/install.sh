@@ -41,7 +41,7 @@ echo "${AOO_SHA256}  ${AOO_TARBALL}" | sha256sum -c - >/dev/null
 log "sha256 ok"
 
 log "unpacking and installing"
-tar -xzf "$AOO_TARBALL"
+tar --no-same-owner -xzf "$AOO_TARBALL"
 dpkg -i en-US/DEBS/*.deb >/dev/null
 rm -rf /tmp/en-US "/tmp/${AOO_TARBALL}"
 ln -sf /opt/openoffice4/program/soffice /usr/local/bin/soffice

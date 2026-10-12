@@ -30,6 +30,12 @@ services:
     #   - "6080:6080" # noVNC (open in browser)
     #   - "5900:5900" # raw VNC
     environment:
+      # GMT's network proxy provider points every HTTP client at a proxy on the
+      # host, which cannot resolve Docker-internal names. The servers' names must
+      # bypass it. GMT sets NO_PROXY earlier on the docker run line, and the later
+      # value wins. Without the provider these variables change nothing.
+      NO_PROXY: matrix.parrot.test,parrot.test,.parrot.test,matrix-container,window-container,localhost,127.0.0.1
+      no_proxy: matrix.parrot.test,parrot.test,.parrot.test,matrix-container,window-container,localhost,127.0.0.1
       # DEBUG: 1
       RESOLUTION: 1440x900
 
@@ -40,6 +46,9 @@ services:
     # one with nothing granted to the container at all.
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/chatclients/common/client-setup.sh
       - command: bash /tmp/repo/applications/chatclients/nheko/install.sh
       # NO SESSION SEEDING. The scenario signs in itself - script.md block 2 -

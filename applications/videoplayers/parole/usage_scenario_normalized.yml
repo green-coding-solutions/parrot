@@ -15,6 +15,9 @@ services:
       LC_ALL: C.UTF-8
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/videoplayers/parole/install.sh
       - command: bash /tmp/repo/applications/videoplayers/common/pin-windows.sh parole 1440 900
       - command: bash /usr/local/bin/entrypoint.sh

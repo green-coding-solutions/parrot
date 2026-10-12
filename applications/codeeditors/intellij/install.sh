@@ -52,7 +52,7 @@ else
     log "unpacking to /opt/idea"
     rm -rf /opt/idea
     mkdir -p /opt/idea
-    tar -xzf /tmp/idea.tar.gz -C /opt/idea --strip-components=1
+    tar --no-same-owner -xzf /tmp/idea.tar.gz -C /opt/idea --strip-components=1
     rm -f /tmp/idea.tar.gz
     touch "$MARKER"
 fi

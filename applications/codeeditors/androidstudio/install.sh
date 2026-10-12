@@ -73,7 +73,7 @@ else
     log "unpacking to /opt/android-studio"
     rm -rf /opt/android-studio
     mkdir -p /opt/android-studio
-    tar -xzf /tmp/studio.tar.gz -C /opt/android-studio --strip-components=1
+    tar --no-same-owner -xzf /tmp/studio.tar.gz -C /opt/android-studio --strip-components=1
     rm -f /tmp/studio.tar.gz
     touch "$MARKER"
 fi

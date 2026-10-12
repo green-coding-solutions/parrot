@@ -13,6 +13,9 @@ services:
       RESOLUTION: 1440x900
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/codeeditors/sublime/install.sh
       # The project the scenario edits, restored to its seeded state.  Setup runs
       # before every replay, which is what this step is for: the last blocks of

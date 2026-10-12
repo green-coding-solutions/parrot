@@ -56,7 +56,7 @@ else
     log "unpacking to /opt/firefox"
     rm -rf /opt/firefox
     mkdir -p /opt/firefox
-    tar -xJf /tmp/firefox.tar.xz -C /opt/firefox --strip-components=1
+    tar --no-same-owner -xJf /tmp/firefox.tar.xz -C /opt/firefox --strip-components=1
     rm -f /tmp/firefox.tar.xz
     touch "$MARKER"
 fi

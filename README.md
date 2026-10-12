@@ -230,6 +230,85 @@ flow:
 
 Point the Green Metrics Tool at the repository and it will set up the container, run the replay, and collect energy and performance metrics automatically.
 
+## Running the Same Software Everywhere
+
+The benchmarks run on several machines over several weeks. Three things keep
+the runs comparable and make them work on every GMT setup.
+
+### A frozen Ubuntu archive
+
+Every `window-container` starts with
+[`applications/common/apt-snapshot.sh`](applications/common/apt-snapshot.sh). It
+points apt at `snapshot.ubuntu.com` as of `20260929T150000Z`, the hour of commit
+`cdbdd06`, which defined the sweep. Every later `apt-get` in that container
+installs from the archive as it was then.
+
+Without it two things go wrong:
+
+- **Pinned versions vanish.** Ubuntu keeps only the newest version of a
+  package in `noble-updates`. `vim 2:9.1.0016-1ubuntu7.18` disappeared on
+  2026-09-29, `libreoffice-* 4:24.2.7-0ubuntu0.24.04.6` between 2026-10-01 and
+  2026-10-06, and the installs failed with "Version ... was not found".
+- **Everything unpinned moves silently.** All terminals, all video players and
+  every dependency of every app install whatever the archive holds that day, so
+  two machines or two days measure different software without any error.
+
+`apt-get --snapshot` does not work here: the image's Release files carry no
+`Snapshots:` field, so apt ignores the option and keeps reading the live
+archive. The script therefore writes the snapshot URL into the sources itself,
+turns off `Check-Valid-Until` (a snapshot's Release files are past it by
+design), and fails if the lists did not come from the snapshot. Vendor
+repositories that install scripts add later are untouched. Their packages are
+pinned by version and sha256 in the install scripts.
+
+To move the snapshot, change `SNAPSHOT` in the script and check that every
+pinned version still resolves there.
+
+### GMT's network proxy provider
+
+GMT's `network_connections_proxy_container` provider starts tinyproxy on the
+host and sets `HTTP_PROXY`, `HTTPS_PROXY` and their lower-case twins in every
+container. Its `NO_PROXY` lists only the compose service names. The chat and
+email clients, however, talk to their servers by network alias
+(`matrix.parrot.test`, `mail.parrot.test`). Those requests went to the host
+proxy, which cannot resolve Docker-internal names, and the chat client setup
+failed with "`http://matrix.parrot.test:8008/... never answered`".
+
+The chat and email scenarios therefore set `NO_PROXY` and `no_proxy` in
+`window-container` to the server aliases, the `.parrot.test` domain, the service
+names and localhost. GMT puts its own value earlier on the `docker run` line,
+and Docker keeps the last one. Without the provider the variables change
+nothing.
+
+Everything else, including apt and Flathub downloads, still goes through the
+proxy, which is what the provider is there to record.
+
+### Rootless Docker
+
+In rootless Docker the container's root is the host user, and only the uids in
+that user's subordinate range exist inside it (65536 by default). Extracting a
+tarball as root makes tar restore the owners recorded in the archive. The
+Eclipse tarball records uid 1001330000, which has no mapping, and tar fails
+with "`Cannot change ownership to uid 1001330000 ... Invalid argument`". Every
+tar extraction in the install and seeding scripts therefore uses
+`--no-same-owner`. The files then belong to root, which changes nothing on a
+rootful host: the apps that come from tarballs all run as root.
+
+Two things are host setup, not code:
+
+- **The network driver.** Without `slirp4netns` or `passt` installed,
+  `dockerd-rootless.sh` falls back to rootlesskit's `gvisor-tap-vsock` driver.
+  It loses a few new connections per thousand (measured 2026-10-12: 34 of 10,000
+  connects timed out, none with slirp4netns, pasta or rootful Docker). Behind
+  GMT's proxy every plain-HTTP download is a new connection, so long apt installs
+  failed with "`Unable to connect to <host>:8889`". Install `slirp4netns` and set
+  `DOCKERD_ROOTLESS_ROOTLESSKIT_NET=slirp4netns` in the rootless docker service.
+- **Flatpak under AppArmor.** Rootless Docker cannot apply the `parrot-flatpak`
+  profile. On Ubuntu 24.04 (`kernel.apparmor_restrict_unprivileged_userns=1`)
+  bubblewrap's user namespace may therefore be refused. Check with the probe in
+  `host-setup/install-apparmor-profile.sh` before running the Flatpak scenarios
+  on such a host.
+
 ## Comparing Recordings Across Applications (`tools/check_blocks.py`)
 
 When the same script is recorded against several applications (e.g. multiple PDF viewers running the same checklist), each `.parrot` file should contain the same ordered set of *blocks*. A block is the sequence of actions ending in a `log <message>` line followed by a `check <ref>.png` line — the log message is the block's identity.

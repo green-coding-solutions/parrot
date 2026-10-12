@@ -49,7 +49,7 @@ echo "${BB_SHA256}  /tmp/betterbird.tar.xz" | sha256sum -c -
 
 log "unpacking to /opt"
 rm -rf /opt/betterbird
-tar -xJf /tmp/betterbird.tar.xz -C /opt
+tar --no-same-owner -xJf /tmp/betterbird.tar.xz -C /opt
 rm -f /tmp/betterbird.tar.xz
 
 fc-cache -f >/dev/null 2>&1 || true

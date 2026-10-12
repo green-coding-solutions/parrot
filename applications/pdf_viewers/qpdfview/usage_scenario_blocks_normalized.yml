@@ -30,6 +30,9 @@ services:
 #      CHECK_SCALE_ON_MISMATCH: 1
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: apt update
       - command: apt-get install -y --no-install-recommends qpdfview=0.5.0+ds-4build4
       - command: bash /usr/local/bin/entrypoint.sh

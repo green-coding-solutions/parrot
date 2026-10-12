@@ -22,6 +22,9 @@ services:
       LC_ALL: en_US.UTF-8
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/terminals/xterm/install.sh
       # res_name is `xterm`, res_class is `XTerm` - measured, not assumed:
       #

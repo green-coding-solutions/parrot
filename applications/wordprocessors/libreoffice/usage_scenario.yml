@@ -13,6 +13,9 @@ services:
       RESOLUTION: 1440x900
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/wordprocessors/libreoffice/install.sh
       # Deterministic window geometry.  Must run BEFORE entrypoint.sh: fluxbox
       # reads ~/.fluxbox/apps once at startup and will not replace an existing

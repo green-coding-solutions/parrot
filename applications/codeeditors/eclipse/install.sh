@@ -64,7 +64,7 @@ else
     log "unpacking to /opt/eclipse"
     rm -rf /opt/eclipse
     mkdir -p /opt/eclipse
-    tar -xzf /tmp/eclipse.tar.gz -C /opt/eclipse --strip-components=1
+    tar --no-same-owner -xzf /tmp/eclipse.tar.gz -C /opt/eclipse --strip-components=1
     rm -f /tmp/eclipse.tar.gz
     # A copy of configuration/ exactly as shipped, taken before Eclipse has ever
     # run - see the reset below for what it is for.

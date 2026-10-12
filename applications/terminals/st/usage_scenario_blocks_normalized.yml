@@ -22,6 +22,9 @@ services:
       LC_ALL: en_US.UTF-8
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/terminals/st/install.sh
       # WM_CLASS(STRING) = "st-256color", "st-256color" - st names itself
       # after its TERM, which is neither the binary name (st) nor the package

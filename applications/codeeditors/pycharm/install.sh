@@ -57,7 +57,7 @@ else
     log "unpacking to /opt/pycharm"
     rm -rf /opt/pycharm
     mkdir -p /opt/pycharm
-    tar -xzf /tmp/pycharm.tar.gz -C /opt/pycharm --strip-components=1
+    tar --no-same-owner -xzf /tmp/pycharm.tar.gz -C /opt/pycharm --strip-components=1
     rm -f /tmp/pycharm.tar.gz
     touch "$MARKER"
 fi

@@ -30,6 +30,9 @@ services:
 #      CHECK_SCALE_ON_MISMATCH: 1
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: apt update
       - command: apt-get install -y --no-install-recommends evince=46.3.1-0ubuntu1.1
       - command: bash /usr/local/bin/entrypoint.sh

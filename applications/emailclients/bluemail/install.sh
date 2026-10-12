@@ -51,7 +51,7 @@ cd "$workdir"
 ar x /tmp/bluemail.deb
 # The data member may be .tar.xz, .tar.gz or .tar.zst depending on the build.
 data="$(ls data.tar.* | head -1)"
-tar -xf "$data" -C /
+tar --no-same-owner -xf "$data" -C /
 cd /
 rm -rf "$workdir" /tmp/bluemail.deb
 

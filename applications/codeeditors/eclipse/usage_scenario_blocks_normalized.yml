@@ -20,6 +20,9 @@ services:
       RESOLUTION: 1440x900
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/codeeditors/eclipse/install.sh
       - command: bash /tmp/repo/applications/codeeditors/common/seed-workspace.sh
       # Eclipse is the one editor in this group whose main window cannot be

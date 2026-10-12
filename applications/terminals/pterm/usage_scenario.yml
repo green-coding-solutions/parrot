@@ -11,6 +11,9 @@ services:
       LC_ALL: en_US.UTF-8
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/terminals/pterm/install.sh
       # WM_CLASS(STRING) = "pterm", "Pterm" - the two fields differ only in case,
       # which xdotool ignores and fluxbox does not, so the pin uses lowercase.

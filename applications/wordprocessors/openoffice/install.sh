@@ -68,7 +68,7 @@ log "sha256 ok"
 # recurse: desktop integration installs menu entries and MIME associations that
 # nothing in this container reads, and it pulls in a dependency chain to do it.
 log "unpacking and installing"
-tar -xzf "$AOO_TARBALL"
+tar --no-same-owner -xzf "$AOO_TARBALL"
 dpkg -i en-US/DEBS/*.deb >/dev/null
 rm -rf /tmp/en-US "/tmp/${AOO_TARBALL}"
 

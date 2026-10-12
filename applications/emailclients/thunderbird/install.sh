@@ -44,7 +44,7 @@ echo "${TB_SHA256}  /tmp/thunderbird.tar.xz" | sha256sum -c -
 
 log "unpacking to /opt"
 rm -rf /opt/thunderbird
-tar -xJf /tmp/thunderbird.tar.xz -C /opt
+tar --no-same-owner -xJf /tmp/thunderbird.tar.xz -C /opt
 rm -f /tmp/thunderbird.tar.xz
 
 # Launch the seeded profile explicitly rather than relying on profiles.ini.

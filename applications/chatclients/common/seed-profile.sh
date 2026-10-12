@@ -64,10 +64,10 @@ case "$tarball" in
             log "ERROR: zstd is not installed but ${tarball} needs it"
             exit 1
         }
-        tar --zstd -xf "$tarball" -C "$TARGET_HOME"
+        tar --no-same-owner --zstd -xf "$tarball" -C "$TARGET_HOME"
         ;;
     *.gz)
-        tar -xzf "$tarball" -C "$TARGET_HOME"
+        tar --no-same-owner -xzf "$tarball" -C "$TARGET_HOME"
         ;;
 esac
 

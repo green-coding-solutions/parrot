@@ -22,6 +22,9 @@ services:
       LC_ALL: C.UTF-8
 
     setup-commands:
+      # First, before any script calls apt: freeze the Ubuntu archive at the
+      # sweep commit, so every machine and repetition installs the same packages.
+      - command: bash /tmp/repo/applications/common/apt-snapshot.sh
       - command: bash /tmp/repo/applications/videoplayers/vlc/install.sh
       # VLC gives its main window WM_WINDOW_ROLE "vlc-main" and its dialogs their
       # own roles, and the role argument is what keeps the full-screen pin rule
