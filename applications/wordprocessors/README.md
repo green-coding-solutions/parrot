@@ -28,7 +28,7 @@ eighteen blocks, recorded, and replayed in a fresh container.
 | [Calligra Words](https://apps.kde.org/calligra.words/) | open (GPL 2.0) | 26.04.3 (2 Jul 2026) | Flathub `org.kde.calligra` |
 | [Collabora Office](https://www.collaboraoffice.com/) | open (MPL 2.0) | desktop suite | Flatpak |
 | [Apache OpenOffice Writer](https://www.openoffice.org/) | open (Apache 2.0) | 4.1.16-3 | `archive.apache.org` deb tarball, pinned by SHA-256 |
-| [SoftMaker FreeOffice TextMaker](https://www.freeoffice.com/en/download/linux) | **closed** | FreeOffice 2024, package rev 3702 | upstream deb |
+| [SoftMaker FreeOffice TextMaker](https://www.freeoffice.com/en/download/linux) | **closed** | FreeOffice 2024, package rev 3714 (recorded on 3702) | upstream deb |
 
 One of the six is closed source. ONLYOFFICE and WPS Office were carried through
 install and partway through measuring before being dropped — ONLYOFFICE never

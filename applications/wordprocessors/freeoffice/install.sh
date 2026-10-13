@@ -20,12 +20,18 @@
 # by version and by the SHA-256 SoftMaker themselves publish in
 #   https://shop.softmaker.com/repo/apt/dists/stable/non-free/binary-amd64/Packages
 # so the digest below is the vendor's, not one observed from a download.
+#
+# SoftMaker's pool keeps only the current build. 3702, which the recording was
+# made with, returned 404 on 2026-10-12, so the pin moved to 3714, the build the
+# Packages file listed that day. The pin will break again with the next build:
+# if the download 404s, take the new Filename and SHA256 from the Packages file
+# above and replay the recording before trusting it.
 set -euo pipefail
 
-FO_VERSION=3702
+FO_VERSION=3714
 FO_DEB="softmaker-freeoffice-2024_${FO_VERSION}_amd64.deb"
 FO_URL="https://shop.softmaker.com/repo/apt/pool/non-free/p/proprietary/${FO_DEB}"
-FO_SHA256=d518ce8058cfae4314f828b3885236aeb964551f3589f2b83d74ef02d80c1e23
+FO_SHA256=fddd0d829982d4bb0fd080fa26118134a110f0ae39a0e5902b2609172c84387a
 
 PROFILE_ONLY=0
 [[ "${1:-}" == "--profile-only" ]] && PROFILE_ONLY=1

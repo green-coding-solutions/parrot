@@ -19,13 +19,20 @@ application.
 
 ## Install
 
-Pinned to **11.1 / package revision 3702**, fetched straight from SoftMaker's
-own APT pool and verified against **the digest SoftMaker publish**:
+Pinned to **package revision 3714** since 2026-10-12, fetched straight from
+SoftMaker's own APT pool and verified against **the digest SoftMaker publish**:
 
 ```text
-https://shop.softmaker.com/repo/apt/pool/non-free/p/proprietary/softmaker-freeoffice-2024_3702_amd64.deb
-sha256 d518ce8058cfae4314f828b3885236aeb964551f3589f2b83d74ef02d80c1e23
+https://shop.softmaker.com/repo/apt/pool/non-free/p/proprietary/softmaker-freeoffice-2024_3714_amd64.deb
+sha256 fddd0d829982d4bb0fd080fa26118134a110f0ae39a0e5902b2609172c84387a
 ```
+
+The recording was made with **11.1 / revision 3702**
+(`softmaker-freeoffice-2024_3702_amd64.deb`, sha256
+`d518ce8058cfae4314f828b3885236aeb964551f3589f2b83d74ef02d80c1e23`). SoftMaker's
+pool keeps only the current build, and 3702 returned 404 on 2026-10-12. The
+recording replayed against 3714 with all 18 checks passing, the largest RMSE
+0.006, so the interface did not change between the two builds.
 
 from `dists/stable/non-free/binary-amd64/Packages`. That makes this the only app
 in the group whose checksum is the vendor's rather than one observed from a
