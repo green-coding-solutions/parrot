@@ -270,6 +270,31 @@ Several steps mutate the mailbox (send, move, delete, mark unread). That is safe
 because the corpus is regenerated from scratch in every run's setup phase, so
 each run starts from an identical mailbox. Nothing is persisted in a volume.
 
+### Edits to recordings
+
+KMail, "Open PDF attachment" (2026-10-13). The recording double-clicked the
+attachment link at the bottom of the message. In KMail that link opens on a
+single click, so the second click raced the "Open Attachment?" dialog. When the
+dialog was up within the 150 ms between the clicks, it blocked the second click
+and the replay worked. That was the case on machines 12, 13 and 15. On the T480
+laptop under GMT, check 6 failed in all three runs. The run with screenshots
+shows a second dialog, opened by the second click, 17 px below the first. The
+recorded "Open" click landed between that dialog's checkbox and its buttons, so
+both dialogs stayed open. The double-click is now a single click. The time of the
+removed click went into the following wait, so the step and every later event
+start exactly as before, and `check_blocks.py --normalize-time` produces the
+same padding as before.
+
+The other clients that double-click in this step (Thunderbird, Betterbird,
+Claws Mail, Evolution) open the attachment from an attachment list, where a
+double-click is the normal gesture, and they passed on all machines.
+
+The same step in KMail does not end in "nothing opens". The image has
+ImageMagick for the checks, and its `display` registers for PDF, so KMail offers
+"Open With 'ImageMagick'". The recording takes it. ImageMagick's policy blocks
+the PDF coder, so `display` shows its built-in logo, and the recording closes it
+again.
+
 ## Running a benchmark
 
 ```bash

@@ -120,11 +120,7 @@ wait 0.000022
 mousedown 1
 wait 0.000081
 mouseup 1
-wait 0.150080
-mousedown 1
-wait 0.000024
-mouseup 1
-wait 7.417831
+wait 7.567935
 mousemove 560 446
 wait 0.000021
 mousedown 1
