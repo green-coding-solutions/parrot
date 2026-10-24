@@ -12,6 +12,8 @@ from pathlib import Path
 
 from helpers import STARTUP_FIELDS, load_app_metadata, note_label
 from timed_xmacro import (
+    TIMINGS,
+    ReplayStats,
     iter_replay_lines,
     parse_xmacro_event,
     read_replay_lines,
@@ -132,6 +134,22 @@ def parse_speed() -> float:
     if speed <= 0:
         raise SystemExit("REPLAY_SPEED must be > 0")
     return speed
+
+
+def parse_injector() -> str:
+    """Read REPLAY_INJECTOR from the environment (default xdotool), see INJECTORS."""
+    raw = os.environ.get("REPLAY_INJECTOR", "").strip().lower() or "xdotool"
+    if raw not in INJECTORS:
+        raise SystemExit(f"Invalid REPLAY_INJECTOR: {raw} (expected one of {', '.join(INJECTORS)})")
+    return raw
+
+
+def parse_timing() -> str:
+    """Read REPLAY_TIMING from the environment (default relative), see TIMINGS."""
+    raw = os.environ.get("REPLAY_TIMING", "").strip().lower() or "relative"
+    if raw not in TIMINGS:
+        raise SystemExit(f"Invalid REPLAY_TIMING: {raw} (expected one of {', '.join(TIMINGS)})")
+    return raw
 
 
 # ---------------------------------------------------------------------------
@@ -510,6 +528,191 @@ def normalize_lock_key(display: str, label: str, xdotool_key: str, desired: str)
 
 
 # ---------------------------------------------------------------------------
+# Input injection
+# ---------------------------------------------------------------------------
+
+# How dispatch() sends a recording's input events, chosen with REPLAY_INJECTOR.
+#
+#   xdotool  one xdotool process per event. The default, and what every
+#            existing cluster run used, so it stays the default.
+#   xtest    the same X requests, sent in-process over one connection by
+#            XTestInjector. Opt-in, for measuring what the default costs.
+INJECTORS = ("xdotool", "xtest")
+
+# The verbs an injector sends. `check` and `log` never reach it.
+INPUT_VERBS = frozenset({"mousemove", "mousedown", "mouseup", "keydown", "keyup"})
+
+
+class XTestInjector:
+    """
+    Send a recording's input events in-process, with the requests xdotool sends.
+
+    The default path starts a process per event. Each one connects to the X
+    server, reads the whole keyboard map, sends one event and exits, and
+    `xdotool keydown` and `keyup` also sleep 12 ms, their default --delay,
+    after the event. Over a session that is hundreds of process starts, and
+    seconds of sleep the recording never had.
+
+    This keeps one connection open for the whole replay and sends what the
+    source of the xdotool in the image (3.20160805.1, xdo.c) sends:
+
+      mousemove X Y   WarpPointer to X,Y on the root window. xdotool moves the
+                      pointer with XWarpPointer, not XTestFakeMotionEvent, so
+                      this does too. Only the client changes, not the request.
+      mousedown N     XTestFakeButtonEvent, press or release of button N.
+      mouseup N
+      keydown NAME    the name through xdotool's aliases (alt, ctrl, ...) and
+      keyup NAME      XStringToKeysym, then the lowest keycode carrying that
+                      keysym. If the keycode is bound to a modifier, the first
+                      keycode of that modifier is sent first, as xdotool's
+                      _xdo_send_modifier does. Then XTestFakeKeyEvent.
+
+    Every event ends with a sync, so the server has it when send() returns.
+    xdotool syncs after a key and only flushes after a pointer event. The
+    difference is one round trip.
+
+    Whatever xdotool would treat differently is handed to xdotool and counted
+    in `fallbacks`. That is a name python-xlib cannot resolve, a keysym that
+    no keycode carries (xdotool binds a spare keycode for the one event and
+    reverts it), a keysym that sits only on a shifted or higher level of its
+    keycode (xdotool adds that level's modifiers and may lock an XKB group),
+    and arguments that are not plain numbers. xmacrorec2 records the unshifted
+    keysym of a keycode, so the recordings contain none of these.
+    """
+
+    # xdotool's own key name aliases, matched case-insensitively (xdo_util.h).
+    ALIASES = {
+        "alt": "Alt_L", "ctrl": "Control_L", "control": "Control_L",
+        "meta": "Meta_L", "super": "Super_L", "shift": "Shift_L",
+    }
+    # xdotool rejects a key name containing any of these, and splits on "+".
+    REJECTED_CHARS = frozenset(" \t\n.-[]{}\\|+")
+
+    def __init__(self, display: str) -> None:
+        # Imported here and not at the top, so the default path keeps working
+        # where python-xlib is missing.
+        from Xlib import X, XK                    # noqa: PLC0415
+        from Xlib import display as xdisplay      # noqa: PLC0415
+        from Xlib.ext import xtest                # noqa: PLC0415
+
+        self._X = X
+        self._XK = XK
+        self._fake_input = xtest.fake_input
+        self._env = {**os.environ, "DISPLAY": display}
+        try:
+            self._conn = xdisplay.Display(display)
+        except Exception as exc:                  # noqa: BLE001 - python-xlib raises several types
+            raise SystemExit(f"[replay] REPLAY_INJECTOR=xtest could not open {display}: {exc}")
+        if not self._conn.has_extension("XTEST"):
+            self._conn.close()
+            raise SystemExit(f"[replay] REPLAY_INJECTOR=xtest: {display} has no XTEST extension")
+        self._root = self._conn.screen().root
+        # Both caches are dropped whenever the server reports a mapping change.
+        self._keys: dict[str, tuple[int, int] | None] = {}
+        self._modifier_map: list[list[int]] | None = None
+        self.fallbacks = 0
+
+    def send(self, action: tuple) -> None:
+        """Send one parsed input action (see INPUT_VERBS) and wait until the server has it."""
+        op = action[0]
+        X = self._X
+        if op == "mousemove":
+            if not (action[1].isdigit() and action[2].isdigit()):
+                self._fallback(action)
+                return
+            self._root.warp_pointer(int(action[1]), int(action[2]))
+        elif op in ("mousedown", "mouseup"):
+            if not action[1].isdigit():
+                self._fallback(action)
+                return
+            press = op == "mousedown"
+            self._fake_input(self._conn, X.ButtonPress if press else X.ButtonRelease,
+                             int(action[1]))
+        else:
+            key = self._resolve_key(action[1])
+            if key is None:
+                self._fallback(action)
+                return
+            keycode, modmask = key
+            press = op == "keydown"
+            if modmask:
+                self._send_modifiers(modmask, press)
+            self._fake_input(self._conn, X.KeyPress if press else X.KeyRelease, keycode)
+        self._conn.sync()
+
+    def close(self) -> None:
+        self._conn.close()
+
+    def _fallback(self, action: tuple) -> None:
+        """Send *action* with xdotool, exactly as the default path does, and count it."""
+        self.fallbacks += 1
+        subprocess.run(["xdotool", *action], env=self._env, check=False)
+        # xdotool may have bound a spare keycode and reverted it again.
+        self._forget_mappings()
+
+    def _forget_mappings(self) -> None:
+        self._keys.clear()
+        self._modifier_map = None
+
+    def _resolve_key(self, name: str) -> tuple[int, int] | None:
+        """Return (keycode, modifier mask) for a key name, or None to fall back to xdotool."""
+        # The server sends MappingNotify to every client, asked for or not, and
+        # the sync after each event has already read it off the socket.
+        while self._conn.pending_events():
+            if self._conn.next_event().type == self._X.MappingNotify:
+                self._forget_mappings()
+        if name in self._keys:
+            return self._keys[name]
+
+        key = None
+        if not set(name) & self.REJECTED_CHARS:
+            keysym = self._XK.string_to_keysym(self.ALIASES.get(name.lower(), name))
+            if keysym != self._X.NoSymbol:
+                key = self._keycode_for(keysym)
+        self._keys[name] = key
+        return key
+
+    def _keycode_for(self, keysym: int) -> tuple[int, int] | None:
+        """The lowest keycode carrying *keysym*, as xdotool's charcode map finds it."""
+        info = self._conn.display.info
+        first = info.min_keycode
+        mapping = self._conn.get_keyboard_mapping(first, info.max_keycode - first + 1)
+        for offset, keysyms in enumerate(mapping):
+            if keysym not in keysyms:
+                continue
+            if keysyms[0] != keysym:
+                return None     # only on a higher level of this keycode, see the docstring
+            keycode = first + offset
+            return keycode, self._modifier_bit(keycode)
+        return None             # no keycode at all, xdotool binds a spare one
+
+    def _modifiers(self) -> list[list[int]]:
+        if self._modifier_map is None:
+            self._modifier_map = [list(codes) for codes in self._conn.get_modifier_mapping()]
+        return self._modifier_map
+
+    def _modifier_bit(self, keycode: int) -> int:
+        """The modifier *keycode* is bound to, or 0 (xdotool's _xdo_query_keycode_to_modifier)."""
+        for index, keycodes in enumerate(self._modifiers()):
+            for code in keycodes:
+                if not code:
+                    break
+                if code == keycode:
+                    return 1 << index
+        return 0
+
+    def _send_modifiers(self, modmask: int, press: bool) -> None:
+        """Press or release the first keycode of every modifier in *modmask* (_xdo_send_modifier)."""
+        event_type = self._X.KeyPress if press else self._X.KeyRelease
+        for index, keycodes in enumerate(self._modifiers()):
+            if not modmask & (1 << index):
+                continue
+            code = next((code for code in keycodes if code), 0)
+            if code:
+                self._fake_input(self._conn, event_type, code)
+
+
+# ---------------------------------------------------------------------------
 # Replay event loop
 # ---------------------------------------------------------------------------
 
@@ -530,10 +733,19 @@ def resolve_check_ref(ref: str, app_dir: Path) -> str:
 
 
 def dispatch(action: tuple, display: str, app_meta: dict[str, str], app_dir: Path,
-             ignore_checks: bool = False) -> None:
-    """Execute a single parsed replay action."""
-    env  = {**os.environ, "DISPLAY": display}
+             ignore_checks: bool = False, injector: XTestInjector | None = None) -> None:
+    """
+    Execute a single parsed replay action.
+
+    With *injector*, the input events go to it instead of to an xdotool
+    process each. Checks and notes are handled here either way.
+    """
     op   = action[0]
+    if injector is not None and op in INPUT_VERBS:
+        injector.send(action)
+        return
+
+    env  = {**os.environ, "DISPLAY": display}
 
     if op == "mousemove":
         subprocess.run(["xdotool", "mousemove", action[1], action[2]], env=env, check=False)
@@ -655,6 +867,8 @@ def main() -> int:
         return 1
 
     speed = parse_speed()
+    injector_name = parse_injector()
+    timing = parse_timing()
 
     if args.block is not None and args.run_to is not None:
         print("--block and --run-to cannot be combined", file=sys.stderr)
@@ -710,6 +924,7 @@ def main() -> int:
         for block in macro_files:
             print(f"            {block.name}", file=sys.stderr)
     print(f"Display   : {display}  speed={speed}", file=sys.stderr)
+    print(f"Injector  : {injector_name}  timing={timing}", file=sys.stderr)
     if args.no_checks:
         print("Checks    : ignored (--no-checks)", file=sys.stderr)
     print(
@@ -742,16 +957,47 @@ def main() -> int:
 
     # 4. Parse each recording and replay its events in-process.
     #    iter_replay_lines() sleeps between events to honour the recorded timing.
+    #    The time spent dispatching is taken around every event, input events
+    #    and checks apart, for the summary line printed at the end.
+    injector = None
+    stats = ReplayStats()
+    events = checks = 0
+    dispatch_s = check_s = 0.0
+    started = time.monotonic()
     try:
+        if injector_name == "xtest":
+            injector = XTestInjector(display)
         for macro_file in macro_files:
-            for line in iter_replay_lines(macro_file, speed, args.block):
+            for line in iter_replay_lines(macro_file, speed, args.block, timing=timing, stats=stats):
                 action = parse_xmacro_event(line)
                 if action is not None:
-                    dispatch(action, display, app_meta, app_dir, args.no_checks)
+                    dispatched_from = time.monotonic()
+                    dispatch(action, display, app_meta, app_dir, args.no_checks, injector)
+                    took = time.monotonic() - dispatched_from
+                    if action[0] in INPUT_VERBS:
+                        events += 1
+                        dispatch_s += took
+                    elif action[0] == "check":
+                        checks += 1
+                        check_s += took
     finally:
+        wall_s = time.monotonic() - started
+        fallbacks = injector.fallbacks if injector is not None else 0
+        if injector is not None:
+            injector.close()
         if recorder:
             stop_recording(recorder)
             print(f"[replay] video saved to {video_output}", file=sys.stderr)
+        # One line, on stderr. stdout is read for notes under GMT
+        # (read-notes-stdout), and every line there becomes a timestamped note.
+        # It is printed after a failed check too, covering the events up to it.
+        print(
+            f"[replay] injector={injector_name} timing={timing} events={events} "
+            f"fallbacks={fallbacks} dispatch_s={dispatch_s:.4f} checks={checks} "
+            f"check_s={check_s:.4f} sleep_s={stats.sleep_s:.4f} wall_s={wall_s:.4f} "
+            f"recorded_s={stats.recorded_s:.4f} max_lag_s={stats.max_lag_s:.4f}",
+            file=sys.stderr,
+        )
 
     return 0
 

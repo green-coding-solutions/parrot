@@ -422,6 +422,10 @@ services:
 | `REPLAY_INIT_NUMLOCK` | `off` | Desired Num Lock state before replay starts (`on`, `off`, or `keep`). |
 | `REPLAY_INIT_SCROLLLOCK` | `keep` | Desired Scroll Lock state before replay starts (`on`, `off`, or `keep`). |
 | `REPLAY_IGNORE_CHECKS` | _(off)_ | Set to `1`/`true` to skip all `Check` screenshot comparisons (same as the `--no-checks` flag). Checks are logged and skipped instead of asserted. |
+| `REPLAY_INJECTOR` | `xdotool` | How input events are sent. `xdotool` starts one `xdotool` process per event. `xtest` sends the same X requests in-process over one connection, with python-xlib. |
+| `REPLAY_TIMING` | `relative` | `relative` sleeps each recorded wait after the previous event is sent, so the time spent sending adds up. `absolute` sleeps until the event's recorded offset from the start, so that time comes out of the next wait instead. |
+
+Both defaults are what every existing scenario has run with. At the end of a replay, `replay.py` prints one summary line to stderr (never to stdout, which GMT reads for notes) with the injector, the timing mode, the number of input events and checks, the time spent sending them, sleeping and in total, the recorded time and the largest lag behind the recording. [`applications/demos/overhead/`](applications/demos/overhead/) measures what the two settings cost.
 
 ### Screenshot checks (`check-image.sh`)
 

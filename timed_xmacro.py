@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 from helpers import (
@@ -399,7 +400,31 @@ def select_block(lines: list[str], block: int) -> list[str]:
     return selected
 
 
-def iter_replay_lines(input_path: Path, speed: float, block: int | None = None):
+# How iter_replay_lines turns the recorded waits into sleeps.
+#
+#   relative  sleep each recorded wait as it is, after the previous event has
+#             been dispatched. Whatever the dispatch costs comes on top, an
+#             xdotool process per event and a screenshot per check, so the
+#             replay runs longer than the recording. This is what every existing
+#             cluster run used, and it stays the default so they stay comparable.
+#   absolute  sleep until t0 + (recorded waits so far) / speed, on the monotonic
+#             clock. The dispatch cost is taken out of the next sleep instead of
+#             added to the replay. When an event is already late it is sent at
+#             once, never with a negative sleep, and the lateness is recorded.
+TIMINGS = ("relative", "absolute")
+
+
+@dataclass
+class ReplayStats:
+    """Timing totals iter_replay_lines adds to, across all the files it replays."""
+
+    sleep_s: float = 0.0      # time actually spent in time.sleep
+    recorded_s: float = 0.0   # recorded waits that were replayed, divided by speed
+    max_lag_s: float = 0.0    # furthest an event was yielded behind its recorded time
+
+
+def iter_replay_lines(input_path: Path, speed: float, block: int | None = None,
+                      timing: str = "relative", stats: ReplayStats | None = None):
     """
     Yield event lines from a .🦜 recording, sleeping between them.
 
@@ -410,7 +435,21 @@ def iter_replay_lines(input_path: Path, speed: float, block: int | None = None):
 
     With *block*, only that block is replayed (see split_blocks).  It is cut
     out before anything is slept, so the other blocks' waits cost nothing.
+
+    *timing* is one of TIMINGS. Both modes sleep the same recorded waits, so
+    `wait`, `label`, `loop` and *block* mean exactly the same in either. They
+    differ only in what the sleep is measured from. With *stats*, the sleeps,
+    the recorded time and the lag are added to it as the replay goes, so it is
+    complete even when the caller stops early on a failed check.
+
+    The lag is how far an event is yielded behind t0 + (recorded waits so far)
+    / speed, with t0 taken when the first event is asked for. In relative mode
+    it grows with every dispatch, in absolute mode it is only the lateness of
+    the worst event.
     """
+    if timing not in TIMINGS:
+        raise ValueError(f"timing must be one of {', '.join(TIMINGS)}, not {timing!r}")
+
     lines = read_replay_lines(input_path)
     if block is not None:
         lines = select_block(lines, block)
@@ -423,6 +462,10 @@ def iter_replay_lines(input_path: Path, speed: float, block: int | None = None):
 
     loop_remaining: dict[int, int] = {}
     pending_wait = 0.0
+    # Recorded waits that have been slept, in recording seconds. The schedule
+    # starts here, after the file has been read and the block cut out.
+    recorded = 0.0
+    t0 = time.monotonic()
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -467,9 +510,25 @@ def iter_replay_lines(input_path: Path, speed: float, block: int | None = None):
             i += 1
             continue
 
+        # A wait that is not positive is not slept in either mode, so it does
+        # not move the absolute schedule either.
         if pending_wait > 0:
-            time.sleep(pending_wait / speed)
+            recorded += pending_wait
+            if stats is not None:
+                stats.recorded_s += pending_wait / speed
+        if timing == "absolute":
+            delay = t0 + recorded / speed - time.monotonic()
+        else:
+            delay = pending_wait / speed
+        if delay > 0:
+            slept_from = time.monotonic()
+            time.sleep(delay)
+            if stats is not None:
+                stats.sleep_s += time.monotonic() - slept_from
         pending_wait = 0.0
+        if stats is not None:
+            lag = time.monotonic() - (t0 + recorded / speed)
+            stats.max_lag_s = max(stats.max_lag_s, lag)
         yield line
         i += 1
 
