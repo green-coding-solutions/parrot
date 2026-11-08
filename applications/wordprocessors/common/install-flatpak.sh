@@ -131,6 +131,17 @@ log "adding flathub"
 flatpak remote-add --if-not-exists flathub \
     https://dl.flathub.org/repo/flathub.flatpakrepo
 
+# Install the pinned runtime branch before the application. The stable
+# application on Flathub may already need a newer runtime branch, and then the
+# pin below finds no installed runtime to move. Collabora moved from
+# org.kde.Platform 6.10 to 6.11 on 7 Nov 2026, and every install failed with
+# "org.kde.Platform//6.10 not installed". The application commit pinned below
+# still needs the pinned runtime, so the newer branch is downloaded but unused.
+if [[ -n "$RUNTIME_REF" ]]; then
+    log "installing ${RUNTIME_REF}"
+    flatpak install -y --noninteractive flathub "$RUNTIME_REF"
+fi
+
 log "installing ${REF} (this pulls a runtime and is large)"
 flatpak install -y --noninteractive flathub "$REF"
 
