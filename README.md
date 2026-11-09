@@ -1,4 +1,4 @@
-# Parrot — Record and Replay X Application Interactions
+#  🦜 Parrot: Record and Replay X Application Interactions
 
 Parrot lets you record mouse clicks, keyboard input, and navigation paths through any X11 GUI application, then replay those interactions automatically. It is designed for benchmarking and testing desktop applications in a reproducible, sandboxed environment.
 
